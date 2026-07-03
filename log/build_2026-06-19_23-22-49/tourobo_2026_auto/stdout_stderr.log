@@ -1,0 +1,31 @@
+running egg_info
+creating ../../build/tourobo_2026_auto/tourobo_2026_auto.egg-info
+writing ../../build/tourobo_2026_auto/tourobo_2026_auto.egg-info/PKG-INFO
+writing dependency_links to ../../build/tourobo_2026_auto/tourobo_2026_auto.egg-info/dependency_links.txt
+writing entry points to ../../build/tourobo_2026_auto/tourobo_2026_auto.egg-info/entry_points.txt
+writing requirements to ../../build/tourobo_2026_auto/tourobo_2026_auto.egg-info/requires.txt
+writing top-level names to ../../build/tourobo_2026_auto/tourobo_2026_auto.egg-info/top_level.txt
+writing manifest file '../../build/tourobo_2026_auto/tourobo_2026_auto.egg-info/SOURCES.txt'
+reading manifest file '../../build/tourobo_2026_auto/tourobo_2026_auto.egg-info/SOURCES.txt'
+writing manifest file '../../build/tourobo_2026_auto/tourobo_2026_auto.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/hatsu/Robobobobobobo/tourobo_2026/build/tourobo_2026_auto/build
+creating /home/hatsu/Robobobobobobo/tourobo_2026/build/tourobo_2026_auto/build/lib
+creating /home/hatsu/Robobobobobobo/tourobo_2026/build/tourobo_2026_auto/build/lib/tourobo_2026_auto
+copying tourobo_2026_auto/__init__.py -> /home/hatsu/Robobobobobobo/tourobo_2026/build/tourobo_2026_auto/build/lib/tourobo_2026_auto
+running install
+running install_lib
+creating /home/hatsu/Robobobobobobo/tourobo_2026/install/tourobo_2026_auto/lib/python3.10/site-packages/tourobo_2026_auto
+copying /home/hatsu/Robobobobobobo/tourobo_2026/build/tourobo_2026_auto/build/lib/tourobo_2026_auto/__init__.py -> /home/hatsu/Robobobobobobo/tourobo_2026/install/tourobo_2026_auto/lib/python3.10/site-packages/tourobo_2026_auto
+byte-compiling /home/hatsu/Robobobobobobo/tourobo_2026/install/tourobo_2026_auto/lib/python3.10/site-packages/tourobo_2026_auto/__init__.py to __init__.cpython-310.pyc
+running install_data
+creating /home/hatsu/Robobobobobobo/tourobo_2026/install/tourobo_2026_auto/share/ament_index
+creating /home/hatsu/Robobobobobobo/tourobo_2026/install/tourobo_2026_auto/share/ament_index/resource_index
+creating /home/hatsu/Robobobobobobo/tourobo_2026/install/tourobo_2026_auto/share/ament_index/resource_index/packages
+copying resource/tourobo_2026_auto -> /home/hatsu/Robobobobobobo/tourobo_2026/install/tourobo_2026_auto/share/ament_index/resource_index/packages
+copying package.xml -> /home/hatsu/Robobobobobobo/tourobo_2026/install/tourobo_2026_auto/share/tourobo_2026_auto
+running install_egg_info
+Copying ../../build/tourobo_2026_auto/tourobo_2026_auto.egg-info to /home/hatsu/Robobobobobobo/tourobo_2026/install/tourobo_2026_auto/lib/python3.10/site-packages/tourobo_2026_auto-0.0.0-py3.10.egg-info
+running install_scripts
+writing list of installed files to '/home/hatsu/Robobobobobobo/tourobo_2026/build/tourobo_2026_auto/install.log'
