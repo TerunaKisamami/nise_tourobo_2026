@@ -1,0 +1,8 @@
+[console_scripts]
+ball_get_node = tourobo_2026_auto_mechanisms.ball_get_node:main
+ball_put_gate_node = tourobo_2026_auto_mechanisms.ball_put_gate_node:main
+ball_put_plate_node = tourobo_2026_auto_mechanisms.ball_put_plate_node:main
+ball_shoot_node = tourobo_2026_auto_mechanisms.ball_shoot_node:main
+joy_mechanism_client = tourobo_2026_auto_mechanisms.joy_mechanism_client:main
+yolo_node = tourobo_2026_auto_mechanisms.yolo_node:main
+

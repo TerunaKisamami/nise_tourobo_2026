@@ -1,0 +1,6 @@
+source;share/tourobo_2026_auto_mechanisms/hook/pythonpath.ps1
+source;share/tourobo_2026_auto_mechanisms/hook/pythonpath.dsv
+source;share/tourobo_2026_auto_mechanisms/hook/pythonpath.sh
+source;share/tourobo_2026_auto_mechanisms/hook/ament_prefix_path.ps1
+source;share/tourobo_2026_auto_mechanisms/hook/ament_prefix_path.dsv
+source;share/tourobo_2026_auto_mechanisms/hook/ament_prefix_path.sh
