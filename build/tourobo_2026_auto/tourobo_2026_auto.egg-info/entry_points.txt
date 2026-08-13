@@ -1,3 +1,0 @@
-[console_scripts]
-testnode = tourobo_2026_auto.testnode:main
-
