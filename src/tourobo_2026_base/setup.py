@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 import os
 from glob import glob
 
-package_name = 'tourobo_2026_auto_base'
+package_name = 'tourobo_2026_base'
 
 setup(
     name=package_name,
@@ -28,12 +28,12 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            "subscribe_twist_node = tourobo_2026_auto_base.subscribe_twist_node:main",
-            "joy2twist_node = tourobo_2026_auto_base.joy2twist_node:main",
-            "publish_odometry_node = tourobo_2026_auto_base.publish_odometry_node:main",
-            "follow_spline_node = tourobo_2026_auto_base.follow_spline_node:main",
-            "omni_pure_pursuit_action_node = tourobo_2026_auto_base.omni_pure_pursuit_action_node_v2:main",
-            "robot_client_node = tourobo_2026_auto_base.robot_client_node:main",
+            "subscribe_twist_node = tourobo_2026_base.subscribe_twist_node:main",
+            "joy2twist_node = tourobo_2026_base.joy2twist_node:main",
+            "publish_odometry_node = tourobo_2026_base.publish_odometry_node:main",
+            "follow_spline_node = tourobo_2026_base.follow_spline_node:main",
+            "omni_pure_pursuit_action_node = tourobo_2026_base.omni_pure_pursuit_action_node_v2:main",
+            "robot_client_node = tourobo_2026_base.robot_client_node:main",
         ],
     },
 )

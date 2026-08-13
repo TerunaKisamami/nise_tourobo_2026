@@ -13,7 +13,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 
 def generate_launch_description():
-    robot_package_name = "tourobo_2026_auto_base"
+    robot_package_name = "tourobo_2026_base"
     ld = LaunchDescription()
     pkg_dir = get_package_share_directory(robot_package_name)
 

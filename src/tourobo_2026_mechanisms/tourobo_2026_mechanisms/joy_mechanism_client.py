@@ -108,9 +108,6 @@ class JoyMechanismClient(Node):
         # △ボタン (buttons[2]): BallPutPlate(ボールを皿の上に置く)
         # □ボタン (buttons[3]): BallShoot(ボール発射)
         
-        target_coroutine = None
-        action_name_log = ""
-
         if self.is_pressed(msg,0): # ✕ボタン
             if not self.is_action_running:
                 self.get_logger().info("BallGetが入力された")
@@ -119,6 +116,8 @@ class JoyMechanismClient(Node):
                     await self.send_ball_get_goal()
                 finally:
                     self.is_action_running = False
+            else:
+                self.get_logger().warn('現在他の動作中なのむし')
 
         elif self.is_pressed(msg,1): # ◯ボタン
             if not self.is_action_running:
@@ -128,6 +127,9 @@ class JoyMechanismClient(Node):
                     await self.send_ball_put_gate_goal()
                 finally:
                     self.is_action_running = False
+            else:
+                self.get_logger().warn('現在他の動作中なのむし')
+
         elif self.is_pressed(msg,2): # △ボタン
             if not self.is_action_running:
                 self.get_logger().info("BallPutPlateが入力された")
@@ -136,6 +138,9 @@ class JoyMechanismClient(Node):
                     await self.send_ball_put_plate_goal()
                 finally:
                     self.is_action_running = False
+            else:
+                self.get_logger().warn('現在他の動作中なのむし')
+
         elif self.is_pressed(msg,3): # □ボタン
             if not self.is_action_running:
                 self.get_logger().info("BallShootが入力された")
@@ -144,21 +149,8 @@ class JoyMechanismClient(Node):
                     await self.send_ball_shoot_goal()
                 finally:
                     self.is_action_running = False
-        
-        if self.is_action_running:
-            self.get_logger().warn('現在他の動作中なのむし')
-
-        #選ばれた動作を実行するのじゃ
-#        if target_coroutine:
-#            if not self.is_action_running:
-#                self.get_logger().info(f'{action_name_log} が入力された')
-#                self.is_action_running = True
-#                try:
-#                    await target_coroutine()
-#                finally:
-#                    self.is_action_running = False
-#            else:
-#                self.get_logger().warn('現在他の動作中なのむし')
+            else:
+                self.get_logger().warn('現在他の動作中なのむし')
 
         self.prev_buttons = msg.buttons
         self.prev_axes = msg.axes
