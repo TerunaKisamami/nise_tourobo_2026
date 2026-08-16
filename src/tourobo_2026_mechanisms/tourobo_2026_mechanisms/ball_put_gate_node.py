@@ -1,3 +1,6 @@
+"""
+ボールをしろの門にocu動作
+"""
 from sympy import false
 from rclpy.action import ActionServer, GoalResponse
 import rclpy

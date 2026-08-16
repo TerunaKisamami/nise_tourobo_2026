@@ -6,6 +6,7 @@
   <description>TODO: Package description</description>
   <maintainer email="teruna1493kisamami@gmail.com">hatsu</maintainer>
   <license>TODO: License declaration</license>
+  <depend>dyna_interfaces</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

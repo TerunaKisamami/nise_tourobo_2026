@@ -31,6 +31,14 @@ class BallShootNode(Node):
     
     async def shoot_ball(self):
         #ボールを発射する処理を書く
+        #サーボモーターを回す
+
+        #ロボマスでボールを送り出す
+
+        #サーボモーターを止める
+
+        #ロボマスを止める
+        
         pass
     
     async def execute_callback(self, goal_handle):

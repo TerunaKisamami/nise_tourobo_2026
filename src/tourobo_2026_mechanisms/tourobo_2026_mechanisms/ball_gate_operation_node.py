@@ -1,6 +1,5 @@
 """
-どういう動きをするか↓
-
+ボールを取り込むゲートの開閉をするだけ
 """
 from sympy import false
 from rclpy.action import ActionServer, GoalResponse
@@ -9,16 +8,16 @@ import asyncio
 from rclpy.node import Node
 from std_msgs.msg import String
 
-from tourobo_2026_interfaces.action import BallGet
+from tourobo_2026_interfaces.action import BallGateOperation
 # pyrefly: ignore [missing-import]
 from dyna_interfaces.msg import DynaTarget, DynaFeedback
 
 import os 
 import sys
 
-class BallGetNode(Node):
+class BallGateOperationNode(Node):
     def __init__(self):
-        super().__init__('ball_get_node')
+        super().__init__('ball_gate_operation_node')
         self.is_executing = False
         self.cb_group=rclpy.callback_groups.ReentrantCallbackGroup()
         
@@ -38,8 +37,8 @@ class BallGetNode(Node):
 
         self._action_server = ActionServer(
             self,
-            BallGet,
-            'ball_get',
+            BallGateOperation,
+            'ball_gate_operation',
             self.execute_callback,
             goal_callback=self.goal_callback,
             callback_group=self.cb_group,
@@ -54,7 +53,6 @@ class BallGetNode(Node):
     
     def dyna_feedback_callback(self, msg):
         # 常に最新の角度データを辞書に保存する
-        # msg.data[0] に位置情報が入っていると仮定
         self.current_dyna_pos[msg.id] = msg.data[0]
 
     def publish_dyna_extpos(self, id, target):
@@ -76,78 +74,38 @@ class BallGetNode(Node):
         self.dyna_pos_publisher.publish(msg)
 
     # ここがメインの処理じゃぞ
-    async def get_ball(self,dir_num):
+    async def operate_ball_gate(self,dir_num):
         DIR_NAME={1:"左",2:"右",0:"エラー"}
-        self.get_logger().info(f"{DIR_NAME[dir_num]}からボール回収動作を開始します")
+        self.get_logger().info(f"{DIR_NAME[dir_num]}ゲートを開閉します")
 
-        #これはまだダミーなので後で変える
-        THRESHOLD_CLOSED_GATE = 2000 # これより大きければ「閉じている」と判定する
-        THRESHOLD_CLOSED_GUARD = 2000 # これより大きければ「閉じている」と判定する
-
+        # 【ダミー設定】閾値やIDは後で調整する
         LEFT_GATE_ID = 20
         RIGHT_GATE_ID = 21
-        LEFT_GUARD_ID = 10
-        RIGHT_GUARD_ID = 11
 
-        # ローラー用サーボモーターID
-        UP_RIGHT_ROLLER_ID = 2
-        UP_LEFT_ROLLER_ID = 3
-        DOWN_ROLLER_ID = 4
-
-        #発射機構のID
-        SHOOT_DIRECTION_ID = 12
-        #これより上ならら支柱は上がってる
-        ANGLE_SHOOT_UP = 1500 
-        
-
-        #左右両方で共通して実行する処理を書く
-        #今ボールを保持しているなら実行しない
+        # 0 ~ 500: 開いている (OPEN)
+        # 500 ~ 1500: 半開き (HALF) - 失敗時など
+        # 1500 ~ : 閉じている (CLOSED)
+        POS_OPEN_THRESHOLD = 500
+        POS_HALF_THRESHOLD = 1500
 
         if dir_num == 1: # 左
-            # 左のゲートが閉じているか半開きなら実行しない
-            if self.current_dyna_pos.get(LEFT_GATE_ID, 0) > THRESHOLD_CLOSED_GATE:
-                self.get_logger().warn("左のゲートが閉じているため、回収動作を中止します。")
-                return False
-            
-            # わきで保持するために左のガードを閉じる
-            if self.current_dyna_pos.get(LEFT_GUARD_ID, 0) < THRESHOLD_CLOSED_GUARD:
-                self.get_logger().info("左のガードを閉じます")
-                self.publish_dyna_pos(LEFT_GUARD_ID, 1111)
-                await asyncio.sleep(1.0)
+            pos = self.current_dyna_pos.get(LEFT_GATE_ID, 0)
+            if pos > POS_OPEN_THRESHOLD:
+                # 閉じている、または半開き（失敗時）なら開く
+                self.get_logger().info("左のゲートが開いていない（閉じている or 半開き）ので、開けます")
             else:
-                self.get_logger().info("左のガードは既に閉じているため、ガードを閉じる処理は行いません")
-
-            # 上のローラーを回すDCモーター
-
-            # 下のローラーを回すDCモーター
-
-            # ダイナミクセルでゲートを閉じる
-
-            # 動作終了
-            
-            return True
-
+                # 完全に開いているなら閉じる
+                self.get_logger().info("左のゲートが開いているので、閉じます")
+            pass
         elif dir_num == 2: # 右
-            # 右のゲートが閉じているか半開きなら実行しない
-            if self.current_dyna_pos.get(RIGHT_GATE_ID, 0) > THRESHOLD_CLOSED_GATE:
-                self.get_logger().warn("右のゲートが閉じているため、回収動作を中止します。")
-                return False
-
-            #わきで保持するために右のガードを閉じる
-            if self.current_dyna_pos.get(RIGHT_GUARD_ID, 0) < THRESHOLD_CLOSED_GUARD:
-                self.get_logger().info("右のガードを閉じます")
-                self.publish_dyna_pos(RIGHT_GUARD_ID, 1111)
-                await asyncio.sleep(1.0)
+            pos = self.current_dyna_pos.get(RIGHT_GATE_ID, 0)
+            if pos > POS_OPEN_THRESHOLD:
+                # 閉じている、または半開き（失敗時）なら開く
+                self.get_logger().info("右のゲートが開いていない（閉じている or 半開き）ので、開けます")
             else:
-                self.get_logger().info("右のガードは既に閉じているため、ガードを閉じる処理は行いません")
-            # 上のローラーを回す
-
-            # 下のローラーを回す
-
-            # ダイナミクセルでゲートを閉じる
-
-            # 動作終了
-
+                # 完全に開いているなら閉じる
+                self.get_logger().info("右のゲートが開いているので、閉じます")
+            pass
         else: # エラー
             self.get_logger().info("エラー: dir_numが1または2ではありません")    
         
@@ -173,17 +131,16 @@ class BallGetNode(Node):
         self.publish_dyna_vel(11, 0)
         """
 
-        self.get_logger().info("ボール回収動作が完了しました！")
         return True
     
     async def execute_callback(self, goal_handle):
         self.is_executing = True
         try:
             req = goal_handle.request
-            res = BallGet.Result()
+            res = BallGateOperation.Result()
             success = False
 
-            success = await self.get_ball(goal_handle.request.execute_mode)
+            success = await self.operate_ball_gate(goal_handle.request.execute_mode)
             
             if success:
                 goal_handle.succeed()
@@ -197,7 +154,7 @@ class BallGetNode(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    node = BallGetNode()
+    node = BallGateOperationNode()
     executor= rclpy.executors.MultiThreadedExecutor()
     executor.add_node(node)
     executor.spin()

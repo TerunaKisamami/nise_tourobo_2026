@@ -1,7 +1,9 @@
 # 1. Goal (クライアントからサーバーへ送信する要求データ)
 bool execute
+int32 current_state
 ---
 # 2. Result (処理完了時にサーバーから返す最終結果データ)
 bool success
+int32 next_state
 ---
 # 3. Feedback (処理実行中にサーバーから定期的に送信する進捗データ)

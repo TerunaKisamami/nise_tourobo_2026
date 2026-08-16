@@ -1,3 +1,6 @@
+"""
+ボールを関所に置く処理
+"""
 from sympy import false
 from rclpy.action import ActionServer, GoalResponse
 import rclpy
@@ -30,8 +33,40 @@ class BallPutPlateNode(Node):
         return GoalResponse.ACCEPT
     
     async def put_ball_in_plate(self):
-        #ボールをプレートに入れる処理を書く
+        #左右どちらのゲートが半開きになっているか確認
+
+        #片方だけ半開きになっている状態でなければエラーを出して終了
+
+        #右側だけ半開き(右脇で保持している状態)なら左側から発射
+            # 左側のガードを上げる
+            # 左側の上のローラーを回す
+            # 右側のガードを上げる
+            # 右側のゲートを下げる
+            # 右側の上のローラーを回す
+            # 下のローラーを左向きに回す
+
+            # 左側のゲートを下ろす
+
         pass
+        
+        #左側だけ半開き(左脇で保持している状態)なら右側から発射
+            # 右側のガードを上げる
+            # 右側の上のローラーを回す
+            # 左側のガードを上げる
+            # 左側の上のローラーを回す
+            # 下のローラーを右向きに回す
+            
+            # 右側のゲートを下ろす
+
+        pass
+
+        #終了処理
+        # 左側の上のローラーを止める
+        # 右側の上のローラーを止める
+        # 下のローラーを止める
+        # ガードを落とす
+
+        
     
     async def execute_callback(self, goal_handle):
         self.is_executing = True
