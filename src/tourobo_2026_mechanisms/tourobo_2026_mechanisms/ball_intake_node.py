@@ -13,6 +13,7 @@ from dyna_interfaces.msg import DynaTarget, DynaFeedback
 
 import os 
 import sys
+import asyncio
 
 class BallIntakeNode(Node):
     def __init__(self):
@@ -74,7 +75,7 @@ class BallIntakeNode(Node):
         self.dyna_pos_publisher.publish(msg)
 
     # ここがメインの処理じゃぞ
-    async def get_ball(self):
+    async def get_ball(self, current_state):
         #これはまだダミーなので後で変える
         THRESHOLD_CLOSED_GATE = 2000 # これより大きければ「閉じている」と判定する
         THRESHOLD_CLOSED_GUARD = 2000 # これより大きければ「閉じている」と判定する
@@ -96,29 +97,40 @@ class BallIntakeNode(Node):
         
 
         #左右両方で共通して実行する処理を書く
-        #今ボールを内側に保持しているなら実行しない
-
-        #左右どちらの脇にボールを挟んでいるか判断する
-
-        #片方だけ半開きでない状態だったらエラー
-    
-        #左脇にボールを挟んでいる場合
+        #支柱が上がってるなら下に下げる
+        if self.current_dyna_pos[SHOOT_DIRECTION_ID] > ANGLE_SHOOT_UP:
+            self.publish_dyna_pos(SHOOT_DIRECTION_ID, 1000)
+            await asyncio.sleep(1.5)
+            
+        # current_state は 2: LEFT_CARRY, 3: RIGHT_CARRY
+        if current_state == 2:
+            self.get_logger().info("左脇にあるボールを内側に取り込みます")
             #右側のガードを下げる
             #左側のガードを上げる
             #下ローラーを右側へ回転
+            #上ローラーを回転
             #左ゲートを下ろす
+            #左ガードを下げる
 
 
-        #右脇にボールを挟んでいる場合
+        elif current_state == 3:
+            self.get_logger().info("右脇にあるボールを内側に取り込みます")
             #左側のガードを下げる
             #右側のガードを上げる
             #下ローラーを左側へ回転
+            #上ローラーを回転
             #右ゲートを下ろす
+            #右ガードを下げる
             
-        #エラー処理
+        else:
+            self.get_logger().error(f"エラー: 想定外の current_state ({current_state}) です。取り込みを中止します。")
+            return False
 
         #終了処理
         #ローラーを止める
+        
+        self.get_logger().info("取り込み完了")
+        return True
 
         
 
@@ -129,9 +141,11 @@ class BallIntakeNode(Node):
             res = BallIntake.Result()
             success = False
 
-            success = await self.get_ball()
+            success = await self.get_ball(req.current_state)
             
             if success:
+                res.success = True
+                res.next_state = 4 # INTAKE
                 goal_handle.succeed()
             else:
                 goal_handle.abort()

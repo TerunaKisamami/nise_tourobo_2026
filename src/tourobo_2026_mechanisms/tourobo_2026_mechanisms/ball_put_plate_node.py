@@ -32,12 +32,12 @@ class BallPutPlateNode(Node):
         self.get_logger().info('新しい指令を受け付けました。')
         return GoalResponse.ACCEPT
     
-    async def put_ball_in_plate(self):
-        #左右どちらのゲートが半開きになっているか確認
-
-        #片方だけ半開きになっている状態でなければエラーを出して終了
-
-        #右側だけ半開き(右脇で保持している状態)なら左側から発射
+    async def put_ball_in_plate(self, current_state):
+        # current_state: 2=LEFT_CARRY, 3=RIGHT_CARRY
+        if current_state == 3:
+            self.get_logger().info("右脇で保持している状態から、左側へボールを関所に置きます")
+            #右側だけ半開き(右脇で保持している状態)なら左側から発射
+            # 左側のゲートを上げる
             # 左側のガードを上げる
             # 左側の上のローラーを回す
             # 右側のガードを上げる
@@ -47,9 +47,10 @@ class BallPutPlateNode(Node):
 
             # 左側のゲートを下ろす
 
-        pass
-        
-        #左側だけ半開き(左脇で保持している状態)なら右側から発射
+        elif current_state == 2:
+            self.get_logger().info("左脇で保持している状態から、右側へボールを関所に置きます")
+            #左側だけ半開き(左脇で保持している状態)なら右側から発射
+            # 右側のゲートを上げる
             # 右側のガードを上げる
             # 右側の上のローラーを回す
             # 左側のガードを上げる
@@ -58,16 +59,18 @@ class BallPutPlateNode(Node):
             
             # 右側のゲートを下ろす
 
-        pass
+        else:
+            self.get_logger().error(f"エラー: 想定外の current_state ({current_state}) です。")
+            return False
 
         #終了処理
         # 左側の上のローラーを止める
         # 右側の上のローラーを止める
         # 下のローラーを止める
         # ガードを落とす
-
         
-    
+        self.get_logger().info("関所への配置完了")
+        return True
     async def execute_callback(self, goal_handle):
         self.is_executing = True
         try:
@@ -75,9 +78,11 @@ class BallPutPlateNode(Node):
             res = BallPutPlate.Result()
             success = False
 
-            success = await self.put_ball_in_plate()
+            success = await self.put_ball_in_plate(req.current_state)
             
             if success:
+                res.success = True
+                res.next_state = 1 # NOT_CARRY
                 goal_handle.succeed()
             else:
                 goal_handle.abort()

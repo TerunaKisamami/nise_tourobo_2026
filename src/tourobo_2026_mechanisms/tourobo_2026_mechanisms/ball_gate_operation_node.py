@@ -74,40 +74,34 @@ class BallGateOperationNode(Node):
         self.dyna_pos_publisher.publish(msg)
 
     # ここがメインの処理じゃぞ
-    async def operate_ball_gate(self,dir_num):
+    async def operate_ball_gate(self, target_gate, is_open):
         DIR_NAME={1:"左",2:"右",0:"エラー"}
-        self.get_logger().info(f"{DIR_NAME[dir_num]}ゲートを開閉します")
+        if target_gate not in DIR_NAME:
+            self.get_logger().info("エラー: target_gateが1(左)または2(右)ではありません")
+            return False
+            
+        action_name = "開けます" if is_open else "閉じます"
+        self.get_logger().info(f"{DIR_NAME[target_gate]}ゲートを{action_name}")
 
         # 【ダミー設定】閾値やIDは後で調整する
         LEFT_GATE_ID = 20
         RIGHT_GATE_ID = 21
 
-        # 0 ~ 500: 開いている (OPEN)
-        # 500 ~ 1500: 半開き (HALF) - 失敗時など
-        # 1500 ~ : 閉じている (CLOSED)
-        POS_OPEN_THRESHOLD = 500
-        POS_HALF_THRESHOLD = 1500
-
-        if dir_num == 1: # 左
-            pos = self.current_dyna_pos.get(LEFT_GATE_ID, 0)
-            if pos > POS_OPEN_THRESHOLD:
-                # 閉じている、または半開き（失敗時）なら開く
-                self.get_logger().info("左のゲートが開いていない（閉じている or 半開き）ので、開けます")
+        # モーターを開閉位置に動かす処理をここに書く
+        if target_gate == 1:
+            if is_open:
+                # 左ゲートを開く動作
+                pass
             else:
-                # 完全に開いているなら閉じる
-                self.get_logger().info("左のゲートが開いているので、閉じます")
-            pass
-        elif dir_num == 2: # 右
-            pos = self.current_dyna_pos.get(RIGHT_GATE_ID, 0)
-            if pos > POS_OPEN_THRESHOLD:
-                # 閉じている、または半開き（失敗時）なら開く
-                self.get_logger().info("右のゲートが開いていない（閉じている or 半開き）ので、開けます")
+                # 左ゲートを閉じる動作
+                pass
+        elif target_gate == 2:
+            if is_open:
+                # 右ゲートを開く動作
+                pass
             else:
-                # 完全に開いているなら閉じる
-                self.get_logger().info("右のゲートが開いているので、閉じます")
-            pass
-        else: # エラー
-            self.get_logger().info("エラー: dir_numが1または2ではありません")    
+                # 右ゲートを閉じる動作
+                pass
         
         
         """
@@ -140,9 +134,11 @@ class BallGateOperationNode(Node):
             res = BallGateOperation.Result()
             success = False
 
-            success = await self.operate_ball_gate(goal_handle.request.execute_mode)
+            success = await self.operate_ball_gate(req.target_gate, req.is_open)
             
             if success:
+                res.next_state = req.current_state # ゲート開閉はメインの論理状態を変えない
+                res.success = True
                 goal_handle.succeed()
             else:
                 goal_handle.abort()

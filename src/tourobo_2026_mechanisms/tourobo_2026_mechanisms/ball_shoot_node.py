@@ -51,6 +51,8 @@ class BallShootNode(Node):
             success = await self.shoot_ball()
             
             if success:
+                res.success = True
+                res.next_state = 1 # NOT_CARRY
                 goal_handle.succeed()
             else:
                 goal_handle.abort()

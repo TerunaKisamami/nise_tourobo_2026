@@ -1,6 +1,6 @@
 # 1. Goal (クライアントからサーバーへ送信する要求データ)
-# 0:なにもしない 1:左を操作 2:右を操作
-int32 execute_mode
+int32 target_gate # 1:左を操作 2:右を操作
+bool is_open
 int32 current_state
 ---
 # 2. Result (処理完了時にサーバーから返す最終結果データ)

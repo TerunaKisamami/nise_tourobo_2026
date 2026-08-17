@@ -104,18 +104,10 @@ class BallGetNode(Node):
         #今ボールを保持しているなら実行しない
 
         if dir_num == 1: # 左
-            # 左のゲートが閉じているか半開きなら実行しない
-            if self.current_dyna_pos.get(LEFT_GATE_ID, 0) > THRESHOLD_CLOSED_GATE:
-                self.get_logger().warn("左のゲートが閉じているため、回収動作を中止します。")
-                return False
-            
             # わきで保持するために左のガードを閉じる
-            if self.current_dyna_pos.get(LEFT_GUARD_ID, 0) < THRESHOLD_CLOSED_GUARD:
-                self.get_logger().info("左のガードを閉じます")
-                self.publish_dyna_pos(LEFT_GUARD_ID, 1111)
-                await asyncio.sleep(1.0)
-            else:
-                self.get_logger().info("左のガードは既に閉じているため、ガードを閉じる処理は行いません")
+            self.get_logger().info("左のガードを閉じます")
+            self.publish_dyna_pos(LEFT_GUARD_ID, 1111)
+            await asyncio.sleep(1.0)
 
             # 上のローラーを回すDCモーター
 
@@ -128,18 +120,10 @@ class BallGetNode(Node):
             return True
 
         elif dir_num == 2: # 右
-            # 右のゲートが閉じているか半開きなら実行しない
-            if self.current_dyna_pos.get(RIGHT_GATE_ID, 0) > THRESHOLD_CLOSED_GATE:
-                self.get_logger().warn("右のゲートが閉じているため、回収動作を中止します。")
-                return False
-
             #わきで保持するために右のガードを閉じる
-            if self.current_dyna_pos.get(RIGHT_GUARD_ID, 0) < THRESHOLD_CLOSED_GUARD:
-                self.get_logger().info("右のガードを閉じます")
-                self.publish_dyna_pos(RIGHT_GUARD_ID, 1111)
-                await asyncio.sleep(1.0)
-            else:
-                self.get_logger().info("右のガードは既に閉じているため、ガードを閉じる処理は行いません")
+            self.get_logger().info("右のガードを閉じます")
+            self.publish_dyna_pos(RIGHT_GUARD_ID, 1111)
+            await asyncio.sleep(1.0)
             # 上のローラーを回す
 
             # 下のローラーを回す
@@ -183,9 +167,12 @@ class BallGetNode(Node):
             res = BallGet.Result()
             success = False
 
-            success = await self.get_ball(goal_handle.request.execute_mode)
+            success = await self.get_ball(req.execute_mode)
             
             if success:
+                res.success = True
+                # execute_mode 1=左 -> LEFT_CARRY(2), 2=右 -> RIGHT_CARRY(3)
+                res.next_state = 2 if req.execute_mode == 1 else 3
                 goal_handle.succeed()
             else:
                 goal_handle.abort()

@@ -46,6 +46,8 @@ class BallPutGateNode(Node):
             success = await self.put_ball_in_gate()
             
             if success:
+                res.success = True
+                res.next_state = 1 # NOT_CARRY
                 goal_handle.succeed()
             else:
                 goal_handle.abort()
