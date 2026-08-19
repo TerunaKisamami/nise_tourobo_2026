@@ -33,7 +33,10 @@ class BallPutGateNode(Node):
         return GoalResponse.ACCEPT
     
     async def put_ball_in_gate(self):
-        #ボールをじょうもんに入れる処理を書く
+        #ボールを城門に入れる処理を書く
+        #射出機構を下げることで中の支柱を上げる
+        #モーターを回して後ろから射出する
+
         return True
     
     async def execute_callback(self, goal_handle):
