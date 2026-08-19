@@ -36,41 +36,58 @@ rosdep update
 ```
 ---
 
-## 3️⃣ ワークスペース作成 & コード取得
+## 3️⃣ インタフェース用ワークスペース (ros2_packages) の作成とビルド
+カスタムメッセージや外部インターフェースが別々のリポジトリで管理されているため、まずはそれらをまとめるワークスペースを作成してビルドします。
+
 ```bash
-# ワークスペース作成（~/robobobo が推奨）
+# ros2_packages ワークスペースを作成
+mkdir -p ~/robobobo/ros2_packages/src
+cd ~/robobobo/ros2_packages/src
+
+# 必要なパッケージを個別にクローン (URLは実際のものに書き換えてください)
+git clone https://github.com/<OWNER1>/ah_dyna_interfaces.git
+git clone https://github.com/<OWNER2>/ah_python_lib_ros_pkg.git
+git clone https://github.com/<OWNER3>/ah_ros2_dynamixel.git
+# ... その他必要なパッケージがあれば追加
+
+# インタフェース類のビルド
+cd ~/robobobo/ros2_packages
+colcon build --symlink-install
+
+# ビルドした環境をロード
+source install/setup.bash
+```
+
+---
+
+## 4️⃣ 本体用ワークスペースの作成とビルド
+次に、先ほどビルドした `ros2_packages` の環境を引き継いだ状態で、ロボット本体のコードをビルドします（オーバーレイ・ワークスペース）。
+
+```bash
+# 本体ワークスペースを作成
 mkdir -p ~/robobobo/nise_tourobo_2026/src
 cd ~/robobobo/nise_tourobo_2026/src
 
-# 本体リポジトリをクローン（現在のリポジトリ）
+# 本体リポジトリをクローン
 git clone https://github.com/TerunaKisamami/tourobo_2026_auto.git .
 
-# 依存であるカスタムインタフェースやメッセージ定義も取得
-# （ros2_packages には dyna_interfaces, tourobo_2026_interfaces などが入っている）
-git clone https://github.com/TerunaKisamami/ros2_packages.git
-```
----
-
-## 4️⃣ 依存パッケージの自動解決 & ビルド
-```bash
+# 依存パッケージの自動解決
 cd ~/robobobo/nise_tourobo_2026
-
-# rosdep が apt パッケージへ自動で変換し、足りない依存をインストール
 rosdep install -i --from-path src --rosdistro humble -y
 
-# ビルド（--symlink-install で開発時の再ビルドが速くなる）
+# ビルド
 colcon build --symlink-install
 
-# ビルドした環境を現在のシェルに反映
+# ビルドした環境をロード
 source install/setup.bash
 ```
-> **Note**: 途中で `apt` パッケージが見つからない場合は、エラーメッセージに表示されたパッケージ名で `sudo apt install <pkg>` を手動で実行してください。
 
 ---
 
 ## 5️⃣ 環境永続化（ターミナル起動時に自動ロード）
+ターミナルを開くたびに両方のワークスペースを順番に読み込むよう `.bashrc` に追記します。
 ```bash
-# .bashrc に追記しておくと、毎回 source が不要になります
+echo 'source ~/robobobo/ros2_packages/install/setup.bash' >> ~/.bashrc
 echo 'source ~/robobobo/nise_tourobo_2026/install/setup.bash' >> ~/.bashrc
 ```
 ---
