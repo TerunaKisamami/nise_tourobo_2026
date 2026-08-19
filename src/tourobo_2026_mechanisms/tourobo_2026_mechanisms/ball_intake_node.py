@@ -83,31 +83,51 @@ class BallIntakeNode(Node):
         ANGLE_SHOOT_UP = 1500 
         
 
+        GUARD_OPEN = 2000
+        GUARD_CLOSE = 0
+        GATE_OPEN = 2000
+        GATE_CLOSE = 0
+
         #左右両方で共通して実行する処理を書く
-        #支柱が上がってるなら下に下げる
-        if self.current_dyna_pos[SHOOT_DIRECTION_ID] > ANGLE_SHOOT_UP:
-            self.publish_dyna_pos(SHOOT_DIRECTION_ID, 1000)
-            await asyncio.sleep(1.5)
+        #フィードバック無しのため、常に支柱を下げて待機する
+        self.get_logger().info("支柱を下げます")
+        self.publish_dyna_pos(SHOOT_DIRECTION_ID, 1000)
+        await asyncio.sleep(1.5)
             
         # current_state は 2: LEFT_CARRY, 3: RIGHT_CARRY
         if current_state == 2:
             self.get_logger().info("左脇にあるボールを内側に取り込みます")
             #右側のガードを下げる
+            self.publish_dyna_pos(RIGHT_GUARD_ID, GUARD_OPEN)
             #左側のガードを上げる
+            self.publish_dyna_pos(LEFT_GUARD_ID, GUARD_CLOSE)
+            await asyncio.sleep(1.0)
             #下ローラーを右側へ回転
             #上ローラーを回転
+            
             #左ゲートを下ろす
+            self.publish_dyna_pos(LEFT_GATE_ID, GATE_CLOSE)
+            await asyncio.sleep(1.0)
             #左ガードを下げる
-
+            self.publish_dyna_pos(LEFT_GUARD_ID, GUARD_OPEN)
+            await asyncio.sleep(1.0)
 
         elif current_state == 3:
             self.get_logger().info("右脇にあるボールを内側に取り込みます")
             #左側のガードを下げる
+            self.publish_dyna_pos(LEFT_GUARD_ID, GUARD_OPEN)
             #右側のガードを上げる
+            self.publish_dyna_pos(RIGHT_GUARD_ID, GUARD_CLOSE)
+            await asyncio.sleep(1.0)
             #下ローラーを左側へ回転
             #上ローラーを回転
+            
             #右ゲートを下ろす
+            self.publish_dyna_pos(RIGHT_GATE_ID, GATE_CLOSE)
+            await asyncio.sleep(1.0)
             #右ガードを下げる
+            self.publish_dyna_pos(RIGHT_GUARD_ID, GUARD_OPEN)
+            await asyncio.sleep(1.0)
             
         else:
             self.get_logger().error(f"エラー: 想定外の current_state ({current_state}) です。取り込みを中止します。")

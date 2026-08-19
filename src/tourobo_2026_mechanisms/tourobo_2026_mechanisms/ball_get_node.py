@@ -87,13 +87,18 @@ class BallGetNode(Node):
         ANGLE_SHOOT_UP = 1500 
         
 
+        GUARD_OPEN = 2000
+        GUARD_CLOSE = 0
+        GATE_OPEN = 2000
+        GATE_CLOSE = 0
+
         #左右両方で共通して実行する処理を書く
         #今ボールを保持しているなら実行しない
 
         if dir_num == 1: # 左
             # わきで保持するために左のガードを閉じる
             self.get_logger().info("左のガードを閉じます")
-            self.publish_dyna_pos(LEFT_GUARD_ID, 1111)
+            self.publish_dyna_pos(LEFT_GUARD_ID, GUARD_CLOSE)
             await asyncio.sleep(1.0)
 
             # 上のローラーを回すDCモーター
@@ -101,6 +106,9 @@ class BallGetNode(Node):
             # 下のローラーを回すDCモーター
 
             # ダイナミクセルでゲートを閉じる
+            self.get_logger().info("左のゲートを閉じます")
+            self.publish_dyna_pos(LEFT_GATE_ID, GATE_CLOSE)
+            await asyncio.sleep(1.0)
 
             # 動作終了
             
@@ -109,13 +117,16 @@ class BallGetNode(Node):
         elif dir_num == 2: # 右
             #わきで保持するために右のガードを閉じる
             self.get_logger().info("右のガードを閉じます")
-            self.publish_dyna_pos(RIGHT_GUARD_ID, 1111)
+            self.publish_dyna_pos(RIGHT_GUARD_ID, GUARD_CLOSE)
             await asyncio.sleep(1.0)
             # 上のローラーを回す
 
             # 下のローラーを回す
 
             # ダイナミクセルでゲートを閉じる
+            self.get_logger().info("右のゲートを閉じます")
+            self.publish_dyna_pos(RIGHT_GATE_ID, GATE_CLOSE)
+            await asyncio.sleep(1.0)
 
             # 動作終了
 

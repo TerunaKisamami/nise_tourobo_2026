@@ -54,14 +54,19 @@ class BallShootAimNode(Node):
         self.dyna_pos_publisher.publish(msg)
     
     async def aim_ball_shoot(self,direction):
+        SHOOT_DIRECTION_ID = 12
+        AIM_UP = 2000
+        AIM_DOWN = 1000
+
         #1: 上げる -1: 下げる 0: 待機
         if direction == 1:
-            pass
+            self.publish_dyna_pos(SHOOT_DIRECTION_ID, AIM_UP)
         elif direction == -1:
-            pass
+            self.publish_dyna_pos(SHOOT_DIRECTION_ID, AIM_DOWN)
         elif direction == 0:
             pass
         
+        await asyncio.sleep(1.0)
         return True
     
     def goal_callback(self, goal_request):

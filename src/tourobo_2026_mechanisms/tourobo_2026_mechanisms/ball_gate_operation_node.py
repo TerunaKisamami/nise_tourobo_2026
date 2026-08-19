@@ -74,22 +74,26 @@ class BallGateOperationNode(Node):
         # 【ダミー設定】閾値やIDは後で調整する
         LEFT_GATE_ID = 20
         RIGHT_GATE_ID = 21
+        GATE_OPEN = 2000
+        GATE_CLOSE = 0
 
         # モーターを開閉位置に動かす処理をここに書く
         if target_gate == 1:
             if is_open:
                 # 左ゲートを開く動作
-                pass
+                self.publish_dyna_pos(LEFT_GATE_ID, GATE_OPEN)
             else:
                 # 左ゲートを閉じる動作
-                pass
+                self.publish_dyna_pos(LEFT_GATE_ID, GATE_CLOSE)
+            await asyncio.sleep(1.0)
         elif target_gate == 2:
             if is_open:
                 # 右ゲートを開く動作
-                pass
+                self.publish_dyna_pos(RIGHT_GATE_ID, GATE_OPEN)
             else:
                 # 右ゲートを閉じる動作
-                pass
+                self.publish_dyna_pos(RIGHT_GATE_ID, GATE_CLOSE)
+            await asyncio.sleep(1.0)
         
         
         """
