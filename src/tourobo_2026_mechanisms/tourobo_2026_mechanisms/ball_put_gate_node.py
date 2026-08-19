@@ -34,7 +34,7 @@ class BallPutGateNode(Node):
     
     async def put_ball_in_gate(self):
         #ボールをじょうもんに入れる処理を書く
-        pass
+        return True
     
     async def execute_callback(self, goal_handle):
         self.is_executing = True

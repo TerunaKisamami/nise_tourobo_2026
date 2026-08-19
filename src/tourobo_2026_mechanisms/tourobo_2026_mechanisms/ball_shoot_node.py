@@ -39,7 +39,7 @@ class BallShootNode(Node):
 
         #ロボマスを止める
         
-        pass
+        return True
     
     async def execute_callback(self, goal_handle):
         self.is_executing = True
