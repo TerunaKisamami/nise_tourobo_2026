@@ -9,7 +9,7 @@ from std_msgs.msg import String
 
 from tourobo_2026_interfaces.action import BallShootAim
 # pyrefly: ignore [missing-import]
-from dyna_interfaces.msg import DynaTarget, DynaFeedback
+from dyna_interfaces.msg import DynaTarget
 
 import os 
 import sys
@@ -24,15 +24,6 @@ class BallShootAimNode(Node):
         self.dyna_vel_publisher = self.create_publisher(DynaTarget, "/dyna_target_vel", 10)
         self.dyna_pos_publisher = self.create_publisher(DynaTarget, "/dyna_target_pos", 10)
 
-        # フィードバック受信用
-        self.current_dyna_pos = {}
-        self.dyna_feedback_sub = self.create_subscription(
-            DynaFeedback,
-            '/dyna_feedback', # ※CANノード側の仕様に合わせて適宜変更してください
-            self.dyna_feedback_callback,
-            10,
-            callback_group=self.cb_group
-        )
 
         self._action_server = ActionServer(
             self,
@@ -43,9 +34,6 @@ class BallShootAimNode(Node):
             callback_group=self.cb_group,
         )
     
-    def dyna_feedback_callback(self, msg):
-        # 常に最新の角度データを辞書に保存する
-        self.current_dyna_pos[msg.id] = msg.data[0]
 
     def publish_dyna_extpos(self, id, target):
         msg = DynaTarget()

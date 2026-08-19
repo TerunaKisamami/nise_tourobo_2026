@@ -254,7 +254,7 @@ class JoyMechanismClient(Node):
         
         elif self.is_pressed(msg,4): # L1ボタン
             if not self.is_action_running:
-                if self.current_state in [Mechanism_State.NOT_CARRY, Mechanism_State.UNKNOWN, Mechanism_State.LEFT_CARRY, Mechanism_State.INTAKE]:
+                if self.current_state in [Mechanism_State.NOT_CARRY, Mechanism_State.UNKNOWN, Mechanism_State.LEFT_CARRY, Mechanism_State.RIGHT_CARRY, Mechanism_State.INTAKE]:
                     self.get_logger().info("BallGateOperation(左)が入力された")
                     self.is_action_running = True
                     target_is_open = not self.is_left_gate_open
@@ -276,7 +276,7 @@ class JoyMechanismClient(Node):
         
         elif self.is_pressed(msg,5): # R1ボタン
             if not self.is_action_running:
-                if self.current_state in [Mechanism_State.NOT_CARRY, Mechanism_State.UNKNOWN, Mechanism_State.RIGHT_CARRY, Mechanism_State.INTAKE]:
+                if self.current_state in [Mechanism_State.NOT_CARRY, Mechanism_State.UNKNOWN, Mechanism_State.LEFT_CARRY, Mechanism_State.RIGHT_CARRY, Mechanism_State.INTAKE]:
                     self.get_logger().info("BallGateOperation(右)が入力された")
                     self.is_action_running = True
                     target_is_open = not self.is_right_gate_open
@@ -332,27 +332,33 @@ class JoyMechanismClient(Node):
 
         elif self.is_axis_changed(msg, 7, 0.5, 1): # 十字キー上
             if not self.is_action_running:
-                self.get_logger().info("十字キー上が押されました(射出機構 上)")
-                self.is_action_running = True
-                try:
-                    res = await self.send_ball_shoot_aim_goal(1)
-                    if res and res.success:
-                        self.current_state = Mechanism_State(res.next_state)
-                finally:
-                    self.is_action_running = False
+                if self.current_state == Mechanism_State.INTAKE:
+                    self.get_logger().info("十字キー上が押されました(射出機構 上)")
+                    self.is_action_running = True
+                    try:
+                        res = await self.send_ball_shoot_aim_goal(1)
+                        if res and res.success:
+                            self.current_state = Mechanism_State(res.next_state)
+                    finally:
+                        self.is_action_running = False
+                else:
+                    self.get_logger().warn('射出機構の上下は INTAKE 状態でのみ許可されます')
             else:
                 self.get_logger().warn('現在他の動作中なのむし')
 
         elif self.is_axis_changed(msg, 7, 0.5, -1): # 十字キー下
             if not self.is_action_running:
-                self.get_logger().info("十字キー下が押されました(射出機構 下)")
-                self.is_action_running = True
-                try:
-                    res = await self.send_ball_shoot_aim_goal(-1)
-                    if res and res.success:
-                        self.current_state = Mechanism_State(res.next_state)
-                finally:
-                    self.is_action_running = False
+                if self.current_state == Mechanism_State.INTAKE:
+                    self.get_logger().info("十字キー下が押されました(射出機構 下)")
+                    self.is_action_running = True
+                    try:
+                        res = await self.send_ball_shoot_aim_goal(-1)
+                        if res and res.success:
+                            self.current_state = Mechanism_State(res.next_state)
+                    finally:
+                        self.is_action_running = False
+                else:
+                    self.get_logger().warn('射出機構の上下は INTAKE 状態でのみ許可されます')
             else:
                 self.get_logger().warn('現在他の動作中なのむし')
 
