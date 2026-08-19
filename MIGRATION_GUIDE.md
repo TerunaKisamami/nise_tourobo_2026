@@ -65,14 +65,14 @@ source install/setup.bash
 
 ```bash
 # 本体ワークスペースを作成
-mkdir -p ~/robobobo/tourobo_2026_auto/src
-cd ~/robobobo/tourobo_2026_auto/src
+mkdir -p ~/robobobo/nise_tourobo_2026/src
+cd ~/robobobo/nise_tourobo_2026/src
 
 # 本体リポジトリをクローン
-git clone https://github.com/TerunaKisamami/tourobo_2026_auto.git .
+git clone https://github.com/TerunaKisamami/nise_tourobo_2026.git .
 
 # 依存パッケージの自動解決
-cd ~/robobobo/tourobo_2026_auto
+cd ~/robobobo/nise_tourobo_2026
 rosdep install -i --from-path src --rosdistro humble -y
 
 # ビルド
@@ -88,7 +88,7 @@ source install/setup.bash
 ターミナルを開くたびに両方のワークスペースを順番に読み込むよう `.bashrc` に追記します。
 ```bash
 echo 'source ~/robobobo/ros2_packages/install/setup.bash' >> ~/.bashrc
-echo 'source ~/robobobo/tourobo_2026_auto/install/setup.bash' >> ~/.bashrc
+echo 'source ~/robobobo/nise_tourobo_2026/install/setup.bash' >> ~/.bashrc
 ```
 ---
 
@@ -137,7 +137,7 @@ ros2 launch tourobo_2026_mechanisms joy_mechanism_client.launch.py
 ```
 MIGRATION_GUIDE.md   ← 本ガイド（今回追加したファイル）
 src/
-  ├─ tourobo_2026_auto/           # 本体コード
+  ├─ nise_tourobo_2026/           # 本体コード
   └─ ros2_packages/               # カスタムメッセージ・インタフェース
 install/                           # colcon ビルド結果（生成物）
 ```
@@ -146,7 +146,7 @@ install/                           # colcon ビルド結果（生成物）
 ## ✅ 完了チェックリスト
 - [ ] ROS 2 Humble がインストール済み
 - [ ] `rosdep` 初期化済み
-- [ ] `~/robobobo/tourobo_2026_auto` にリポジトリがクローン済み
+- [ ] `~/robobobo/nise_tourobo_2026` にリポジトリがクローン済み
 - [ ] 依存パッケージを `rosdep install` で解決
 - [ ] `colcon build` がエラーなしで完了
 - [ ] `source install/setup.bash` が実行できる
