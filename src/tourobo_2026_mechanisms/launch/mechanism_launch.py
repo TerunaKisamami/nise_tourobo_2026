@@ -1,3 +1,6 @@
+"""
+メカニズム関連のnodeを立ち上げるlaunchですわよ
+"""
 import launch
 from launch import LaunchDescription
 from launch_ros.actions import Node
@@ -5,7 +8,6 @@ from launch_ros.actions import Node
 def generate_launch_description():
     pkg_name = 'tourobo_2026_mechanisms'
     
-    # アクションサーバーのノード群
     ball_get = Node(package=pkg_name, executable="ball_get_node", name="ball_get_node")
     ball_put_plate = Node(package=pkg_name, executable="ball_put_plate_node", name="ball_put_plate_node")
     ball_put_gate = Node(package=pkg_name, executable="ball_put_gate_node", name="ball_put_gate_node")
@@ -14,7 +16,6 @@ def generate_launch_description():
     ball_intake = Node(package=pkg_name, executable="ball_intake_node", name="ball_intake_node")
     ball_shoot_aim = Node(package=pkg_name, executable="ball_shoot_aim_node", name="ball_shoot_aim_node")
     
-    # 司令塔（クライアント）ノード
     joy_client = Node(package=pkg_name, executable="joy_mechanism_client", name="joy_mechanism_client")
 
     ld = LaunchDescription()
