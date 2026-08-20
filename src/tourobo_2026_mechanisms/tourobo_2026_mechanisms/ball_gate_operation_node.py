@@ -1,30 +1,33 @@
 """
 ボールを取り込むゲートの開閉をするだけ
+ダイナミクセル　ゲート開閉
 """
-from sympy import false
 from rclpy.action import ActionServer, GoalResponse
 import rclpy
 import asyncio
 from rclpy.node import Node
 from std_msgs.msg import String
-
-from tourobo_2026_interfaces.action import BallGateOperation
-# pyrefly: ignore [missing-import]
-from dyna_interfaces.msg import DynaTarget
-
-import os 
+import os
 import sys
 
+from ah_python_lib.ah_python_can import *
+from tourobo_2026_interfaces.action import BallGateOperation
+from dyna_interfaces.msg import DynaTarget
+
+
 class BallGateOperationNode(Node):
+
     def __init__(self):
         super().__init__('ball_gate_operation_node')
         self.is_executing = False
-        self.cb_group=rclpy.callback_groups.ReentrantCallbackGroup()
-        
-        self.dyna_extpos_publisher = self.create_publisher(DynaTarget, "/dyna_target_extpos", 10)
-        self.dyna_vel_publisher = self.create_publisher(DynaTarget, "/dyna_target_vel", 10)
-        self.dyna_pos_publisher = self.create_publisher(DynaTarget, "/dyna_target_pos", 10)
+        self.cb_group = rclpy.callback_groups.ReentrantCallbackGroup()
 
+        self.dyna_extpos_publisher = self.create_publisher(
+            DynaTarget, "/dyna_target_extpos", 10)
+        self.dyna_vel_publisher = self.create_publisher(DynaTarget,
+                                                        "/dyna_target_vel", 10)
+        self.dyna_pos_publisher = self.create_publisher(DynaTarget,
+                                                        "/dyna_target_pos", 10)
 
         self._action_server = ActionServer(
             self,
@@ -41,7 +44,6 @@ class BallGateOperationNode(Node):
             return GoalResponse.REJECT
         self.get_logger().info('新しい指令を受け付けました。')
         return GoalResponse.ACCEPT
-    
 
     def publish_dyna_extpos(self, id, target):
         msg = DynaTarget()
@@ -63,11 +65,11 @@ class BallGateOperationNode(Node):
 
     # ここがメインの処理じゃぞ
     async def operate_ball_gate(self, target_gate, is_open):
-        DIR_NAME={1:"左",2:"右",0:"エラー"}
+        DIR_NAME = {1: "左", 2: "右", 0: "エラー"}
         if target_gate not in DIR_NAME:
             self.get_logger().info("エラー: target_gateが1(左)または2(右)ではありません")
             return False
-            
+
         action_name = "開けます" if is_open else "閉じます"
         self.get_logger().info(f"{DIR_NAME[target_gate]}ゲートを{action_name}")
 
@@ -94,8 +96,6 @@ class BallGateOperationNode(Node):
                 # 右ゲートを閉じる動作
                 self.publish_dyna_pos(RIGHT_GATE_ID, GATE_CLOSE)
             await asyncio.sleep(1.0)
-        
-        
         """
         # 例: アームを下げる (ID: 10, Pos: 2000)
         self.get_logger().info("アームを下ろします")
@@ -118,7 +118,7 @@ class BallGateOperationNode(Node):
         """
 
         return True
-    
+
     async def execute_callback(self, goal_handle):
         self.is_executing = True
         try:
@@ -127,27 +127,28 @@ class BallGateOperationNode(Node):
             success = False
 
             success = await self.operate_ball_gate(req.target_gate, req.is_open)
-            
+
             if success:
-                res.next_state = req.current_state # ゲート開閉はメインの論理状態を変えない
+                res.next_state = req.current_state  # ゲート開閉はメインの論理状態を変えない
                 res.success = True
                 goal_handle.succeed()
             else:
                 goal_handle.abort()
-            
+
             return res
         finally:
             self.is_executing = False
-        
+
 
 def main(args=None):
     rclpy.init(args=args)
     node = BallGateOperationNode()
-    executor= rclpy.executors.MultiThreadedExecutor()
+    executor = rclpy.executors.MultiThreadedExecutor()
     executor.add_node(node)
     executor.spin()
     node.destroy_node()
     rclpy.shutdown()
-        
+
+
 if __name__ == '__main__':
     main()

@@ -2,29 +2,37 @@
 わきにかかえたボールを内側へ取り込む
 """
 
-from sympy import false
 from rclpy.action import ActionServer, GoalResponse
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
-from tourobo_2026_interfaces.action import BallIntake
-# pyrefly: ignore [missing-import]
-from dyna_interfaces.msg import DynaTarget
-
-import os 
+import os
 import sys
 import asyncio
 
+from ah_python_lib.ah_python_can import *
+from tourobo_2026_interfaces.action import BallIntake
+from dyna_interfaces.msg import DynaTarget
+
+CAN_BUS = can.interface.Bus(bustype="socketcan",
+                            channel="can0",
+                            asynchronous=True,
+                            bitrate=1000000)
+
+
 class BallIntakeNode(Node):
+
     def __init__(self):
         super().__init__('ball_intake_node')
         self.is_executing = False
-        self.cb_group=rclpy.callback_groups.ReentrantCallbackGroup()
-        
-        self.dyna_extpos_publisher = self.create_publisher(DynaTarget, "/dyna_target_extpos", 10)
-        self.dyna_vel_publisher = self.create_publisher(DynaTarget, "/dyna_target_vel", 10)
-        self.dyna_pos_publisher = self.create_publisher(DynaTarget, "/dyna_target_pos", 10)
+        self.cb_group = rclpy.callback_groups.ReentrantCallbackGroup()
 
+        self.dyna_extpos_publisher = self.create_publisher(
+            DynaTarget, "/dyna_target_extpos", 10)
+        self.dyna_vel_publisher = self.create_publisher(DynaTarget,
+                                                        "/dyna_target_vel", 10)
+        self.dyna_pos_publisher = self.create_publisher(DynaTarget,
+                                                        "/dyna_target_pos", 10)
 
         self._action_server = ActionServer(
             self,
@@ -35,13 +43,27 @@ class BallIntakeNode(Node):
             callback_group=self.cb_group,
         )
 
+        #dcモーター立ち上げ
+        set_pwm_mode()
+        set_pwm_mode()
+        set_pwm_mode()
+        set_pwm_mode()
+
+        #dcモーター初期化
+        set_goal_pwm()
+        set_goal_pwm()
+        set_goal_pwm()
+        set_goal_pwm()
+
+        #ロボマスモーター立ち上げ
+        set_enc_pos_mode()
+
     def goal_callback(self, goal_request):
         if self.is_executing:
             self.get_logger().warn('現在別の処理を実行中です。新しい指令を拒否します。')
             return GoalResponse.REJECT
         self.get_logger().info('新しい指令を受け付けました。')
         return GoalResponse.ACCEPT
-    
 
     def publish_dyna_extpos(self, id, target):
         msg = DynaTarget()
@@ -62,10 +84,10 @@ class BallIntakeNode(Node):
         self.dyna_pos_publisher.publish(msg)
 
     # ここがメインの処理じゃぞ
-    async def get_ball(self, current_state):
+    async def get_ball(self, current_state, execute_mode):
         #これはまだダミーなので後で変える
-        THRESHOLD_CLOSED_GATE = 2000 # これより大きければ「閉じている」と判定する
-        THRESHOLD_CLOSED_GUARD = 2000 # これより大きければ「閉じている」と判定する
+        THRESHOLD_CLOSED_GATE = 2000  # これより大きければ「閉じている」と判定する
+        THRESHOLD_CLOSED_GUARD = 2000  # これより大きければ「閉じている」と判定する
 
         LEFT_GATE_ID = 20
         RIGHT_GATE_ID = 21
@@ -80,8 +102,7 @@ class BallIntakeNode(Node):
         #発射機構のID
         SHOOT_DIRECTION_ID = 12
         #これより上ならら支柱は上がってる
-        ANGLE_SHOOT_UP = 1500 
-        
+        ANGLE_SHOOT_UP = 1500
 
         GUARD_OPEN = 2000
         GUARD_CLOSE = 0
@@ -93,53 +114,124 @@ class BallIntakeNode(Node):
         self.get_logger().info("支柱を下げます")
         self.publish_dyna_pos(SHOOT_DIRECTION_ID, 1000)
         await asyncio.sleep(1.5)
-            
-        # current_state は 2: LEFT_CARRY, 3: RIGHT_CARRY
-        if current_state == 2:
-            self.get_logger().info("左脇にあるボールを内側に取り込みます")
-            #右側のガードを下げる
-            self.publish_dyna_pos(RIGHT_GUARD_ID, GUARD_OPEN)
-            #左側のガードを上げる
-            self.publish_dyna_pos(LEFT_GUARD_ID, GUARD_CLOSE)
-            await asyncio.sleep(1.0)
-            #下ローラーを右側へ回転
-            #上ローラーを回転
-            
-            #左ゲートを下ろす
-            self.publish_dyna_pos(LEFT_GATE_ID, GATE_CLOSE)
-            await asyncio.sleep(1.0)
-            #左ガードを下げる
-            self.publish_dyna_pos(LEFT_GUARD_ID, GUARD_OPEN)
-            await asyncio.sleep(1.0)
 
+        # current_state は 2: LEFT_CARRY, 3: RIGHT_CARRY
+        #left
+        if current_state == 2:
+
+            #城門
+            if execute_mode == 1:
+                self.get_logger().info("左脇にあるボールを内側に取り込みます")
+
+                #右側のガードを下げる
+                self.publish_dyna_pos(RIGHT_GUARD_ID, GUARD_OPEN)
+
+                #左側のガードを上げる
+                self.publish_dyna_pos(LEFT_GUARD_ID, GUARD_CLOSE)
+                await asyncio.sleep(1.0)
+
+                #下ローラーを右側へ回転
+                set_goal_pwm()
+
+                #上ローラーを回転
+                set_goal_pwm()
+
+                #左ゲートを下ろす
+                self.publish_dyna_pos(LEFT_GATE_ID, GATE_CLOSE)
+                await asyncio.sleep(1.0)
+                
+                #左ガードを下げる
+                self.publish_dyna_pos(LEFT_GUARD_ID, GUARD_OPEN)
+                await asyncio.sleep(1.0)
+
+            #射出
+            elif execute_mode == 2:
+                self.get_logger().info("左脇にあるボールを内側に取り込みます")
+
+                #右側のガードを下げる
+                self.publish_dyna_pos(RIGHT_GUARD_ID, GUARD_OPEN)
+                
+                #左側のガードを上げる
+                self.publish_dyna_pos(LEFT_GUARD_ID, GUARD_CLOSE)
+                await asyncio.sleep(1.0)
+
+                #下ローラーを右側へ回転
+                set_goal_pwm()
+
+                #上ローラーを回転
+                set_goal_pwm()
+
+                #左ゲートを下ろす
+                self.publish_dyna_pos(LEFT_GATE_ID, GATE_CLOSE)
+                await asyncio.sleep(1.0)
+
+                #左ガードを下げる
+                self.publish_dyna_pos(LEFT_GUARD_ID, GUARD_OPEN)
+                await asyncio.sleep(1.0)
+
+        #right
         elif current_state == 3:
-            self.get_logger().info("右脇にあるボールを内側に取り込みます")
-            #左側のガードを下げる
-            self.publish_dyna_pos(LEFT_GUARD_ID, GUARD_OPEN)
-            #右側のガードを上げる
-            self.publish_dyna_pos(RIGHT_GUARD_ID, GUARD_CLOSE)
-            await asyncio.sleep(1.0)
-            #下ローラーを左側へ回転
-            #上ローラーを回転
-            
-            #右ゲートを下ろす
-            self.publish_dyna_pos(RIGHT_GATE_ID, GATE_CLOSE)
-            await asyncio.sleep(1.0)
-            #右ガードを下げる
-            self.publish_dyna_pos(RIGHT_GUARD_ID, GUARD_OPEN)
-            await asyncio.sleep(1.0)
-            
+
+            #城門
+            if execute_mode == 1:
+                self.get_logger().info("右脇にあるボールを内側に取り込みます")
+
+                #左側のガードを下げる
+                self.publish_dyna_pos(LEFT_GUARD_ID, GUARD_OPEN)
+
+                #右側のガードを上げる
+                self.publish_dyna_pos(RIGHT_GUARD_ID, GUARD_CLOSE)
+                await asyncio.sleep(1.0)
+
+                #下ローラーを左側へ回転
+                set_goal_pwm()
+
+                #上ローラーを回転
+                set_goal_pwm()
+
+                #右ゲートを下ろす
+                self.publish_dyna_pos(RIGHT_GATE_ID, GATE_CLOSE)
+                await asyncio.sleep(1.0)
+
+                #右ガードを下げる
+                self.publish_dyna_pos(RIGHT_GUARD_ID, GUARD_OPEN)
+                await asyncio.sleep(1.0)
+
+            #射出
+            elif execute_mode == 2:
+                self.get_logger().info("右脇にあるボールを内側に取り込みます")
+
+                #左側のガードを下げる
+                self.publish_dyna_pos(LEFT_GUARD_ID, GUARD_OPEN)
+
+                #右側のガードを上げる
+                self.publish_dyna_pos(RIGHT_GUARD_ID, GUARD_CLOSE)
+                await asyncio.sleep(1.0)
+
+                #下ローラーを左側へ回転
+                set_goal_pwm()
+
+                #上ローラーを回転
+                set_goal_pwm()
+
+                #右ゲートを下ろす
+                self.publish_dyna_pos(RIGHT_GATE_ID, GATE_CLOSE)
+                await asyncio.sleep(1.0)
+
+                #右ガードを下げる
+                self.publish_dyna_pos(RIGHT_GUARD_ID, GUARD_OPEN)
+                await asyncio.sleep(1.0)
+
         else:
-            self.get_logger().error(f"エラー: 想定外の current_state ({current_state}) です。取り込みを中止します。")
+            self.get_logger().error(
+                f"エラー: 想定外の current_state ({current_state}) です。取り込みを中止します。")
             return False
 
         #終了処理
         #ローラーを止める
-        
+
         self.get_logger().info("取り込み完了")
         return True
-
-        
 
     async def execute_callback(self, goal_handle):
         self.is_executing = True
@@ -148,28 +240,35 @@ class BallIntakeNode(Node):
             res = BallIntake.Result()
             success = False
 
-            success = await self.get_ball(req.current_state)
-            
+            success = await self.get_ball(req.current_state, req.execute_mode)
+
             if success:
                 res.success = True
-                res.next_state = 4 # INTAKE
+                #城門
+                if (req.execute_mode == 1):
+                    res.next_state = 4  # INTAKE
+                #射出
+                elif (req.execute_mode == 2):
+                    res.next_state = 5  # INTAKE
                 goal_handle.succeed()
             else:
                 goal_handle.abort()
-            
+
             return res
         finally:
             self.is_executing = False
-        
+
 
 def main(args=None):
     rclpy.init(args=args)
     node = BallIntakeNode()
-    executor= rclpy.executors.MultiThreadedExecutor()
+    executor = rclpy.executors.MultiThreadedExecutor()
     executor.add_node(node)
     executor.spin()
     node.destroy_node()
     rclpy.shutdown()
-        
+
+
 if __name__ == '__main__':
     main()
+

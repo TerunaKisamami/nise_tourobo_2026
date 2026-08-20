@@ -1,5 +1,6 @@
 # 1. Goal (クライアントからサーバーへ送信する要求データ)
-bool execute
+# execute_mode: 1:城門, 2:射出
+int32 execute_mode
 int32 current_state
 ---
 # 2. Result (処理完了時にサーバーから返す最終結果データ)
