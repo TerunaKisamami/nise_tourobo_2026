@@ -6,6 +6,7 @@
 from rclpy.action import ActionServer, GoalResponse
 import rclpy
 from rclpy.node import Node
+from .mechanism_base_node import MechanismBaseNode
 from std_msgs.msg import String
 import asyncio
 import os
@@ -22,58 +23,14 @@ CAN_BUS = can.interface.Bus(bustype="socketcan",
                             bitrate=1000000)
 
 
-class BallPutPlateNode(Node):
+class BallPutPlateNode(MechanismBaseNode):
 
     def __init__(self):
         super().__init__('ball_put_plate_node')
         self.is_executing = False
         self.cb_group = rclpy.callback_groups.ReentrantCallbackGroup()
         
-        self.declare_parameters(
-            namespace='',
-            parameters=[
-                ('arm_left_id', 20),
-                ('arm_right_id', 21),
-                ('guard_left_id', 22),
-                ('guard_right_id', 23),
-                ('shoot_angle_id', 10),
-                ('arm_open', 2000),
-                ('arm_close', 0),
-                ('guard_open', 2000),
-                ('guard_close', 0),
-                ('shoot_angle_min', 0),
-                ('shoot_angle_max', 2000),
-                ('shoot_angle_at_gate', 1000),
-                ('shoot_push_max', 2000),
-                ('shoot_push_min', 0),
-                ('shoot_push_intake_gate_ready', 100),
-                ('shoot_push_intake_shoot_ready', 200),
-                ('shoot_push_shoot_finish', 300),
-                ('shoot_push_put_gate_finish', 400),
-                ('down_roller_can_id', 0x040),
-                ('right_roller_can_id', 0x041),
-                ('left_roller_can_id', 0x010),
-                ('shoot_roller_1_can_id', 0x011),
-                ('shoot_roller_2_can_id', 0x012),
-                ('shoot_roller_3_can_id', 0x013),
-                ('mini_shoot_can_id', 0x031),
-                ('shoot_motor_speed', 1000),
-                ('ball_get_down_roller_speed', 1000),
-                ('ball_get_up_roller_speed', -1000),
-                ('ball_intake_down_roller_speed', 1000),
-                ('ball_intake_up_roller_speed', -1000),
-                ('ball_put_plate_down_roller_speed', 1000),
-                ('ball_put_plate_up_roller_speed', -1000),
-                ('wait_time_guard', 1.0),
-                ('wait_time_arm', 1.0),
-                ('wait_time_shoot_dir', 1.5),
-                ('wait_time_roller', 1.0),
-                ('wait_time_push', 1.0),
-                ('wait_time_get', 1.0),
-                ('wait_time_intake', 1.0),
-                ('wait_time_put_plate', 1.0)
-            ]
-        )
+
         
         self._action_server = ActionServer(
             self,
@@ -85,22 +42,12 @@ class BallPutPlateNode(Node):
         )
 
 
-        MINI_SHOOT_CAN_ID = self.get_parameter('mini_shoot_can_id').value
+        MINI_SHOOT_CAN_ID = self.get_p('mini_shoot_can_id')
         set_enc_pos_mode(MINI_SHOOT_CAN_ID, CAN_BUS)
 
-        self.dyna_extpos_publisher = self.create_publisher(
-            DynaTarget, "/dyna_target_extpos", 10)
-        self.dyna_vel_publisher = self.create_publisher(DynaTarget,
-                                                        "/dyna_target_vel", 10)
-        self.dyna_pos_publisher = self.create_publisher(DynaTarget,
-                                                        "/dyna_target_pos", 10)
 
 
-    def publish_dyna_pos(self, id, target):
-        msg = DynaTarget()
-        msg.id = id
-        msg.target = target
-        self.dyna_pos_publisher.publish(msg)
+
 
     def goal_callback(self, goal_request):
         if self.is_executing:
@@ -111,34 +58,41 @@ class BallPutPlateNode(Node):
 
     #実際の動作部分
     async def put_ball_in_plate(self, current_state):
-        LEFT_ARM_ID = self.get_parameter('arm_left_id').value
-        RIGHT_ARM_ID = self.get_parameter('arm_right_id').value
-        LEFT_GUARD_ID = self.get_parameter('guard_left_id').value
-        RIGHT_GUARD_ID = self.get_parameter('guard_right_id').value
+        LEFT_ARM_ID = self.get_p('arm_left_id')
+        RIGHT_ARM_ID = self.get_p('arm_right_id')
+        LEFT_GUARD_ID = self.get_p('guard_left_id')
+        RIGHT_GUARD_ID = self.get_p('guard_right_id')
 
-        GUARD_OPEN = self.get_parameter('guard_open').value
-        GUARD_CLOSE = self.get_parameter('guard_close').value
-        ARM_OPEN = self.get_parameter('arm_open').value
-        ARM_CLOSE = self.get_parameter('arm_close').value
 
-        DOWN_ROLLER_ID = self.get_parameter('down_roller_can_id').value
-        RIGHT_ROLLER_ID = self.get_parameter('right_roller_can_id').value
-        LEFT_ROLLER_ID = self.get_parameter('left_roller_can_id').value
+        DOWN_ROLLER_ID = self.get_p('down_roller_can_id')
+        RIGHT_ROLLER_ID = self.get_p('right_roller_can_id')
+        LEFT_ROLLER_ID = self.get_p('left_roller_can_id')
 
-        SHOOT_ANGLE_ID = self.get_parameter('shoot_angle_id').value
-        SHOOT_ANGLE_MAX = self.get_parameter('shoot_angle_max').value
+        SHOOT_ANGLE_ID = self.get_p('shoot_angle_id')
+        SHOOT_ANGLE_MAX = self.get_p('shoot_angle_max')
 
-        MINI_SHOOT_CAN_ID = self.get_parameter('mini_shoot_can_id').value
-        SHOOT_PUSH_MAX = self.get_parameter('shoot_push_max').value
+        MINI_SHOOT_CAN_ID = self.get_p('mini_shoot_can_id')
+        SHOOT_PUSH_MAX = self.get_p('shoot_push_max')
 
-        WAIT_TIME_GUARD = self.get_parameter('wait_time_guard').value
-        WAIT_TIME_ARM = self.get_parameter('wait_time_arm').value
-        WAIT_TIME_PUT_PLATE = self.get_parameter('wait_time_put_plate').value
-        WAIT_TIME_SHOOT_DIR = self.get_parameter('wait_time_shoot_dir').value
-        WAIT_TIME_PUSH = self.get_parameter('wait_time_push').value
+        WAIT_TIME_GUARD = self.get_p('wait_time_guard')
 
-        BALL_PUT_PLATE_DOWN_ROLLER_SPEED = self.get_parameter('ball_put_plate_down_roller_speed').value
-        BALL_PUT_PLATE_UP_ROLLER_SPEED = self.get_parameter('ball_put_plate_up_roller_speed').value
+        LEFT_ARM_OPEN = self.get_p('arm_left_open')
+        RIGHT_ARM_OPEN = self.get_p('arm_right_open')
+        LEFT_ARM_CLOSE = self.get_p('arm_left_close')
+        RIGHT_ARM_CLOSE = self.get_p('arm_right_close')
+        LEFT_ARM_GET_HALF = self.get_p('arm_left_get_half')
+        RIGHT_ARM_GET_HALF = self.get_p('arm_right_get_half')
+        LEFT_GUARD_OPEN = self.get_p('guard_left_open')
+        RIGHT_GUARD_OPEN = self.get_p('guard_right_open')
+        LEFT_GUARD_CLOSE = self.get_p('guard_left_close')
+        RIGHT_GUARD_CLOSE = self.get_p('guard_right_close')
+        WAIT_TIME_ARM = self.get_p('wait_time_arm')
+        WAIT_TIME_PUT_PLATE = self.get_p('wait_time_put_plate')
+        WAIT_TIME_SHOOT_DIR = self.get_p('wait_time_shoot_dir')
+        WAIT_TIME_PUSH = self.get_p('wait_time_push')
+
+        BALL_PUT_PLATE_DOWN_ROLLER_SPEED = self.get_p('ball_put_plate_down_roller_speed')
+        BALL_PUT_PLATE_UP_ROLLER_SPEED = self.get_p('ball_put_plate_up_roller_speed')
         
 
         #左右共通して行う動作
@@ -157,18 +111,18 @@ class BallPutPlateNode(Node):
             #右側だけ半開き(右脇で保持している状態)なら左側から発射
 
             # 左側のアームを上げる
-            self.publish_dyna_pos(LEFT_ARM_ID, ARM_OPEN)
+            self.publish_dyna_pos(LEFT_ARM_ID, LEFT_ARM_OPEN)
             await asyncio.sleep(WAIT_TIME_ARM)
 
             # 左側のガードを上げる
-            self.publish_dyna_pos(LEFT_GUARD_ID, GUARD_CLOSE)
+            self.publish_dyna_pos(LEFT_GUARD_ID, LEFT_GUARD_CLOSE)
             await asyncio.sleep(WAIT_TIME_GUARD)
 
             # 左側のローラーを回す
             set_goal_pwm(LEFT_ROLLER_ID,BALL_PUT_PLATE_UP_ROLLER_SPEED,CAN_BUS)
 
             # 右側のガードを上げる
-            self.publish_dyna_pos(RIGHT_GUARD_ID, GUARD_CLOSE)
+            self.publish_dyna_pos(RIGHT_GUARD_ID, RIGHT_GUARD_CLOSE)
             await asyncio.sleep(WAIT_TIME_GUARD)
 
             # 右側のローラーを回す
@@ -177,7 +131,7 @@ class BallPutPlateNode(Node):
             set_goal_pwm(DOWN_ROLLER_ID,BALL_PUT_PLATE_DOWN_ROLLER_SPEED,CAN_BUS)
        
             # 右側のアームを下げる
-            self.publish_dyna_pos(RIGHT_ARM_ID, ARM_CLOSE)
+            self.publish_dyna_pos(RIGHT_ARM_ID, RIGHT_ARM_CLOSE)
             await asyncio.sleep(WAIT_TIME_ARM)
 
             #ボールが移動して関所に置かれるのを待つ
@@ -193,17 +147,17 @@ class BallPutPlateNode(Node):
             #左側だけ半開き(左脇で保持している状態)なら右側から発射
 
             # 右側のアームを上げる
-            self.publish_dyna_pos(RIGHT_ARM_ID, ARM_OPEN)
+            self.publish_dyna_pos(RIGHT_ARM_ID, RIGHT_ARM_OPEN)
             await asyncio.sleep(WAIT_TIME_ARM)
 
             # 右側のガードを上げる
-            self.publish_dyna_pos(RIGHT_GUARD_ID, GUARD_CLOSE)
+            self.publish_dyna_pos(RIGHT_GUARD_ID, RIGHT_GUARD_CLOSE)
             await asyncio.sleep(WAIT_TIME_GUARD)
             # 右側のローラーを回す
             set_goal_pwm(RIGHT_ROLLER_ID,BALL_PUT_PLATE_UP_ROLLER_SPEED,CAN_BUS)
 
             # 左側のガードを上げる
-            self.publish_dyna_pos(LEFT_GUARD_ID, GUARD_CLOSE)
+            self.publish_dyna_pos(LEFT_GUARD_ID, LEFT_GUARD_CLOSE)
             await asyncio.sleep(WAIT_TIME_GUARD)
 
             # 左側のローラーを回す
@@ -213,7 +167,7 @@ class BallPutPlateNode(Node):
             set_goal_pwm(DOWN_ROLLER_ID,BALL_PUT_PLATE_DOWN_ROLLER_SPEED,CAN_BUS)
             
             # 左側のアームを下ろす
-            self.publish_dyna_pos(LEFT_ARM_ID, ARM_CLOSE)
+            self.publish_dyna_pos(LEFT_ARM_ID, LEFT_ARM_CLOSE)
             await asyncio.sleep(WAIT_TIME_ARM)
 
             #ボールが移動して関所に置かれるのを待つ

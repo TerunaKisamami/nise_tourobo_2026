@@ -5,6 +5,7 @@ from rclpy.action import ActionServer, GoalResponse
 import rclpy
 import asyncio
 from rclpy.node import Node
+from .mechanism_base_node import MechanismBaseNode
 from std_msgs.msg import String
 import os
 import sys
@@ -14,65 +15,16 @@ from tourobo_2026_interfaces.action import BallShootAim
 from dyna_interfaces.msg import DynaTarget
 
 
-class BallShootAimNode(Node):
+class BallShootAimNode(MechanismBaseNode):
 
     def __init__(self):
         super().__init__('ball_shoot_aim_node')
         self.is_executing = False
         self.cb_group = rclpy.callback_groups.ReentrantCallbackGroup()
 
-        self.declare_parameters(
-            namespace='',
-            parameters=[
-                ('arm_left_id', 20),
-                ('arm_right_id', 21),
-                ('guard_left_id', 22),
-                ('guard_right_id', 23),
-                ('shoot_angle_id', 10),
-                ('arm_open', 2000),
-                ('arm_close', 0),
-                ('guard_open', 2000),
-                ('guard_close', 0),
-                ('shoot_angle_min', 0),
-                ('shoot_angle_max', 2000),
-                ('shoot_angle_at_gate', 1000),
-                ('shoot_push_max', 2000),
-                ('shoot_push_min', 0),
-                ('shoot_push_intake_gate_ready', 100),
-                ('shoot_push_intake_shoot_ready', 200),
-                ('shoot_push_shoot_finish', 300),
-                ('shoot_push_put_gate_finish', 400),
-                ('down_roller_can_id', 0x040),
-                ('right_roller_can_id', 0x041),
-                ('left_roller_can_id', 0x010),
-                ('shoot_roller_1_can_id', 0x011),
-                ('shoot_roller_2_can_id', 0x012),
-                ('shoot_roller_3_can_id', 0x013),
-                ('mini_shoot_can_id', 0x031),
-                ('shoot_motor_speed', 1000),
-                ('ball_get_down_roller_speed', 1000),
-                ('ball_get_up_roller_speed', -1000),
-                ('ball_intake_down_roller_speed', 1000),
-                ('ball_intake_up_roller_speed', -1000),
-                ('ball_put_plate_down_roller_speed', 1000),
-                ('ball_put_plate_up_roller_speed', -1000),
-                ('wait_time_guard', 1.0),
-                ('wait_time_arm', 1.0),
-                ('wait_time_shoot_dir', 1.5),
-                ('wait_time_roller', 1.0),
-                ('wait_time_push', 1.0),
-                ('wait_time_get', 1.0),
-                ('wait_time_intake', 1.0),
-                ('wait_time_put_plate', 1.0)
-            ]
-        )
 
-        self.dyna_extpos_publisher = self.create_publisher(
-            DynaTarget, "/dyna_target_extpos", 10)
-        self.dyna_vel_publisher = self.create_publisher(DynaTarget,
-                                                        "/dyna_target_vel", 10)
-        self.dyna_pos_publisher = self.create_publisher(DynaTarget,
-                                                        "/dyna_target_pos", 10)
+
+
 
         self._action_server = ActionServer(
             self,
@@ -83,11 +35,6 @@ class BallShootAimNode(Node):
             callback_group=self.cb_group,
         )
 
-    def publish_dyna_extpos(self, id, target):
-        msg = DynaTarget()
-        msg.id = id
-        msg.target = target
-        self.dyna_extpos_publisher.publish(msg)
 
     def publish_dyna_vel(self, id, target):
         msg = DynaTarget()
@@ -95,19 +42,25 @@ class BallShootAimNode(Node):
         msg.target = target
         self.dyna_vel_publisher.publish(msg)
 
-    def publish_dyna_pos(self, id, target):
-        msg = DynaTarget()
-        msg.id = id
-        msg.target = target
-        self.dyna_pos_publisher.publish(msg)
 
 
     #しゃしゅつきこうのじょうげ
     async def aim_ball(self, direction):
-        SHOOT_DIRECTION_ID = self.get_parameter('shoot_angle_id').value
-        AIM_UP = self.get_parameter('shoot_angle_max').value
-        AIM_DOWN = self.get_parameter('shoot_angle_min').value
-        WAIT_TIME_SHOOT_DIR = self.get_parameter('wait_time_shoot_dir').value
+        SHOOT_DIRECTION_ID = self.get_p('shoot_angle_id')
+
+        LEFT_ARM_OPEN = self.get_p('arm_left_open')
+        RIGHT_ARM_OPEN = self.get_p('arm_right_open')
+        LEFT_ARM_CLOSE = self.get_p('arm_left_close')
+        RIGHT_ARM_CLOSE = self.get_p('arm_right_close')
+        LEFT_ARM_GET_HALF = self.get_p('arm_left_get_half')
+        RIGHT_ARM_GET_HALF = self.get_p('arm_right_get_half')
+        LEFT_GUARD_OPEN = self.get_p('guard_left_open')
+        RIGHT_GUARD_OPEN = self.get_p('guard_right_open')
+        LEFT_GUARD_CLOSE = self.get_p('guard_left_close')
+        RIGHT_GUARD_CLOSE = self.get_p('guard_right_close')
+        AIM_UP = self.get_p('shoot_angle_max')
+        AIM_DOWN = self.get_p('shoot_angle_min')
+        WAIT_TIME_SHOOT_DIR = self.get_p('wait_time_shoot_dir')
 
         #1: 上げる -1: 下げる 0: 待機
         if direction == 1:
