@@ -1,7 +1,7 @@
 """
 メカニズム関連のnodeを立ち上げるlaunchですわよ
 """
-from nise_tourobo_2026.src.tourobo_2026_mechanisms.launch.mechanism_launch import WAIT_TIME_ROLLER
+from nise_tourobo_2026.src.tourobo_2026_mechanisms_v2.launch.mechanism_launch import WAIT_TIME_ROLLER
 import launch
 from launch import LaunchDescription
 from launch_ros.actions import Node
@@ -21,20 +21,25 @@ SHOOT_ROLLER_3_CAN_ID = 0x013
 MINI_SHOOT_CAN_ID = 0x031
 
 #ダイナミクセルID(仮置き)
-ARM_LEFT_ID = 20
-ARM_RIGHT_ID = 21
-GUARD_LEFT_ID = 22
-GUARD_RIGHT_ID = 23
-SHOOT_ANGLE_ID = 10
+ARM_LEFT_ID = 0
+ARM_RIGHT_ID = 1
+GUARD_LEFT_ID = 2
+GUARD_RIGHT_ID = 3
+SHOOT_ANGLE_ID = 4
 
 #左右アーム開閉時のダイナミクセル値
-ARM_OPEN = 2000 
-ARM_CLOSE= 0
-ARM_GET_HALF = 1000
+LEFT_ARM_OPEN = 2000 
+RIGHT_ARM_OPEN = 2000 
+LEFT_ARM_CLOSE = 0
+RIGHT_ARM_CLOSE = 0
+LEFT_ARM_GET_HALF = 1000
+RIGHT_ARM_GET_HALF = 1000
 
 #ガード開閉時のダイナミクセル値
-GUARD_OPEN = 2000 
-GUARD_CLOSE = 0
+LEFT_GUARD_OPEN = 2000 
+RIGHT_GUARD_OPEN = 2000 
+LEFT_GUARD_CLOSE = 0
+RIGHT_GUARD_CLOSE = 0
 
 #射出機構の角度の最小値と最大値
 SHOOT_ANGLE_MIN = 0
@@ -82,7 +87,7 @@ WAIT_TIME_PUT_PLATE = 1.0
 WAIT_TIME_PUSH = 1.0
 
 def generate_launch_description():
-    pkg_name = 'tourobo_2026_mechanisms'
+    pkg_name = 'tourobo_2026_mechanisms_v2'
     
     params = {
         'down_roller_can_id': DOWN_ROLLER_CAN_ID,
@@ -97,10 +102,16 @@ def generate_launch_description():
         'guard_left_id': GUARD_LEFT_ID,
         'guard_right_id': GUARD_RIGHT_ID,
         'shoot_angle_id': SHOOT_ANGLE_ID,
-        'arm_open': ARM_OPEN,
-        'arm_close': ARM_CLOSE,
-        'guard_open': GUARD_OPEN,
-        'guard_close': GUARD_CLOSE,
+        'arm_left_open': LEFT_ARM_OPEN,
+        'arm_right_open': RIGHT_ARM_OPEN,
+        'arm_left_close': LEFT_ARM_CLOSE,
+        'arm_right_close': RIGHT_ARM_CLOSE,
+        'arm_left_get_half': LEFT_ARM_GET_HALF,
+        'arm_right_get_half': RIGHT_ARM_GET_HALF,
+        'guard_left_open': LEFT_GUARD_OPEN,
+        'guard_right_open': RIGHT_GUARD_OPEN,
+        'guard_left_close': LEFT_GUARD_CLOSE,
+        'guard_right_close': RIGHT_GUARD_CLOSE,
         'shoot_angle_min': SHOOT_ANGLE_MIN,
         'shoot_angle_max': SHOOT_ANGLE_MAX,
         'shoot_angle_at_gate': SHOOT_ANGLE_AT_GATE,
@@ -124,7 +135,6 @@ def generate_launch_description():
         'wait_time_put_plate': WAIT_TIME_PUT_PLATE,
         'wait_time_get': WAIT_TIME_GET,
         'wait_time_shoot_dir': WAIT_TIME_SHOOT_DIR,
-        'arm_get_half': ARM_GET_HALF,
     }
     
     ball_get = Node(package=pkg_name, executable="ball_get_node", name="ball_get_node", parameters=[params])

@@ -2,6 +2,13 @@ import rclpy
 from rclpy.node import Node
 from dyna_interfaces.msg import DynaTarget
 
+
+class Params:
+    def __init__(self, node):
+        self.node = node
+    def __getattr__(self, name):
+        return self.node.get_parameter(name).value
+
 class MechanismBaseNode(Node):
     def __init__(self, node_name):
         super().__init__(node_name)
@@ -59,6 +66,8 @@ class MechanismBaseNode(Node):
         self.dyna_extpos_publisher = self.create_publisher(DynaTarget, "/dyna_target_extpos", 10)
         self.dyna_vel_publisher = self.create_publisher(DynaTarget, "/dyna_target_vel", 10)
         self.dyna_pos_publisher = self.create_publisher(DynaTarget, "/dyna_target_pos", 10)
+
+        self.p = Params(self)
 
     def get_p(self, name):
         return self.get_parameter(name).value
