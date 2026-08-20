@@ -21,6 +21,52 @@ class BallShootAimNode(Node):
         self.is_executing = False
         self.cb_group = rclpy.callback_groups.ReentrantCallbackGroup()
 
+        self.declare_parameters(
+            namespace='',
+            parameters=[
+                ('arm_left_id', 20),
+                ('arm_right_id', 21),
+                ('guard_left_id', 22),
+                ('guard_right_id', 23),
+                ('shoot_angle_id', 10),
+                ('arm_open', 2000),
+                ('arm_close', 0),
+                ('guard_open', 2000),
+                ('guard_close', 0),
+                ('shoot_angle_min', 0),
+                ('shoot_angle_max', 2000),
+                ('shoot_angle_at_gate', 1000),
+                ('shoot_push_max', 2000),
+                ('shoot_push_min', 0),
+                ('shoot_push_intake_gate_ready', 100),
+                ('shoot_push_intake_shoot_ready', 200),
+                ('shoot_push_shoot_finish', 300),
+                ('shoot_push_put_gate_finish', 400),
+                ('down_roller_can_id', 0x040),
+                ('right_roller_can_id', 0x041),
+                ('left_roller_can_id', 0x010),
+                ('shoot_roller_1_can_id', 0x011),
+                ('shoot_roller_2_can_id', 0x012),
+                ('shoot_roller_3_can_id', 0x013),
+                ('mini_shoot_can_id', 0x031),
+                ('shoot_motor_speed', 1000),
+                ('ball_get_down_roller_speed', 1000),
+                ('ball_get_up_roller_speed', -1000),
+                ('ball_intake_down_roller_speed', 1000),
+                ('ball_intake_up_roller_speed', -1000),
+                ('ball_put_plate_down_roller_speed', 1000),
+                ('ball_put_plate_up_roller_speed', -1000),
+                ('wait_time_guard', 1.0),
+                ('wait_time_arm', 1.0),
+                ('wait_time_shoot_dir', 1.5),
+                ('wait_time_roller', 1.0),
+                ('wait_time_push', 1.0),
+                ('wait_time_get', 1.0),
+                ('wait_time_intake', 1.0),
+                ('wait_time_put_plate', 1.0)
+            ]
+        )
+
         self.dyna_extpos_publisher = self.create_publisher(
             DynaTarget, "/dyna_target_extpos", 10)
         self.dyna_vel_publisher = self.create_publisher(DynaTarget,
@@ -55,10 +101,13 @@ class BallShootAimNode(Node):
         msg.target = target
         self.dyna_pos_publisher.publish(msg)
 
-    async def aim_ball_shoot(self, direction):
-        SHOOT_DIRECTION_ID = 12
-        AIM_UP = 2000
-        AIM_DOWN = 1000
+
+    #しゃしゅつきこうのじょうげ
+    async def aim_ball(self, direction):
+        SHOOT_DIRECTION_ID = self.get_parameter('shoot_angle_id').value
+        AIM_UP = self.get_parameter('shoot_angle_max').value
+        AIM_DOWN = self.get_parameter('shoot_angle_min').value
+        WAIT_TIME_SHOOT_DIR = self.get_parameter('wait_time_shoot_dir').value
 
         #1: 上げる -1: 下げる 0: 待機
         if direction == 1:
@@ -68,7 +117,6 @@ class BallShootAimNode(Node):
         elif direction == 0:
             pass
 
-        await asyncio.sleep(1.0)
         return True
 
     def goal_callback(self, goal_request):
@@ -85,7 +133,7 @@ class BallShootAimNode(Node):
             res = BallShootAim.Result()
             success = False
 
-            success = await self.aim_ball_shoot(req.direction)
+            success = await self.aim_ball(req.direction)
 
             if success:
                 goal_handle.succeed()
