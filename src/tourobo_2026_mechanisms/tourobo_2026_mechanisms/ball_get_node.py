@@ -38,10 +38,25 @@ class BallGetNode(Node):
                 ('guard_left_id', 22),
                 ('guard_right_id', 23),
                 ('shoot_angle_id', 10),
-                ('arm_open', 2000),
-                ('arm_close', 0),
-                ('guard_open', 2000),
-                ('guard_close', 0),
+
+                ('arm_left_open', 2000),
+                ('arm_right_open', 2000),
+                ('arm_left_close', 0),
+                ('arm_right_close', 0),
+                ('arm_left_get_half', 1000),
+                ('arm_right_get_half', 1000),
+                ('guard_left_open', 2000),
+                ('guard_right_open', 2000),
+                ('guard_left_close', 0),
+                ('guard_right_close', 0),
+                ('arm_left_open', 2000),
+                ('arm_right_open', 2000),
+                ('arm_left_close', 0),
+                ('arm_right_close', 0),
+                ('guard_left_open', 2000),
+                ('guard_right_open', 2000),
+                ('guard_left_close', 0),
+                ('guard_right_close', 0),
                 ('shoot_angle_min', 0),
                 ('shoot_angle_max', 2000),
                 ('shoot_angle_at_gate', 1000),
@@ -71,7 +86,8 @@ class BallGetNode(Node):
                 ('wait_time_roller', 1.0),
                 ('wait_time_push', 1.0),
                 ('wait_time_get', 1.0),
-                ('arm_get_half', 1.0)
+                ('arm_left_get_half', 1000),
+                ('arm_right_get_half', 1000)
             ]
         )
 
@@ -137,23 +153,32 @@ class BallGetNode(Node):
         RIGHT_ARM_ID = self.get_parameter('arm_right_id').value
         LEFT_GUARD_ID = self.get_parameter('guard_left_id').value
         RIGHT_GUARD_ID = self.get_parameter('guard_right_id').value
-        GUARD_CLOSE = self.get_parameter('guard_close').value
-        GATE_CLOSE = self.get_parameter('arm_close').value
         LEFT_ROLLER_CAN_ID = self.get_parameter('left_roller_can_id').value
         RIGHT_ROLLER_CAN_ID = self.get_parameter('right_roller_can_id').value
         DOWN_ROLLER_CAN_ID = self.get_parameter('down_roller_can_id').value
         BALL_GET_DOWN_ROLLER_SPEED = self.get_parameter('ball_get_down_roller_speed').value
         BALL_GET_UP_ROLLER_SPEED = self.get_parameter('ball_get_up_roller_speed').value
-        ARM_GET_HALF = self.get_parameter('arm_get_half').value
 
         WAIT_TIME_GUARD = self.get_parameter('wait_time_guard').value
+
+        LEFT_ARM_OPEN = self.get_parameter('arm_left_open').value
+        RIGHT_ARM_OPEN = self.get_parameter('arm_right_open').value
+        LEFT_ARM_CLOSE = self.get_parameter('arm_left_close').value
+        RIGHT_ARM_CLOSE = self.get_parameter('arm_right_close').value
+        LEFT_ARM_GET_HALF = self.get_parameter('arm_left_get_half').value
+        RIGHT_ARM_GET_HALF = self.get_parameter('arm_right_get_half').value
+        LEFT_GUARD_OPEN = self.get_parameter('guard_left_open').value
+        RIGHT_GUARD_OPEN = self.get_parameter('guard_right_open').value
+        LEFT_GUARD_CLOSE = self.get_parameter('guard_left_close').value
+        RIGHT_GUARD_CLOSE = self.get_parameter('guard_right_close').value
+
         WAIT_TIME_ARM = self.get_parameter('wait_time_arm').value
         WAIT_TIME_GET = self.get_parameter('wait_time_get').value
 
         if execute_mode == 1:  # 左
             # 左脇に保持するために左のガードを閉じる
             self.get_logger().info("左のガードを閉じます")
-            self.publish_dyna_pos(LEFT_GUARD_ID, GUARD_CLOSE)
+            self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_CLOSE)
             await asyncio.sleep(WAIT_TIME_GUARD)
 
             # 上のローラーを回す
@@ -163,7 +188,7 @@ class BallGetNode(Node):
 
             # ダイナミクセルでゲートを閉じる
             self.get_logger().info("左のゲートを閉じます")
-            self.publish_dyna_pos(LEFT_ARM_ID, ARM_GET_HALF)
+            self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_GET_HALF)
             await asyncio.sleep(WAIT_TIME_ARM)
             
             #ぼーるが入るのを待つ
@@ -178,7 +203,7 @@ class BallGetNode(Node):
         elif execute_mode == 2:  # 右
             #右脇に保持するために右のガードを閉じる
             self.get_logger().info("右のガードを閉じます")
-            self.publish_dyna_pos(RIGHT_GUARD_ID, GUARD_CLOSE)
+            self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_CLOSE)
             await asyncio.sleep(WAIT_TIME_GUARD)
 
             # 右のローラーを回す
@@ -188,7 +213,7 @@ class BallGetNode(Node):
 
             # ダイナミクセルでゲートを閉じる
             self.get_logger().info("右のゲートを閉じます")
-            self.publish_dyna_pos(RIGHT_ARM_ID, ARM_GET_HALF)
+            self.publish_dyna_extpos(RIGHT_ARM_ID, RIGHT_ARM_GET_HALF)
             await asyncio.sleep(WAIT_TIME_ARM)
 
             #ボールが入るのを待つ

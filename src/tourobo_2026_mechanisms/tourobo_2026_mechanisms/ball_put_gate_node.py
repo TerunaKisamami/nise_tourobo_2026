@@ -35,10 +35,25 @@ class BallPutGateNode(Node):
                 ('guard_left_id', 22),
                 ('guard_right_id', 23),
                 ('shoot_angle_id', 10),
-                ('arm_open', 2000),
-                ('arm_close', 0),
-                ('guard_open', 2000),
-                ('guard_close', 0),
+
+                ('arm_left_open', 2000),
+                ('arm_right_open', 2000),
+                ('arm_left_close', 0),
+                ('arm_right_close', 0),
+                ('arm_left_get_half', 1000),
+                ('arm_right_get_half', 1000),
+                ('guard_left_open', 2000),
+                ('guard_right_open', 2000),
+                ('guard_left_close', 0),
+                ('guard_right_close', 0),
+                ('arm_left_open', 2000),
+                ('arm_right_open', 2000),
+                ('arm_left_close', 0),
+                ('arm_right_close', 0),
+                ('guard_left_open', 2000),
+                ('guard_right_open', 2000),
+                ('guard_left_close', 0),
+                ('guard_right_close', 0),
                 ('shoot_angle_min', 0),
                 ('shoot_angle_max', 2000),
                 ('shoot_angle_at_gate', 1000),
@@ -125,6 +140,17 @@ class BallPutGateNode(Node):
     #じっさいのどうさぶぶん
     async def put_ball_in_gate(self, current_state):
 
+        LEFT_ARM_OPEN = self.get_parameter('arm_left_open').value
+        RIGHT_ARM_OPEN = self.get_parameter('arm_right_open').value
+        LEFT_ARM_CLOSE = self.get_parameter('arm_left_close').value
+        RIGHT_ARM_CLOSE = self.get_parameter('arm_right_close').value
+        LEFT_ARM_GET_HALF = self.get_parameter('arm_left_get_half').value
+        RIGHT_ARM_GET_HALF = self.get_parameter('arm_right_get_half').value
+        LEFT_GUARD_OPEN = self.get_parameter('guard_left_open').value
+        RIGHT_GUARD_OPEN = self.get_parameter('guard_right_open').value
+        LEFT_GUARD_CLOSE = self.get_parameter('guard_left_close').value
+        RIGHT_GUARD_CLOSE = self.get_parameter('guard_right_close').value
+
         #射出角度をさげる
         SHOOT_ANGLE_ID = self.get_parameter('shoot_angle_id').value
         SHOOT_ANGLE_AT_GATE = self.get_parameter('shoot_angle_at_gate').value
@@ -143,13 +169,24 @@ class BallPutGateNode(Node):
         return True
 
     async def execute_callback(self, goal_handle):
+
+        LEFT_ARM_OPEN = self.get_parameter('arm_left_open').value
+        RIGHT_ARM_OPEN = self.get_parameter('arm_right_open').value
+        LEFT_ARM_CLOSE = self.get_parameter('arm_left_close').value
+        RIGHT_ARM_CLOSE = self.get_parameter('arm_right_close').value
+        LEFT_ARM_GET_HALF = self.get_parameter('arm_left_get_half').value
+        RIGHT_ARM_GET_HALF = self.get_parameter('arm_right_get_half').value
+        LEFT_GUARD_OPEN = self.get_parameter('guard_left_open').value
+        RIGHT_GUARD_OPEN = self.get_parameter('guard_right_open').value
+        LEFT_GUARD_CLOSE = self.get_parameter('guard_left_close').value
+        RIGHT_GUARD_CLOSE = self.get_parameter('guard_right_close').value
         self.is_executing = True
         try:
             req = goal_handle.request
             res = BallPutGate.Result()
             success = False
 
-            success = await self.put_ball_in_gate()
+            success = await self.put_ball_in_gate(req.current_state)
 
             if success:
                 res.success = True

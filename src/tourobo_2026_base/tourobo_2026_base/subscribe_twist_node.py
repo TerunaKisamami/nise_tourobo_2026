@@ -45,10 +45,10 @@ class TwistSubscriber(Node):
         super().__init__("TwistSubscriber")
 
         # 足回り速度制御立ち上げ
-        set_enc_vel_mode(0x010, bus)
-        set_enc_vel_mode(0x011, bus)
-        set_enc_vel_mode(0x012, bus)
-        set_enc_vel_mode(0x013, bus)
+        set_enc_vel_mode(0x020, bus)
+        set_enc_vel_mode(0x021, bus)
+        set_enc_vel_mode(0x022, bus)
+        set_enc_vel_mode(0x023, bus)
 
         self.subscription_twist = self.create_subscription(
             Twist,  # メッセージの型

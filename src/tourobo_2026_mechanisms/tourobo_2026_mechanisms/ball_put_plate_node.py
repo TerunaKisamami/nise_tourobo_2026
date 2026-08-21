@@ -37,10 +37,25 @@ class BallPutPlateNode(Node):
                 ('guard_left_id', 22),
                 ('guard_right_id', 23),
                 ('shoot_angle_id', 10),
-                ('arm_open', 2000),
-                ('arm_close', 0),
-                ('guard_open', 2000),
-                ('guard_close', 0),
+
+                ('arm_left_open', 2000),
+                ('arm_right_open', 2000),
+                ('arm_left_close', 0),
+                ('arm_right_close', 0),
+                ('arm_left_get_half', 1000),
+                ('arm_right_get_half', 1000),
+                ('guard_left_open', 2000),
+                ('guard_right_open', 2000),
+                ('guard_left_close', 0),
+                ('guard_right_close', 0),
+                ('arm_left_open', 2000),
+                ('arm_right_open', 2000),
+                ('arm_left_close', 0),
+                ('arm_right_close', 0),
+                ('guard_left_open', 2000),
+                ('guard_right_open', 2000),
+                ('guard_left_close', 0),
+                ('guard_right_close', 0),
                 ('shoot_angle_min', 0),
                 ('shoot_angle_max', 2000),
                 ('shoot_angle_at_gate', 1000),
@@ -102,6 +117,13 @@ class BallPutPlateNode(Node):
         msg.target = target
         self.dyna_pos_publisher.publish(msg)
 
+    #相対角度
+    def publish_dyna_extpos(self, id, target):
+        msg = DynaTarget()
+        msg.id = id
+        msg.target = target
+        self.dyna_extpos_publisher.publish(msg)
+
     def goal_callback(self, goal_request):
         if self.is_executing:
             self.get_logger().warn('現在別の処理を実行中です。新しい指令を拒否します。')
@@ -111,15 +133,22 @@ class BallPutPlateNode(Node):
 
     #実際の動作部分
     async def put_ball_in_plate(self, current_state):
+
+        LEFT_ARM_OPEN = self.get_parameter('arm_left_open').value
+        RIGHT_ARM_OPEN = self.get_parameter('arm_right_open').value
+        LEFT_ARM_CLOSE = self.get_parameter('arm_left_close').value
+        RIGHT_ARM_CLOSE = self.get_parameter('arm_right_close').value
+        LEFT_ARM_GET_HALF = self.get_parameter('arm_left_get_half').value
+        RIGHT_ARM_GET_HALF = self.get_parameter('arm_right_get_half').value
+        LEFT_GUARD_OPEN = self.get_parameter('guard_left_open').value
+        RIGHT_GUARD_OPEN = self.get_parameter('guard_right_open').value
+        LEFT_GUARD_CLOSE = self.get_parameter('guard_left_close').value
+        RIGHT_GUARD_CLOSE = self.get_parameter('guard_right_close').value
         LEFT_ARM_ID = self.get_parameter('arm_left_id').value
         RIGHT_ARM_ID = self.get_parameter('arm_right_id').value
         LEFT_GUARD_ID = self.get_parameter('guard_left_id').value
         RIGHT_GUARD_ID = self.get_parameter('guard_right_id').value
 
-        GUARD_OPEN = self.get_parameter('guard_open').value
-        GUARD_CLOSE = self.get_parameter('guard_close').value
-        ARM_OPEN = self.get_parameter('arm_open').value
-        ARM_CLOSE = self.get_parameter('arm_close').value
 
         DOWN_ROLLER_ID = self.get_parameter('down_roller_can_id').value
         RIGHT_ROLLER_ID = self.get_parameter('right_roller_can_id').value
@@ -132,6 +161,7 @@ class BallPutPlateNode(Node):
         SHOOT_PUSH_MAX = self.get_parameter('shoot_push_max').value
 
         WAIT_TIME_GUARD = self.get_parameter('wait_time_guard').value
+
         WAIT_TIME_ARM = self.get_parameter('wait_time_arm').value
         WAIT_TIME_PUT_PLATE = self.get_parameter('wait_time_put_plate').value
         WAIT_TIME_SHOOT_DIR = self.get_parameter('wait_time_shoot_dir').value
@@ -143,7 +173,7 @@ class BallPutPlateNode(Node):
 
         #左右共通して行う動作
         #射出機構を上げる
-        self.publish_dyna_pos(SHOOT_ANGLE_ID, SHOOT_ANGLE_MAX)
+        self.publish_dyna_extpos(SHOOT_ANGLE_ID, SHOOT_ANGLE_MAX)
         await asyncio.sleep(WAIT_TIME_SHOOT_DIR)
 
         #押し出し機構を上に上げる
@@ -157,18 +187,18 @@ class BallPutPlateNode(Node):
             #右側だけ半開き(右脇で保持している状態)なら左側から発射
 
             # 左側のアームを上げる
-            self.publish_dyna_pos(LEFT_ARM_ID, ARM_OPEN)
+            self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_OPEN)
             await asyncio.sleep(WAIT_TIME_ARM)
 
             # 左側のガードを上げる
-            self.publish_dyna_pos(LEFT_GUARD_ID, GUARD_CLOSE)
+            self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_CLOSE)
             await asyncio.sleep(WAIT_TIME_GUARD)
 
             # 左側のローラーを回す
             set_goal_pwm(LEFT_ROLLER_ID,BALL_PUT_PLATE_UP_ROLLER_SPEED,CAN_BUS)
 
             # 右側のガードを上げる
-            self.publish_dyna_pos(RIGHT_GUARD_ID, GUARD_CLOSE)
+            self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_CLOSE)
             await asyncio.sleep(WAIT_TIME_GUARD)
 
             # 右側のローラーを回す
@@ -177,7 +207,7 @@ class BallPutPlateNode(Node):
             set_goal_pwm(DOWN_ROLLER_ID,BALL_PUT_PLATE_DOWN_ROLLER_SPEED,CAN_BUS)
        
             # 右側のアームを下げる
-            self.publish_dyna_pos(RIGHT_ARM_ID, ARM_CLOSE)
+            self.publish_dyna_extpos(RIGHT_ARM_ID, RIGHT_ARM_CLOSE)
             await asyncio.sleep(WAIT_TIME_ARM)
 
             #ボールが移動して関所に置かれるのを待つ
@@ -193,17 +223,17 @@ class BallPutPlateNode(Node):
             #左側だけ半開き(左脇で保持している状態)なら右側から発射
 
             # 右側のアームを上げる
-            self.publish_dyna_pos(RIGHT_ARM_ID, ARM_OPEN)
+            self.publish_dyna_extpos(RIGHT_ARM_ID, RIGHT_ARM_OPEN)
             await asyncio.sleep(WAIT_TIME_ARM)
 
             # 右側のガードを上げる
-            self.publish_dyna_pos(RIGHT_GUARD_ID, GUARD_CLOSE)
+            self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_CLOSE)
             await asyncio.sleep(WAIT_TIME_GUARD)
             # 右側のローラーを回す
             set_goal_pwm(RIGHT_ROLLER_ID,BALL_PUT_PLATE_UP_ROLLER_SPEED,CAN_BUS)
 
             # 左側のガードを上げる
-            self.publish_dyna_pos(LEFT_GUARD_ID, GUARD_CLOSE)
+            self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_CLOSE)
             await asyncio.sleep(WAIT_TIME_GUARD)
 
             # 左側のローラーを回す
@@ -213,7 +243,7 @@ class BallPutPlateNode(Node):
             set_goal_pwm(DOWN_ROLLER_ID,BALL_PUT_PLATE_DOWN_ROLLER_SPEED,CAN_BUS)
             
             # 左側のアームを下ろす
-            self.publish_dyna_pos(LEFT_ARM_ID, ARM_CLOSE)
+            self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_CLOSE)
             await asyncio.sleep(WAIT_TIME_ARM)
 
             #ボールが移動して関所に置かれるのを待つ
@@ -239,6 +269,17 @@ class BallPutPlateNode(Node):
         return True
 
     async def execute_callback(self, goal_handle):
+
+        LEFT_ARM_OPEN = self.get_parameter('arm_left_open').value
+        RIGHT_ARM_OPEN = self.get_parameter('arm_right_open').value
+        LEFT_ARM_CLOSE = self.get_parameter('arm_left_close').value
+        RIGHT_ARM_CLOSE = self.get_parameter('arm_right_close').value
+        LEFT_ARM_GET_HALF = self.get_parameter('arm_left_get_half').value
+        RIGHT_ARM_GET_HALF = self.get_parameter('arm_right_get_half').value
+        LEFT_GUARD_OPEN = self.get_parameter('guard_left_open').value
+        RIGHT_GUARD_OPEN = self.get_parameter('guard_right_open').value
+        LEFT_GUARD_CLOSE = self.get_parameter('guard_left_close').value
+        RIGHT_GUARD_CLOSE = self.get_parameter('guard_right_close').value
         self.is_executing = True
         try:
             req = goal_handle.request

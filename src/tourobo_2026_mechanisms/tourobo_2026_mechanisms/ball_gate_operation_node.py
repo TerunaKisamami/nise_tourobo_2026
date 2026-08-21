@@ -30,10 +30,25 @@ class BallGateOperationNode(Node):
                 ('guard_left_id', 22),
                 ('guard_right_id', 23),
                 ('shoot_angle_id', 10),
-                ('arm_open', 2000),
-                ('arm_close', 0),
-                ('guard_open', 2000),
-                ('guard_close', 0),
+
+                ('arm_left_open', 2000),
+                ('arm_right_open', 2000),
+                ('arm_left_close', 0),
+                ('arm_right_close', 0),
+                ('arm_left_get_half', 1000),
+                ('arm_right_get_half', 1000),
+                ('guard_left_open', 2000),
+                ('guard_right_open', 2000),
+                ('guard_left_close', 0),
+                ('guard_right_close', 0),
+                ('arm_left_open', 2000),
+                ('arm_right_open', 2000),
+                ('arm_left_close', 0),
+                ('arm_right_close', 0),
+                ('guard_left_open', 2000),
+                ('guard_right_open', 2000),
+                ('guard_left_close', 0),
+                ('guard_right_close', 0),
                 ('shoot_angle_min', 0),
                 ('shoot_angle_max', 2000),
                 ('shoot_angle_at_gate', 1000),
@@ -111,6 +126,17 @@ class BallGateOperationNode(Node):
 
     # ここがメインの処理じゃぞ
     async def operate_ball_gate(self, target_gate, is_open):
+
+        LEFT_ARM_OPEN = self.get_parameter('arm_left_open').value
+        RIGHT_ARM_OPEN = self.get_parameter('arm_right_open').value
+        LEFT_ARM_CLOSE = self.get_parameter('arm_left_close').value
+        RIGHT_ARM_CLOSE = self.get_parameter('arm_right_close').value
+        LEFT_ARM_GET_HALF = self.get_parameter('arm_left_get_half').value
+        RIGHT_ARM_GET_HALF = self.get_parameter('arm_right_get_half').value
+        LEFT_GUARD_OPEN = self.get_parameter('guard_left_open').value
+        RIGHT_GUARD_OPEN = self.get_parameter('guard_right_open').value
+        LEFT_GUARD_CLOSE = self.get_parameter('guard_left_close').value
+        RIGHT_GUARD_CLOSE = self.get_parameter('guard_right_close').value
         DIR_NAME = {1: "左", 2: "右", 0: "エラー"}
         if target_gate not in DIR_NAME:
             self.get_logger().info("エラー: target_gateが1(左)または2(右)ではありません")
@@ -121,26 +147,24 @@ class BallGateOperationNode(Node):
 
         LEFT_GATE_ID = self.get_parameter('arm_left_id').value
         RIGHT_GATE_ID = self.get_parameter('arm_right_id').value
-        GATE_OPEN = self.get_parameter('arm_open').value
-        GATE_CLOSE = self.get_parameter('arm_close').value
         WAIT_TIME_ARM = self.get_parameter('wait_time_arm').value
 
         # モーターを開閉位置に動かす処理をここに書く
         if target_gate == 1:
             if is_open:
                 # 左ゲートを開く動作
-                self.publish_dyna_pos(LEFT_GATE_ID, GATE_OPEN)
+                self.publish_dyna_extpos(LEFT_GATE_ID, LEFT_ARM_OPEN)
             else:
                 # 左ゲートを閉じる動作
-                self.publish_dyna_pos(LEFT_GATE_ID, GATE_CLOSE)
+                self.publish_dyna_extpos(LEFT_GATE_ID, LEFT_ARM_CLOSE)
             await asyncio.sleep(WAIT_TIME_ARM)
         elif target_gate == 2:
             if is_open:
                 # 右ゲートを開く動作
-                self.publish_dyna_pos(RIGHT_GATE_ID, GATE_OPEN)
+                self.publish_dyna_extpos(RIGHT_GATE_ID, RIGHT_ARM_OPEN)
             else:
                 # 右ゲートを閉じる動作
-                self.publish_dyna_pos(RIGHT_GATE_ID, GATE_CLOSE)
+                self.publish_dyna_extpos(RIGHT_GATE_ID, RIGHT_ARM_CLOSE)
             await asyncio.sleep(WAIT_TIME_ARM)
         """
         # 例: アームを下げる (ID: 10, Pos: 2000)
@@ -166,6 +190,17 @@ class BallGateOperationNode(Node):
         return True
 
     async def execute_callback(self, goal_handle):
+
+        LEFT_ARM_OPEN = self.get_parameter('arm_left_open').value
+        RIGHT_ARM_OPEN = self.get_parameter('arm_right_open').value
+        LEFT_ARM_CLOSE = self.get_parameter('arm_left_close').value
+        RIGHT_ARM_CLOSE = self.get_parameter('arm_right_close').value
+        LEFT_ARM_GET_HALF = self.get_parameter('arm_left_get_half').value
+        RIGHT_ARM_GET_HALF = self.get_parameter('arm_right_get_half').value
+        LEFT_GUARD_OPEN = self.get_parameter('guard_left_open').value
+        RIGHT_GUARD_OPEN = self.get_parameter('guard_right_open').value
+        LEFT_GUARD_CLOSE = self.get_parameter('guard_left_close').value
+        RIGHT_GUARD_CLOSE = self.get_parameter('guard_right_close').value
         self.is_executing = True
         try:
             req = goal_handle.request

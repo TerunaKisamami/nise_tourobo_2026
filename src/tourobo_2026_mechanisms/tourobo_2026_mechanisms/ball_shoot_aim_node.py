@@ -29,10 +29,25 @@ class BallShootAimNode(Node):
                 ('guard_left_id', 22),
                 ('guard_right_id', 23),
                 ('shoot_angle_id', 10),
-                ('arm_open', 2000),
-                ('arm_close', 0),
-                ('guard_open', 2000),
-                ('guard_close', 0),
+
+                ('arm_left_open', 2000),
+                ('arm_right_open', 2000),
+                ('arm_left_close', 0),
+                ('arm_right_close', 0),
+                ('arm_left_get_half', 1000),
+                ('arm_right_get_half', 1000),
+                ('guard_left_open', 2000),
+                ('guard_right_open', 2000),
+                ('guard_left_close', 0),
+                ('guard_right_close', 0),
+                ('arm_left_open', 2000),
+                ('arm_right_open', 2000),
+                ('arm_left_close', 0),
+                ('arm_right_close', 0),
+                ('guard_left_open', 2000),
+                ('guard_right_open', 2000),
+                ('guard_left_close', 0),
+                ('guard_right_close', 0),
                 ('shoot_angle_min', 0),
                 ('shoot_angle_max', 2000),
                 ('shoot_angle_at_gate', 1000),
@@ -105,6 +120,17 @@ class BallShootAimNode(Node):
     #しゃしゅつきこうのじょうげ
     async def aim_ball(self, direction):
         SHOOT_DIRECTION_ID = self.get_parameter('shoot_angle_id').value
+
+        LEFT_ARM_OPEN = self.get_parameter('arm_left_open').value
+        RIGHT_ARM_OPEN = self.get_parameter('arm_right_open').value
+        LEFT_ARM_CLOSE = self.get_parameter('arm_left_close').value
+        RIGHT_ARM_CLOSE = self.get_parameter('arm_right_close').value
+        LEFT_ARM_GET_HALF = self.get_parameter('arm_left_get_half').value
+        RIGHT_ARM_GET_HALF = self.get_parameter('arm_right_get_half').value
+        LEFT_GUARD_OPEN = self.get_parameter('guard_left_open').value
+        RIGHT_GUARD_OPEN = self.get_parameter('guard_right_open').value
+        LEFT_GUARD_CLOSE = self.get_parameter('guard_left_close').value
+        RIGHT_GUARD_CLOSE = self.get_parameter('guard_right_close').value
         AIM_UP = self.get_parameter('shoot_angle_max').value
         AIM_DOWN = self.get_parameter('shoot_angle_min').value
         WAIT_TIME_SHOOT_DIR = self.get_parameter('wait_time_shoot_dir').value

@@ -35,10 +35,25 @@ class BallIntakeNode(Node):
                 ('guard_left_id', 22),
                 ('guard_right_id', 23),
                 ('shoot_angle_id', 10),
-                ('arm_open', 2000),
-                ('arm_close', 0),
-                ('guard_open', 2000),
-                ('guard_close', 0),
+
+                ('arm_left_open', 2000),
+                ('arm_right_open', 2000),
+                ('arm_left_close', 0),
+                ('arm_right_close', 0),
+                ('arm_left_get_half', 1000),
+                ('arm_right_get_half', 1000),
+                ('guard_left_open', 2000),
+                ('guard_right_open', 2000),
+                ('guard_left_close', 0),
+                ('guard_right_close', 0),
+                ('arm_left_open', 2000),
+                ('arm_right_open', 2000),
+                ('arm_left_close', 0),
+                ('arm_right_close', 0),
+                ('guard_left_open', 2000),
+                ('guard_right_open', 2000),
+                ('guard_left_close', 0),
+                ('guard_right_close', 0),
                 ('shoot_angle_min', 0),
                 ('shoot_angle_max', 2000),
                 ('shoot_angle_at_gate', 1000),
@@ -149,16 +164,24 @@ class BallIntakeNode(Node):
         #発射機構のID
         SHOOT_DIRECTION_ID = self.get_parameter('shoot_angle_id').value
 
-        GUARD_OPEN = self.get_parameter('guard_open').value
-        GUARD_CLOSE = self.get_parameter('guard_close').value
-        ARM_OPEN = self.get_parameter('arm_open').value
-        ARM_CLOSE = self.get_parameter('arm_close').value
         SHOOT_PUSH_INTAKE_GATE_READY = self.get_parameter('shoot_push_intake_gate_ready').value
         SHOOT_PUSH_INTAKE_SHOOT_READY = self.get_parameter('shoot_push_intake_shoot_ready').value
         BALL_INTAKE_DOWN_ROLLER_SPEED = self.get_parameter('ball_intake_down_roller_speed').value
         BALL_INTAKE_UP_ROLLER_SPEED = self.get_parameter('ball_intake_up_roller_speed').value
         SHOOT_ANGLE_MIN = self.get_parameter('shoot_angle_min').value
         WAIT_TIME_GUARD = self.get_parameter('wait_time_guard').value
+
+        LEFT_ARM_OPEN = self.get_parameter('arm_left_open').value
+        RIGHT_ARM_OPEN = self.get_parameter('arm_right_open').value
+        LEFT_ARM_CLOSE = self.get_parameter('arm_left_close').value
+        RIGHT_ARM_CLOSE = self.get_parameter('arm_right_close').value
+        LEFT_ARM_GET_HALF = self.get_parameter('arm_left_get_half').value
+        RIGHT_ARM_GET_HALF = self.get_parameter('arm_right_get_half').value
+        LEFT_GUARD_OPEN = self.get_parameter('guard_left_open').value
+        RIGHT_GUARD_OPEN = self.get_parameter('guard_right_open').value
+        LEFT_GUARD_CLOSE = self.get_parameter('guard_left_close').value
+        RIGHT_GUARD_CLOSE = self.get_parameter('guard_right_close').value
+
         WAIT_TIME_ARM = self.get_parameter('wait_time_arm').value
         WAIT_TIME_SHOOT_DIR = self.get_parameter('wait_time_shoot_dir').value
         WAIT_TIME_PUSH = self.get_parameter('wait_time_push').value
@@ -185,10 +208,10 @@ class BallIntakeNode(Node):
                 await asyncio.sleep(WAIT_TIME_PUSH)
 
                 #右側のガードを下げる
-                self.publish_dyna_pos(RIGHT_GUARD_ID, GUARD_OPEN)
+                self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_OPEN)
 
                 #左側のガードを上げる
-                self.publish_dyna_pos(LEFT_GUARD_ID, GUARD_CLOSE)
+                self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_CLOSE)
                 await asyncio.sleep(WAIT_TIME_GUARD)
 
                 #下ローラーを右側へ回転
@@ -198,14 +221,14 @@ class BallIntakeNode(Node):
                 set_goal_pwm(UP_LEFT_ROLLER_ID,BALL_INTAKE_UP_ROLLER_SPEED,CAN_BUS)
 
                 #左アームを下ろす
-                self.publish_dyna_pos(LEFT_ARM_ID, ARM_CLOSE)
+                self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_CLOSE)
                 await asyncio.sleep(WAIT_TIME_ARM)
 
                 #ボールが完全に内側に入るのを待つ
                 await asyncio.sleep(WAIT_TIME_INTAKE)
                 
                 #左ガードを下げる
-                self.publish_dyna_pos(LEFT_GUARD_ID, GUARD_OPEN)
+                self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_OPEN)
                 await asyncio.sleep(WAIT_TIME_GUARD)
 
                 #ローラーを止める
@@ -222,10 +245,10 @@ class BallIntakeNode(Node):
                 await asyncio.sleep(WAIT_TIME_PUSH)
 
                 #右側のガードを下げる
-                self.publish_dyna_pos(RIGHT_GUARD_ID, GUARD_OPEN)
+                self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_OPEN)
                 
                 #左側のガードを上げる
-                self.publish_dyna_pos(LEFT_GUARD_ID, GUARD_CLOSE)
+                self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_CLOSE)
                 await asyncio.sleep(WAIT_TIME_GUARD)
 
                 #下ローラーを右側へ回転
@@ -235,14 +258,14 @@ class BallIntakeNode(Node):
                 set_goal_pwm(UP_LEFT_ROLLER_ID,BALL_INTAKE_UP_ROLLER_SPEED,CAN_BUS)
 
                 #左アームを下ろす
-                self.publish_dyna_pos(LEFT_ARM_ID, ARM_CLOSE)
+                self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_CLOSE)
                 await asyncio.sleep(WAIT_TIME_ARM)
 
                 #ボールが完全に内側に入るのを待つ
                 await asyncio.sleep(WAIT_TIME_INTAKE)
 
                 #左ガードを下げる
-                self.publish_dyna_pos(LEFT_GUARD_ID, GUARD_OPEN)
+                self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_OPEN)
                 await asyncio.sleep(WAIT_TIME_GUARD)
 
                 #ローラーを止める
@@ -262,10 +285,10 @@ class BallIntakeNode(Node):
                 await asyncio.sleep(WAIT_TIME_PUSH)
 
                 #左側のガードを下げる
-                self.publish_dyna_pos(LEFT_GUARD_ID, GUARD_OPEN)
+                self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_OPEN)
 
                 #右側のガードを上げる
-                self.publish_dyna_pos(RIGHT_GUARD_ID, GUARD_CLOSE)
+                self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_CLOSE)
                 await asyncio.sleep(WAIT_TIME_GUARD)
 
                 #下ローラーを左側へ回転
@@ -275,14 +298,14 @@ class BallIntakeNode(Node):
                 set_goal_pwm(UP_RIGHT_ROLLER_ID,BALL_INTAKE_UP_ROLLER_SPEED,CAN_BUS)
 
                 #右アームを下ろす
-                self.publish_dyna_pos(RIGHT_ARM_ID, ARM_CLOSE)
+                self.publish_dyna_extpos(RIGHT_ARM_ID, RIGHT_ARM_CLOSE)
                 await asyncio.sleep(WAIT_TIME_ARM)
 
                 #ボールが完全に内側に入るのを待つ
                 await asyncio.sleep(WAIT_TIME_INTAKE)
 
                 #右ガードを下げる
-                self.publish_dyna_pos(RIGHT_GUARD_ID, GUARD_OPEN)
+                self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_OPEN)
                 await asyncio.sleep(WAIT_TIME_GUARD)
 
                 #ローラーを止める
@@ -299,10 +322,10 @@ class BallIntakeNode(Node):
                 await asyncio.sleep(WAIT_TIME_PUSH)
 
                 #左側のガードを下げる
-                self.publish_dyna_pos(LEFT_GUARD_ID, GUARD_OPEN)
+                self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_OPEN)
 
                 #右側のガードを上げる
-                self.publish_dyna_pos(RIGHT_GUARD_ID, GUARD_CLOSE)
+                self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_CLOSE)
                 await asyncio.sleep(WAIT_TIME_GUARD)
 
                 #下ローラーを左側へ回転
@@ -312,14 +335,14 @@ class BallIntakeNode(Node):
                 set_goal_pwm(UP_RIGHT_ROLLER_ID,BALL_INTAKE_UP_ROLLER_SPEED,CAN_BUS)
 
                 #右アームを下ろす
-                self.publish_dyna_pos(RIGHT_ARM_ID, ARM_CLOSE)
+                self.publish_dyna_extpos(RIGHT_ARM_ID, RIGHT_ARM_CLOSE)
                 await asyncio.sleep(WAIT_TIME_ARM)
 
                 #ボールが完全に内側に入るのを待つ
                 await asyncio.sleep(WAIT_TIME_INTAKE)
 
                 #右ガードを下げる
-                self.publish_dyna_pos(RIGHT_GUARD_ID, GUARD_OPEN)
+                self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_OPEN)
                 await asyncio.sleep(WAIT_TIME_GUARD)
 
                 #ローラーを止める
