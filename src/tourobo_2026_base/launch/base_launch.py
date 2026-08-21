@@ -43,8 +43,8 @@ def generate_launch_description():
     )
 
     joy_node = Node(
-        package="joy_linux",
-        executable="joy_linux_node",
+        package="joy",
+        executable="joy_node",
     )
 
     ekf_node = Node(
