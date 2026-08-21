@@ -68,7 +68,7 @@ class BallPutPlateNode(MechanismBaseNode):
 
         #左右共通して行う動作
         #射出機構を上げる
-        self.publish_dyna_pos(self.p.shoot_angle_id, self.p.shoot_angle_max)
+        self.publish_dyna_extpos(self.p.shoot_angle_id, self.p.shoot_angle_max)
         await asyncio.sleep(self.p.wait_time_shoot_dir)
 
         #押し出し機構を上に上げる
@@ -82,18 +82,18 @@ class BallPutPlateNode(MechanismBaseNode):
             #右側だけ半開き(右脇で保持している状態)なら左側から発射
 
             # 左側のアームを上げる
-            self.publish_dyna_pos(self.p.left_arm_id, self.p.arm_left_open)
+            self.publish_dyna_extpos(self.p.left_arm_id, self.p.arm_left_open)
             await asyncio.sleep(self.p.wait_time_arm)
 
             # 左側のガードを上げる
-            self.publish_dyna_pos(self.p.left_guard_id, self.p.guard_left_close)
+            self.publish_dyna_extpos(self.p.left_guard_id, self.p.guard_left_close)
             await asyncio.sleep(self.p.wait_time_guard)
 
             # 左側のローラーを回す
             set_goal_pwm(self.p.left_roller_id,self.p.ball_put_plate_up_roller_speed,CAN_BUS)
 
             # 右側のガードを上げる
-            self.publish_dyna_pos(self.p.right_guard_id, self.p.guard_right_close)
+            self.publish_dyna_extpos(self.p.right_guard_id, self.p.guard_right_close)
             await asyncio.sleep(self.p.wait_time_guard)
 
             # 右側のローラーを回す
@@ -102,7 +102,7 @@ class BallPutPlateNode(MechanismBaseNode):
             set_goal_pwm(self.p.down_roller_id,self.p.ball_put_plate_down_roller_speed,CAN_BUS)
        
             # 右側のアームを下げる
-            self.publish_dyna_pos(self.p.right_arm_id, self.p.arm_right_close)
+            self.publish_dyna_extpos(self.p.right_arm_id, self.p.arm_right_close)
             await asyncio.sleep(self.p.wait_time_arm)
 
             #ボールが移動して関所に置かれるのを待つ
@@ -118,17 +118,17 @@ class BallPutPlateNode(MechanismBaseNode):
             #左側だけ半開き(左脇で保持している状態)なら右側から発射
 
             # 右側のアームを上げる
-            self.publish_dyna_pos(self.p.right_arm_id, self.p.arm_right_open)
+            self.publish_dyna_extpos(self.p.right_arm_id, self.p.arm_right_open)
             await asyncio.sleep(self.p.wait_time_arm)
 
             # 右側のガードを上げる
-            self.publish_dyna_pos(self.p.right_guard_id, self.p.guard_right_close)
+            self.publish_dyna_extpos(self.p.right_guard_id, self.p.guard_right_close)
             await asyncio.sleep(self.p.wait_time_guard)
             # 右側のローラーを回す
             set_goal_pwm(self.p.right_roller_id,self.p.ball_put_plate_up_roller_speed,CAN_BUS)
 
             # 左側のガードを上げる
-            self.publish_dyna_pos(self.p.left_guard_id, self.p.guard_left_close)
+            self.publish_dyna_extpos(self.p.left_guard_id, self.p.guard_left_close)
             await asyncio.sleep(self.p.wait_time_guard)
 
             # 左側のローラーを回す
@@ -138,7 +138,7 @@ class BallPutPlateNode(MechanismBaseNode):
             set_goal_pwm(self.p.down_roller_id,self.p.ball_put_plate_down_roller_speed,CAN_BUS)
             
             # 左側のアームを下ろす
-            self.publish_dyna_pos(self.p.left_arm_id, self.p.arm_left_close)
+            self.publish_dyna_extpos(self.p.left_arm_id, self.p.arm_left_close)
             await asyncio.sleep(self.p.wait_time_arm)
 
             #ボールが移動して関所に置かれるのを待つ

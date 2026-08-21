@@ -67,7 +67,7 @@ class BallPutGateNode(MechanismBaseNode):
     async def put_ball_in_gate(self, current_state):
 
         #射出角度をさげる
-        self.publish_dyna_pos(self.p.shoot_angle_id, self.p.shoot_angle_at_gate)
+        self.publish_dyna_extpos(self.p.shoot_angle_id, self.p.shoot_angle_at_gate)
         await asyncio.sleep(self.p.wait_time_shoot_dir_put_gate)
 
         #押し出しを城門側へ
@@ -84,7 +84,7 @@ class BallPutGateNode(MechanismBaseNode):
             res = BallPutGate.Result()
             success = False
 
-            success = await self.put_ball_in_gate()
+            success = await self.put_ball_in_gate(req.current_state)
 
             if success:
                 res.success = True

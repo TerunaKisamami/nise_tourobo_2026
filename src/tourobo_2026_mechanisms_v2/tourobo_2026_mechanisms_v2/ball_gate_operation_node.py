@@ -78,7 +78,7 @@ class BallGateOperationNode(MechanismBaseNode):
         """
         # 例: アームを下げる (ID: 10, Pos: 2000)
         self.get_logger().info("アームを下ろします")
-        self.publish_dyna_pos(10, 2000)
+        self.publish_dyna_extpos(10, 2000)
         await asyncio.sleep(2.0) # 2秒待機 (time.sleepは使わないこと！)
 
         # 例: ローラーを回す (ID: 11, Vel: 100)
@@ -88,7 +88,7 @@ class BallGateOperationNode(MechanismBaseNode):
 
         # 例: アームを上げる (ID: 10, Pos: 0)
         self.get_logger().info("アームを上げます")
-        self.publish_dyna_pos(10, 0)
+        self.publish_dyna_extpos(10, 0)
         await asyncio.sleep(2.0)
 
         # 例: ローラーを止める (ID: 11, Vel: 0)

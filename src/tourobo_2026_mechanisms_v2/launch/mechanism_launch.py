@@ -1,7 +1,10 @@
 """
 メカニズム関連のnodeを立ち上げるlaunchですわよ
 """
-from nise_tourobo_2026.src.tourobo_2026_mechanisms_v2.launch.mechanism_launch import WAIT_TIME_ROLLER
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.actions import IncludeLaunchDescription
+import os
+from ament_index_python.packages import get_package_share_directory
 import launch
 from launch import LaunchDescription
 from launch_ros.actions import Node
@@ -30,26 +33,26 @@ SHOOT_ANGLE_ID = 4
 #左右アーム開閉時のダイナミクセル値
 LEFT_ARM_OPEN = 2000 
 RIGHT_ARM_OPEN = 2000 
-LEFT_ARM_CLOSE = 0
-RIGHT_ARM_CLOSE = 0
+LEFT_ARM_CLOSE = 0 #内部的には
+RIGHT_ARM_CLOSE = 0 #内部的には
 LEFT_ARM_GET_HALF = 1000
 RIGHT_ARM_GET_HALF = 1000
 
 #ガード開閉時のダイナミクセル値
 LEFT_GUARD_OPEN = 2000 
 RIGHT_GUARD_OPEN = 2000 
-LEFT_GUARD_CLOSE = 0
-RIGHT_GUARD_CLOSE = 0
+LEFT_GUARD_CLOSE = 0 #内部的には
+RIGHT_GUARD_CLOSE = 0 #内部的には
 
 #射出機構の角度の最小値と最大値
-SHOOT_ANGLE_MIN = 0
+SHOOT_ANGLE_MIN = 0 
 SHOOT_ANGLE_MAX = 2000
 #城門位置の射出機構角度
 SHOOT_ANGLE_AT_GATE = 1000 
 
 #射出機構押し出し機構の位置(初期位置からの相対角度)
 SHOOT_PUSH_MIN = 0 #これを初期位置にする
-SHOOT_PUSH_MAX = 2000
+SHOOT_PUSH_MAX = 80000 #射出機構に近いほどでかい
 SHOOT_PUSH_INTAKE_GATE_READY = 100
 SHOOT_PUSH_INTAKE_SHOOT_READY = 200
 SHOOT_PUSH_SHOOT_FINISH = 300
@@ -137,6 +140,7 @@ def generate_launch_description():
         'wait_time_shoot_dir': WAIT_TIME_SHOOT_DIR,
     }
     
+    #Nodes
     ball_get = Node(package=pkg_name, executable="ball_get_node", name="ball_get_node", parameters=[params])
     ball_put_plate = Node(package=pkg_name, executable="ball_put_plate_node", name="ball_put_plate_node", parameters=[params])
     ball_put_gate = Node(package=pkg_name, executable="ball_put_gate_node", name="ball_put_gate_node", parameters=[params])
@@ -144,6 +148,13 @@ def generate_launch_description():
     ball_gate_operation = Node(package=pkg_name, executable="ball_gate_operation_node", name="ball_gate_operation_node", parameters=[params])
     ball_intake = Node(package=pkg_name, executable="ball_intake_node", name="ball_intake_node", parameters=[params])
     ball_shoot_aim = Node(package=pkg_name, executable="ball_shoot_aim_node", name="ball_shoot_aim_node", parameters=[params])
+
+    #launchs
+    base_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(get_package_share_directory('tourobo_2026_base'), 'launch', 'base_launch.py')
+        )
+    )
     
     joy_client = Node(package=pkg_name, executable="joy_mechanism_client", name="joy_mechanism_client", parameters=[params])
 
@@ -157,5 +168,6 @@ def generate_launch_description():
     ld.add_action(ball_intake)
     ld.add_action(ball_shoot_aim)
     ld.add_action(joy_client)
+    ld.add_action(base_launch)
 
     return ld

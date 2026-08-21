@@ -86,7 +86,7 @@ class BallIntakeNode(MechanismBaseNode):
         #左右両方で共通して実行する処理を書く
         #フィードバック無しのため、常に支柱を下げて待機する
         self.get_logger().info("支柱を下げます")
-        self.publish_dyna_pos(self.p.shoot_direction_id, self.p.shoot_angle_min)
+        self.publish_dyna_extpos(self.p.shoot_direction_id, self.p.shoot_angle_min)
         await asyncio.sleep(self.p.wait_time_shoot_dir)
 
         # current_state は 2: self.p.left_carry, 3: self.p.right_carry
@@ -190,14 +190,14 @@ class BallIntakeNode(MechanismBaseNode):
                 set_goal_pwm(self.p.up_right_roller_id,self.p.ball_intake_up_roller_speed,CAN_BUS)
 
                 #右アームを下ろす
-                self.publish_dyna_pos(self.p.right_arm_id, self.p.arm_right_close)
+                self.publish_dyna_extpos(self.p.right_arm_id, self.p.arm_right_close)
                 await asyncio.sleep(self.p.wait_time_arm)
 
                 #ボールが完全に内側に入るのを待つ
                 await asyncio.sleep(self.p.wait_time_intake)
 
                 #右ガードを下げる
-                self.publish_dyna_pos(self.p.right_guard_id, self.p.guard_right_open)
+                self.publish_dyna_extpos(self.p.right_guard_id, self.p.guard_right_open)
                 await asyncio.sleep(self.p.wait_time_guard)
 
                 #ローラーを止める
@@ -213,10 +213,10 @@ class BallIntakeNode(MechanismBaseNode):
                 await asyncio.sleep(self.p.wait_time_push)
 
                 #左側のガードを下げる
-                self.publish_dyna_pos(self.p.left_guard_id, self.p.guard_left_open)
+                self.publish_dyna_extpos(self.p.left_guard_id, self.p.guard_left_open)
 
                 #右側のガードを上げる
-                self.publish_dyna_pos(self.p.right_guard_id, self.p.guard_right_close)
+                self.publish_dyna_extpos(self.p.right_guard_id, self.p.guard_right_close)
                 await asyncio.sleep(self.p.wait_time_guard)
 
                 #下ローラーを左側へ回転
@@ -226,14 +226,14 @@ class BallIntakeNode(MechanismBaseNode):
                 set_goal_pwm(self.p.up_right_roller_id,self.p.ball_intake_up_roller_speed,CAN_BUS)
 
                 #右アームを下ろす
-                self.publish_dyna_pos(self.p.right_arm_id, self.p.arm_right_close)
+                self.publish_dyna_extpos(self.p.right_arm_id, self.p.arm_right_close)
                 await asyncio.sleep(self.p.wait_time_arm)
 
                 #ボールが完全に内側に入るのを待つ
                 await asyncio.sleep(self.p.wait_time_intake)
 
                 #右ガードを下げる
-                self.publish_dyna_pos(self.p.right_guard_id, self.p.guard_right_open)
+                self.publish_dyna_extpos(self.p.right_guard_id, self.p.guard_right_open)
                 await asyncio.sleep(self.p.wait_time_guard)
 
                 #ローラーを止める

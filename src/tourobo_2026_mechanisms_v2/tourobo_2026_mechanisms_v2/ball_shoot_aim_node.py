@@ -50,9 +50,9 @@ class BallShootAimNode(MechanismBaseNode):
 
         #1: 上げる -1: 下げる 0: 待機
         if direction == 1:
-            self.publish_dyna_pos(self.p.shoot_direction_id, self.p.aim_up)
+            self.publish_dyna_extpos(self.p.shoot_direction_id, self.p.aim_up)
         elif direction == -1:
-            self.publish_dyna_pos(self.p.shoot_direction_id, self.p.aim_down)
+            self.publish_dyna_extpos(self.p.shoot_direction_id, self.p.aim_down)
         elif direction == 0:
             pass
 
