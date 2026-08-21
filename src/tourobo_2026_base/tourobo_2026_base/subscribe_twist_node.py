@@ -1,3 +1,4 @@
+import can
 """twistをsubscribeして、足回りesp32にモーター指令値を送信する"""
 
 import rclpy
@@ -17,7 +18,7 @@ import sys
 
 target_dir = os.path.abspath("/home/aratahorie/ah_python_libraries")
 sys.path.append(target_dir)
-from ah_python_can import *
+from ah_python_lib.ah_python_can import *
 
 #足回り用(id 2)エンコーダーピン配列
 #const int ENC_PINNUM_A[4] = {19, 17, 21, 15};  足回りのピン
