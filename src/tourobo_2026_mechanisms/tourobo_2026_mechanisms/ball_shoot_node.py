@@ -6,6 +6,7 @@ from std_msgs.msg import String
 import os
 import sys
 import asyncio
+import time
 
 from tourobo_2026_interfaces.action import BallShoot
 from ah_python_lib.ah_python_can import *
@@ -158,19 +159,19 @@ class BallShootNode(Node):
         SHOOT_ROLLER_2 = self.get_parameter('shoot_roller_2_can_id').value
         SHOOT_ROLLER_3 = self.get_parameter('shoot_roller_3_can_id').value
         SHOOT_MOTOR_SPEED = self.get_parameter('shoot_motor_speed').value
-        SHOOT_PUSH_SHOOT_FINISH = self.get_parameter('shoot_push_shoot_finish').value
+        SHOOT_PUSH_MAX = self.get_parameter('shoot_push_max').value
         MINI_SHOOT_ID = self.get_parameter('mini_shoot_can_id').value
         WAIT_TIME_PUSH = self.get_parameter('wait_time_push').value
 
         #同時に、3つのモーターを回す
-        set_goal_pwm(SHOOT_ROLLER_1 ,SHOOT_MOTOR_SPEED, CAN_BUS)
+        set_goal_pwm(SHOOT_ROLLER_1 ,-SHOOT_MOTOR_SPEED, CAN_BUS)
         set_goal_pwm(SHOOT_ROLLER_2 ,SHOOT_MOTOR_SPEED, CAN_BUS)
         set_goal_pwm(SHOOT_ROLLER_3 ,SHOOT_MOTOR_SPEED, CAN_BUS)
         
         #ろぼますをつかっておしだす
-        set_goal_pos(MINI_SHOOT_ID, SHOOT_PUSH_SHOOT_FINISH, CAN_BUS)
+        set_goal_pos(0x031, 75000, CAN_BUS)
         
-        await asyncio.sleep(WAIT_TIME_PUSH)
+        time.sleep(WAIT_TIME_PUSH)
 
         #射出モーターを停止
         set_goal_pwm(SHOOT_ROLLER_1, 0, CAN_BUS)

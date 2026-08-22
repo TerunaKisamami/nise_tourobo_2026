@@ -26,10 +26,10 @@ from ah_python_lib.ah_python_can import *
 
 
 def from_twist_to_motor_vel(vx, vy, w, L, fy):
-    V_1 = (-vx - -vy + 2 * math.sqrt(2) * w * L) / (4 * math.pi * fy)
+    V_1 = (-vx +vy + 2 * math.sqrt(2) * w * L) / (4 * math.pi * fy)
     V_2 = (vx + vy + 2 * math.sqrt(2) * w * L) / (4 * math.pi * fy)
-    V_3 = (vx - vy + 2 * math.sqrt(2) * w * L) / (4 * math.pi * fy)
-    V_4 = (vx + vy + 2 * math.sqrt(2) * -w * L) / (4 * math.pi * fy)
+    V_3 = (-vx - vy + 2 * math.sqrt(2) * w * L) / (4 * math.pi * fy)
+    V_4 = (vx - vy + 2 * math.sqrt(2) * -w * L) / (4 * math.pi * fy)
 
     return (V_1, V_2, V_3, V_4)
 
@@ -90,10 +90,10 @@ class TwistSubscriber(Node):
 
         V_1, V_2, V_3, V_4 = from_twist_to_motor_vel(vx, vy, w, self.L, self.fy)
 
-        set_goal_vel(0x010, float(V_1 / self.twist_gain), bus)
-        set_goal_vel(0x011, float(V_2 / self.twist_gain), bus)
-        set_goal_vel(0x012, float(V_3 / self.twist_gain), bus)
-        set_goal_vel(0x013, float(V_4 / self.twist_gain), bus)
+        set_goal_vel(0x020, float(V_1 / self.twist_gain), bus)
+        set_goal_vel(0x021, float(V_2 / self.twist_gain), bus)
+        set_goal_vel(0x022, float(V_3 / self.twist_gain), bus)
+        set_goal_vel(0x023, float(V_4 / self.twist_gain), bus)
 
 
 def main():

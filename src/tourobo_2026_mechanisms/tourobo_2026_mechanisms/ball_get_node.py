@@ -9,11 +9,12 @@ import rclpy
 import asyncio
 from rclpy.node import Node
 from std_msgs.msg import String
+import time
 
 from tourobo_2026_interfaces.action import BallGet
 # pyrefly: ignore [missing-import]
 from dyna_interfaces.msg import DynaTarget
-
+from ah_python_lib.ah_python_can import *
 import os
 import sys
 
@@ -180,20 +181,20 @@ class BallGetNode(Node):
             # 左脇に保持するために左のガードを閉じる
             self.get_logger().info("左のガードを閉じます")
             self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_CLOSE)
-            await asyncio.sleep(WAIT_TIME_GUARD)
+            time.sleep(WAIT_TIME_GUARD)
 
             # 上のローラーを回す
-            set_goal_pwm(LEFT_ROLLER_CAN_ID, BALL_GET_UP_ROLLER_SPEED,CAN_BUS)
+            set_goal_pwm(LEFT_ROLLER_CAN_ID, -BALL_GET_UP_ROLLER_SPEED,CAN_BUS)
             # 下のローラーを回す
             set_goal_pwm(DOWN_ROLLER_CAN_ID, BALL_GET_DOWN_ROLLER_SPEED,CAN_BUS)
 
             # ダイナミクセルでゲートを閉じる
             self.get_logger().info("左のゲートを閉じます")
             self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_GET_HALF)
-            await asyncio.sleep(WAIT_TIME_ARM)
+     #       time.sleep(WAIT_TIME_ARM)
             
             #ぼーるが入るのを待つ
-            await asyncio.sleep(WAIT_TIME_GET)
+            time.sleep(WAIT_TIME_GET)
 
             # ろーらーをとめる
             set_goal_pwm(LEFT_ROLLER_CAN_ID, 0, CAN_BUS)
@@ -205,7 +206,7 @@ class BallGetNode(Node):
             #右脇に保持するために右のガードを閉じる
             self.get_logger().info("右のガードを閉じます")
             self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_CLOSE)
-            await asyncio.sleep(WAIT_TIME_GUARD)
+            time.sleep(WAIT_TIME_GUARD)
 
             # 右のローラーを回す
             set_goal_pwm(RIGHT_ROLLER_CAN_ID, BALL_GET_UP_ROLLER_SPEED,CAN_BUS)
@@ -215,10 +216,10 @@ class BallGetNode(Node):
             # ダイナミクセルでゲートを閉じる
             self.get_logger().info("右のゲートを閉じます")
             self.publish_dyna_extpos(RIGHT_ARM_ID, RIGHT_ARM_GET_HALF)
-            await asyncio.sleep(WAIT_TIME_ARM)
+            time.sleep(WAIT_TIME_ARM)
 
             #ボールが入るのを待つ
-            await asyncio.sleep(WAIT_TIME_GET)
+     #       time.sleep(WAIT_TIME_GET)
 
             # ろーらーをとめる
             set_goal_pwm(RIGHT_ROLLER_CAN_ID, 0, CAN_BUS)
@@ -242,7 +243,7 @@ class BallGetNode(Node):
             if success:
                 res.success = True
                 # execute_mode 1=左 -> LEFT_CARRY(2), 2=右 -> RIGHT_CARRY(3)
-                res.next_state = 2 if req.current_state == 1 else 3
+                res.next_state = 2 if req.execute_mode == 1 else 3
                 goal_handle.succeed()
             else:
                 goal_handle.abort()

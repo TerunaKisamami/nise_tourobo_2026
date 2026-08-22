@@ -12,6 +12,7 @@ import asyncio
 import os
 import sys
 import asyncio  
+import time
 
 from ah_python_lib.ah_python_can import *
 from tourobo_2026_interfaces.action import BallPutPlate
@@ -157,6 +158,7 @@ class BallPutPlateNode(Node):
 
         SHOOT_ANGLE_ID = self.get_parameter('shoot_angle_id').value
         SHOOT_ANGLE_MAX = self.get_parameter('shoot_angle_max').value
+        SHOOT_ANGLE_MIN = self.get_parameter('shoot_angle_min').value
 
         MINI_SHOOT_CAN_ID = self.get_parameter('mini_shoot_can_id').value
         SHOOT_PUSH_MAX = self.get_parameter('shoot_push_max').value
@@ -173,15 +175,15 @@ class BallPutPlateNode(Node):
         
 
         #左右共通して行う動作
-        #射出機構を上げる
-        self.publish_dyna_extpos(SHOOT_ANGLE_ID, SHOOT_ANGLE_MAX)
-        await asyncio.sleep(WAIT_TIME_SHOOT_DIR)
-
         #押し出し機構を上に上げる
         set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MAX, CAN_BUS)
-        await asyncio.sleep(WAIT_TIME_PUSH)
+        time.sleep(WAIT_TIME_PUSH)
 
+        #射出機構を上げる
+        self.publish_dyna_extpos(SHOOT_ANGLE_ID, SHOOT_ANGLE_MIN)
+        time.sleep(WAIT_TIME_SHOOT_DIR)
 
+      
         # current_state: 2=LEFT_CARRY, 3=RIGHT_CARRY
         if current_state == 3:
             self.get_logger().info("右脇で保持している状態から、左側へボールを関所に置きます")
@@ -189,32 +191,32 @@ class BallPutPlateNode(Node):
 
             # 左側のアームを上げる
             self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_OPEN)
-            await asyncio.sleep(WAIT_TIME_ARM)
+            time.sleep(WAIT_TIME_ARM)
 
             # 左側のガードを上げる
-            self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_CLOSE)
-            await asyncio.sleep(WAIT_TIME_GUARD)
+            self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_OPEN)
+            time.sleep(WAIT_TIME_GUARD)
 
             # 左側のローラーを回す
             set_goal_pwm(LEFT_ROLLER_ID,BALL_PUT_PLATE_UP_ROLLER_SPEED,CAN_BUS)
 
             # 右側のガードを上げる
-            self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_CLOSE)
-            await asyncio.sleep(WAIT_TIME_GUARD)
+            self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_OPEN)
+            time.sleep(WAIT_TIME_GUARD)
 
             # 右側のローラーを回す
             set_goal_pwm(RIGHT_ROLLER_ID,BALL_PUT_PLATE_UP_ROLLER_SPEED,CAN_BUS)
             # 下のローラーを左向きに回す
-            set_goal_pwm(DOWN_ROLLER_ID,BALL_PUT_PLATE_DOWN_ROLLER_SPEED,CAN_BUS)
+            set_goal_pwm(DOWN_ROLLER_ID,-BALL_PUT_PLATE_DOWN_ROLLER_SPEED,CAN_BUS)
        
             # 右側のアームを下げる
             self.publish_dyna_extpos(RIGHT_ARM_ID, RIGHT_ARM_CLOSE)
-            await asyncio.sleep(WAIT_TIME_ARM)
+            time.sleep(WAIT_TIME_ARM)
 
             #ボールが移動して関所に置かれるのを待つ
-            await asyncio.sleep(WAIT_TIME_PUT_PLATE)
+            time.sleep(WAIT_TIME_PUT_PLATE)
 
-            #ろーらーをとめる
+            #ろーらーをとめ
             set_goal_pwm(LEFT_ROLLER_ID,0,CAN_BUS)
             set_goal_pwm(RIGHT_ROLLER_ID,0,CAN_BUS)
             set_goal_pwm(DOWN_ROLLER_ID,0,CAN_BUS)
@@ -225,17 +227,17 @@ class BallPutPlateNode(Node):
 
             # 右側のアームを上げる
             self.publish_dyna_extpos(RIGHT_ARM_ID, RIGHT_ARM_OPEN)
-            await asyncio.sleep(WAIT_TIME_ARM)
+            time.sleep(WAIT_TIME_ARM)
 
             # 右側のガードを上げる
-            self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_CLOSE)
-            await asyncio.sleep(WAIT_TIME_GUARD)
+            self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_OPEN)
+            time.sleep(WAIT_TIME_GUARD)
             # 右側のローラーを回す
             set_goal_pwm(RIGHT_ROLLER_ID,BALL_PUT_PLATE_UP_ROLLER_SPEED,CAN_BUS)
 
             # 左側のガードを上げる
-            self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_CLOSE)
-            await asyncio.sleep(WAIT_TIME_GUARD)
+            self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_OPEN)
+            time.sleep(WAIT_TIME_GUARD)
 
             # 左側のローラーを回す
             set_goal_pwm(LEFT_ROLLER_ID,BALL_PUT_PLATE_UP_ROLLER_SPEED,CAN_BUS)
@@ -245,10 +247,10 @@ class BallPutPlateNode(Node):
             
             # 左側のアームを下ろす
             self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_CLOSE)
-            await asyncio.sleep(WAIT_TIME_ARM)
+            time.sleep(WAIT_TIME_ARM)
 
             #ボールが移動して関所に置かれるのを待つ
-            await asyncio.sleep(WAIT_TIME_PUT_PLATE)
+            time.sleep(WAIT_TIME_PUT_PLATE)
 
             #ローラーを止める
             set_goal_pwm(LEFT_ROLLER_ID,0,CAN_BUS)

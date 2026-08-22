@@ -9,6 +9,7 @@ from rclpy.node import Node
 from std_msgs.msg import String
 import os
 import sys
+import time 
 
 from ah_python_lib.ah_python_can import *
 from tourobo_2026_interfaces.action import BallGateOperation
@@ -157,7 +158,7 @@ class BallGateOperationNode(Node):
             else:
                 # 左ゲートを閉じる動作
                 self.publish_dyna_extpos(LEFT_GATE_ID, LEFT_ARM_CLOSE)
-            await asyncio.sleep(WAIT_TIME_ARM)
+            time.sleep(WAIT_TIME_ARM)
         elif target_gate == 2:
             if is_open:
                 # 右ゲートを開く動作
@@ -165,7 +166,7 @@ class BallGateOperationNode(Node):
             else:
                 # 右ゲートを閉じる動作
                 self.publish_dyna_extpos(RIGHT_GATE_ID, RIGHT_ARM_CLOSE)
-            await asyncio.sleep(WAIT_TIME_ARM)
+            time.sleep(WAIT_TIME_ARM)
         """
         # 例: アームを下げる (ID: 10, Pos: 2000)
         self.get_logger().info("アームを下ろします")

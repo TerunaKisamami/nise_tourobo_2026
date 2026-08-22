@@ -10,6 +10,7 @@ from std_msgs.msg import String
 import os
 import sys
 import asyncio
+import time
 
 from ah_python_lib.ah_python_can import *
 from tourobo_2026_interfaces.action import BallPutGate
@@ -152,20 +153,25 @@ class BallPutGateNode(Node):
         LEFT_GUARD_CLOSE = self.get_parameter('guard_left_close').value
         RIGHT_GUARD_CLOSE = self.get_parameter('guard_right_close').value
 
-        #射出角度をさげる
+        SHOOT_PUSH_MIN = self.get_parameter('shoot_push_min').value
         SHOOT_ANGLE_ID = self.get_parameter('shoot_angle_id').value
         SHOOT_ANGLE_AT_GATE = self.get_parameter('shoot_angle_at_gate').value
         WAIT_TIME_SHOOT_DIR_PUT_GATE = self.get_parameter('wait_time_shoot_dir').value
-        self.publish_dyna_pos(SHOOT_ANGLE_ID, SHOOT_ANGLE_AT_GATE)
-        await asyncio.sleep(WAIT_TIME_SHOOT_DIR_PUT_GATE)
+
+        MINI_SHOOT_CAN_ID = self.get_parameter('mini_shoot_can_id').value
+        WAIT_TIME_PUSH = self.get_parameter('wait_time_push').value
+    
+        #tyottohasqamu
+
+
+        #射出角度をさげる
+        self.publish_dyna_extpos(SHOOT_ANGLE_ID, SHOOT_ANGLE_AT_GATE)
+        time.sleep(WAIT_TIME_SHOOT_DIR_PUT_GATE)
 
         #押し出しを城門側へ
         # ロボマスを使って押し出しを城門側へ
-        MINI_SHOOT_CAN_ID = self.get_parameter('mini_shoot_can_id').value
-        SHOOT_PUSH_GATE_FINISH = self.get_parameter('shoot_push_put_gate_finish').value
-        WAIT_TIME_PUSH = self.get_parameter('wait_time_push').value
-        set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_GATE_FINISH, CAN_BUS)
-        await asyncio.sleep(WAIT_TIME_PUSH)
+        set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MIN, CAN_BUS)
+        time.sleep(WAIT_TIME_PUSH)
 
         return True
 

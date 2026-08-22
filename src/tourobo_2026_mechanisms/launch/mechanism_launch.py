@@ -31,7 +31,7 @@ GUARD_RIGHT_ID = 3
 SHOOT_ANGLE_ID = 4
 
 #左右アーム開閉時のダイナミクセル値
-LEFT_ARM_OPEN =  1163#内部的には2630
+LEFT_ARM_OPEN =  1300#内部的には2630
 RIGHT_ARM_OPEN = -1176 #内部的には1040
 LEFT_ARM_CLOSE = 0 #内部的には1467
 RIGHT_ARM_CLOSE = 0 #内部的には2216
@@ -39,27 +39,23 @@ LEFT_ARM_GET_HALF = 784 #内部的には2251
 RIGHT_ARM_GET_HALF = -863 #内部的には1353
 
 #ガード開閉時のダイナミクセル値
-LEFT_GUARD_OPEN = -1156 #内部的には317
-RIGHT_GUARD_OPEN = 1204 #内部的には1502
-LEFT_GUARD_CLOSE = 0 #内部的には1473
-RIGHT_GUARD_CLOSE = 0 #内部的には298
+LEFT_GUARD_OPEN = 0 #内部的には317
+RIGHT_GUARD_OPEN = 0 #内部的には1502
+LEFT_GUARD_CLOSE = 1156 #内部的には1473
+RIGHT_GUARD_CLOSE = -1204 #内部的には298
 
 #射出機構の角度の最小値と最大値
 SHOOT_ANGLE_MIN = 0 #内部的には3000
-SHOOT_ANGLE_MAX = 800 #内部的には3800
+SHOOT_ANGLE_MAX =800  #内部的には3800
 #城門位置の射出機構角度
 SHOOT_ANGLE_AT_GATE = 695 #内部的には3695
 
 #射出機構押し出し機構の位置(初期位置からの相対角度)
 SHOOT_PUSH_MIN = 0 #これを初期位置にする
-SHOOT_PUSH_MAX = 80000 #射出機構に近いほどでかい
-SHOOT_PUSH_INTAKE_GATE_READY = 100
-SHOOT_PUSH_INTAKE_SHOOT_READY = 200
-SHOOT_PUSH_SHOOT_FINISH = 300
-SHOOT_PUSH_PUT_GATE_FINISH = 400
+SHOOT_PUSH_MAX = 78000 #射出機構に近いほどでかい
 
 #射出機構のローラー回転速度
-SHOOT_MOTOR_SPEED = 1000
+SHOOT_MOTOR_SPEED = 800
 
 #ボール入手のローラー回転速度
 BALL_GET_DOWN_ROLLER_SPEED = 1000
@@ -79,15 +75,15 @@ WAIT_TIME_GUARD = 1.0
 # アームの開閉にかかる時間
 WAIT_TIME_ARM = 1.0
 # ボール入手の時にボールが入るのを待つ時間
-WAIT_TIME_GET = 1.0
+WAIT_TIME_GET = 0.7
 # ボール内側取り込み時にボールが内部に入るのを待つ時間
-WAIT_TIME_INTAKE = 1.0
+WAIT_TIME_INTAKE = 2.0
 #射出機構の角度変更にかかる時間
 WAIT_TIME_SHOOT_DIR = 1.5
 # ボールを関所に置くときに内部を移動するのを待つ時間
 WAIT_TIME_PUT_PLATE = 1.0
 # 射出機構の押し出し部分の動作時間
-WAIT_TIME_PUSH = 1.0
+WAIT_TIME_PUSH =6.0
 
 def generate_launch_description():
     pkg_name = 'tourobo_2026_mechanisms'
@@ -120,10 +116,6 @@ def generate_launch_description():
         'shoot_angle_at_gate': SHOOT_ANGLE_AT_GATE,
         'shoot_push_max': SHOOT_PUSH_MAX,
         'shoot_push_min': SHOOT_PUSH_MIN,
-        'shoot_push_intake_gate_ready': SHOOT_PUSH_INTAKE_GATE_READY,
-        'shoot_push_intake_shoot_ready': SHOOT_PUSH_INTAKE_SHOOT_READY,
-        'shoot_push_shoot_finish': SHOOT_PUSH_SHOOT_FINISH,
-        'shoot_push_put_gate_finish': SHOOT_PUSH_PUT_GATE_FINISH,
         'shoot_motor_speed': SHOOT_MOTOR_SPEED,
         'ball_get_down_roller_speed': BALL_GET_DOWN_ROLLER_SPEED,
         'ball_get_up_roller_speed': BALL_GET_UP_ROLLER_SPEED,
@@ -166,7 +158,7 @@ def generate_launch_description():
     ld.add_action(ball_shoot)
     ld.add_action(ball_gate_operation)
     ld.add_action(ball_intake)
-    ld.add_action(ball_shoot_aim)
+#    ld.add_action(ball_shoot_aim)
     ld.add_action(joy_client)
     ld.add_action(base_launch)
 

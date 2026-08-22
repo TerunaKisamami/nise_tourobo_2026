@@ -63,7 +63,7 @@ def generate_launch_description():
     ld.add_action(sub_twist_node)
 #    ld.add_action(pub_odometry_node)
 #    ld.add_action(ekf_node)
-    ld.add_action(joy_node)
+#    ld.add_action(joy_node)
     ld.add_action(joy2twist_node)
     ld.add_action(dyna_node)
 
