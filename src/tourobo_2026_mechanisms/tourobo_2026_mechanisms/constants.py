@@ -75,9 +75,3 @@ WAIT_TIME_PUT_PLATE = 1.0
 # 射出機構の押し出し部分の動作時間
 WAIT_TIME_PUSH =6.0
 WAIT_TIME_ROLLER = 1.0
-
-# 状態定数 (not currently used but to resolve missing dict keys if any)
-SHOOT_PUSH_INTAKE_GATE_READY = 100
-SHOOT_PUSH_INTAKE_SHOOT_READY = 200
-SHOOT_PUSH_SHOOT_FINISH = 300
-SHOOT_PUSH_PUT_GATE_FINISH = 400
