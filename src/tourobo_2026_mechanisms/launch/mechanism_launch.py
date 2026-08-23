@@ -9,146 +9,19 @@ import launch
 from launch import LaunchDescription
 from launch_ros.actions import Node
 
-#各モーターCANのID
-#下ローラー
-DOWN_ROLLER_CAN_ID = 0x040
-#右ローラー
-RIGHT_ROLLER_CAN_ID = 0x041
-#左ローラー
-LEFT_ROLLER_CAN_ID = 0x010
-#射出機構ローラー
-SHOOT_ROLLER_1_CAN_ID = 0x011
-SHOOT_ROLLER_2_CAN_ID = 0x012
-SHOOT_ROLLER_3_CAN_ID = 0x013
-#小ロボマス(射出機構用)
-MINI_SHOOT_CAN_ID = 0x031
-
-#ダイナミクセルID(仮置き)
-ARM_LEFT_ID = 0
-ARM_RIGHT_ID = 1
-GUARD_LEFT_ID = 2
-GUARD_RIGHT_ID = 3
-SHOOT_ANGLE_ID = 4
-
-#左右アーム開閉時のダイナミクセル値
-LEFT_ARM_OPEN =  1300#内部的には2630
-RIGHT_ARM_OPEN = -1176 #内部的には1040
-LEFT_ARM_CLOSE = 0 #内部的には1467
-RIGHT_ARM_CLOSE = 0 #内部的には2216
-LEFT_ARM_GET_HALF = 784 #内部的には2251
-RIGHT_ARM_GET_HALF = -863 #内部的には1353
-
-#ガード開閉時のダイナミクセル値
-LEFT_GUARD_OPEN = 0 #内部的には317
-RIGHT_GUARD_OPEN = 0 #内部的には1502
-LEFT_GUARD_CLOSE = 1156 #内部的には1473
-RIGHT_GUARD_CLOSE = -1204 #内部的には298
-
-#射出機構の角度の最小値と最大値
-SHOOT_ANGLE_MIN = 0 #内部的には3000
-SHOOT_ANGLE_MAX =800  #内部的には3800
-#城門位置の射出機構角度
-SHOOT_ANGLE_AT_GATE = 695 #内部的には3695
-
-#射出機構押し出し機構の位置(初期位置からの相対角度)
-SHOOT_PUSH_MIN = 0 #これを初期位置にする
-SHOOT_PUSH_MAX = 78000 #射出機構に近いほどでかい
-
-#射出機構のローラー回転速度
-SHOOT_MOTOR_SPEED = 800
-
-#ボール入手のローラー回転速度
-BALL_GET_DOWN_ROLLER_SPEED = 1000
-BALL_GET_UP_ROLLER_SPEED = -1000
-
-#ボール内側取り込みローラー回転速度
-BALL_INTAKE_DOWN_ROLLER_SPEED = 1000
-BALL_INTAKE_UP_ROLLER_SPEED = -1000
-
-#ぼーるを関所におくときのローラー回転速度
-BALL_PUT_PLATE_DOWN_ROLLER_SPEED = 1000
-BALL_PUT_PLATE_UP_ROLLER_SPEED = -1000
-
-# 動作待機時間の設定
-# ガードの開閉にかかる時間
-WAIT_TIME_GUARD = 1.0
-# アームの開閉にかかる時間
-WAIT_TIME_ARM = 1.0
-# ボール入手の時にボールが入るのを待つ時間
-WAIT_TIME_GET = 0.7
-# ボール内側取り込み時にボールが内部に入るのを待つ時間
-WAIT_TIME_INTAKE = 2.0
-#射出機構の角度変更にかかる時間
-WAIT_TIME_SHOOT_DIR = 1.5
-# ボールを関所に置くときに内部を移動するのを待つ時間
-WAIT_TIME_PUT_PLATE = 1.0
-# 射出機構の押し出し部分の動作時間
-WAIT_TIME_PUSH =6.0
-
 def generate_launch_description():
     pkg_name = 'tourobo_2026_mechanisms'
     
-    params = {
-        'down_roller_can_id': DOWN_ROLLER_CAN_ID,
-        'right_roller_can_id': RIGHT_ROLLER_CAN_ID,
-        'left_roller_can_id': LEFT_ROLLER_CAN_ID,
-        'shoot_roller_1_can_id': SHOOT_ROLLER_1_CAN_ID,
-        'shoot_roller_2_can_id': SHOOT_ROLLER_2_CAN_ID,
-        'shoot_roller_3_can_id': SHOOT_ROLLER_3_CAN_ID,
-        'mini_shoot_can_id': MINI_SHOOT_CAN_ID,
-        'arm_left_id': ARM_LEFT_ID,
-        'arm_right_id': ARM_RIGHT_ID,
-        'guard_left_id': GUARD_LEFT_ID,
-        'guard_right_id': GUARD_RIGHT_ID,
-        'shoot_angle_id': SHOOT_ANGLE_ID,
-        'arm_left_open': LEFT_ARM_OPEN,
-        'arm_right_open': RIGHT_ARM_OPEN,
-        'arm_left_close': LEFT_ARM_CLOSE,
-        'arm_right_close': RIGHT_ARM_CLOSE,
-        'arm_left_get_half': LEFT_ARM_GET_HALF,
-        'arm_right_get_half': RIGHT_ARM_GET_HALF,
-        'guard_left_open': LEFT_GUARD_OPEN,
-        'guard_right_open': RIGHT_GUARD_OPEN,
-        'guard_left_close': LEFT_GUARD_CLOSE,
-        'guard_right_close': RIGHT_GUARD_CLOSE,
-        'shoot_angle_min': SHOOT_ANGLE_MIN,
-        'shoot_angle_max': SHOOT_ANGLE_MAX,
-        'shoot_angle_at_gate': SHOOT_ANGLE_AT_GATE,
-        'shoot_push_max': SHOOT_PUSH_MAX,
-        'shoot_push_min': SHOOT_PUSH_MIN,
-        'shoot_motor_speed': SHOOT_MOTOR_SPEED,
-        'ball_get_down_roller_speed': BALL_GET_DOWN_ROLLER_SPEED,
-        'ball_get_up_roller_speed': BALL_GET_UP_ROLLER_SPEED,
-        'ball_intake_down_roller_speed': BALL_INTAKE_DOWN_ROLLER_SPEED,
-        'ball_intake_up_roller_speed': BALL_INTAKE_UP_ROLLER_SPEED,
-        'ball_put_plate_down_roller_speed': BALL_PUT_PLATE_DOWN_ROLLER_SPEED,
-        'ball_put_plate_up_roller_speed': BALL_PUT_PLATE_UP_ROLLER_SPEED,
-        'wait_time_guard': WAIT_TIME_GUARD,
-        'wait_time_arm': WAIT_TIME_ARM,
-        'wait_time_push': WAIT_TIME_PUSH,
-        'wait_time_intake': WAIT_TIME_INTAKE,
-        'wait_time_put_plate': WAIT_TIME_PUT_PLATE,
-        'wait_time_get': WAIT_TIME_GET,
-        'wait_time_shoot_dir': WAIT_TIME_SHOOT_DIR,
-    }
-    
-    #Nodes
-    ball_get = Node(package=pkg_name, executable="ball_get_node", name="ball_get_node", parameters=[params])
-    ball_put_plate = Node(package=pkg_name, executable="ball_put_plate_node", name="ball_put_plate_node", parameters=[params])
-    ball_put_gate = Node(package=pkg_name, executable="ball_put_gate_node", name="ball_put_gate_node", parameters=[params])
-    ball_shoot = Node(package=pkg_name, executable="ball_shoot_node", name="ball_shoot_node", parameters=[params])
-    ball_gate_operation = Node(package=pkg_name, executable="ball_gate_operation_node", name="ball_gate_operation_node", parameters=[params])
-    ball_intake = Node(package=pkg_name, executable="ball_intake_node", name="ball_intake_node", parameters=[params])
-    ball_shoot_aim = Node(package=pkg_name, executable="ball_shoot_aim_node", name="ball_shoot_aim_node", parameters=[params])
+#Nodes
+    ball_get = Node(package=pkg_name, executable="ball_get_node", name="ball_get_node")
+    ball_put_plate = Node(package=pkg_name, executable="ball_put_plate_node", name="ball_put_plate_node")
+    ball_put_gate = Node(package=pkg_name, executable="ball_put_gate_node", name="ball_put_gate_node")
+    ball_shoot = Node(package=pkg_name, executable="ball_shoot_node", name="ball_shoot_node")
+    ball_arm_operation = Node(package=pkg_name, executable="ball_arm_operation_node", name="ball_arm_operation_node")
+    ball_intake = Node(package=pkg_name, executable="ball_intake_node", name="ball_intake_node")
+    ball_shoot_aim = Node(package=pkg_name, executable="ball_shoot_aim_node", name="ball_shoot_aim_node")
 
-    #launchs
-    base_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(get_package_share_directory('tourobo_2026_base'), 'launch', 'base_launch.py')
-        )
-    )
-    
-    joy_client = Node(package=pkg_name, executable="joy_mechanism_client", name="joy_mechanism_client", parameters=[params])
+    joy_client = Node(package=pkg_name, executable="joy_mechanism_client", name="joy_mechanism_client")
 
     ld = LaunchDescription()
 
@@ -156,10 +29,9 @@ def generate_launch_description():
     ld.add_action(ball_put_plate)
     ld.add_action(ball_put_gate)
     ld.add_action(ball_shoot)
-    ld.add_action(ball_gate_operation)
+    ld.add_action(ball_arm_operation)
     ld.add_action(ball_intake)
 #    ld.add_action(ball_shoot_aim)
     ld.add_action(joy_client)
-    ld.add_action(base_launch)
 
     return ld

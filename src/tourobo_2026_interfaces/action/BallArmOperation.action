@@ -1,5 +1,5 @@
 # 1. Goal (クライアントからサーバーへ送信する要求データ)
-int32 target_gate # 1:左を操作 2:右を操作
+int32 target_arm # 1:左を操作 2:右を操作
 bool is_open
 int32 current_state
 ---

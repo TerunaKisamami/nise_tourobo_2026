@@ -16,7 +16,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "action/BallShoot.action"
   "action/BallShootAim.action"
   "action/BallIntake.action"
-  "action/BallGateOperation.action"
+  "action/BallArmOperation.action"
 )
 
 if(BUILD_TESTING)

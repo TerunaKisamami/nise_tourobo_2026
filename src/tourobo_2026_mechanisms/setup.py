@@ -33,7 +33,7 @@ setup(
             "ball_put_gate_node = tourobo_2026_mechanisms.ball_put_gate_node:main",
             "ball_shoot_node = tourobo_2026_mechanisms.ball_shoot_node:main",
             "joy_mechanism_client = tourobo_2026_mechanisms.joy_mechanism_client:main",
-            "ball_gate_operation_node = tourobo_2026_mechanisms.ball_gate_operation_node:main",
+            "ball_arm_operation_node = tourobo_2026_mechanisms.ball_arm_operation_node:main",
             "ball_intake_node = tourobo_2026_mechanisms.ball_intake_node:main",
             "ball_shoot_aim_node = tourobo_2026_mechanisms.ball_shoot_aim_node:main",
         ],

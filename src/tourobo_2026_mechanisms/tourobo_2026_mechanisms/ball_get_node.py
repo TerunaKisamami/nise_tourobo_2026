@@ -1,29 +1,23 @@
 import can
-"""
-どういう動きをするか↓
-
-"""
 from sympy import false
 from rclpy.action import ActionServer, GoalResponse
 import rclpy
 import asyncio
 from rclpy.node import Node
+from tourobo_2026_mechanisms.constants import *
 from std_msgs.msg import String
 import time
 
 from tourobo_2026_interfaces.action import BallGet
-# pyrefly: ignore [missing-import]
 from dyna_interfaces.msg import DynaTarget
 from ah_python_lib.ah_python_can import *
 import os
 import sys
 
-
 CAN_BUS = can.interface.Bus(bustype="socketcan",
                             channel="can0",
                             asynchronous=True,
                             bitrate=1000000)
-
 
 class BallGetNode(Node):
 
@@ -31,67 +25,6 @@ class BallGetNode(Node):
         super().__init__('ball_get_node')
         self.is_executing = False
         self.cb_group = rclpy.callback_groups.ReentrantCallbackGroup()
-
-        self.declare_parameters(
-            namespace='',
-            parameters=[
-                ('arm_left_id', 20),
-                ('arm_right_id', 21),
-                ('guard_left_id', 22),
-                ('guard_right_id', 23),
-                ('shoot_angle_id', 10),
-
-                ('arm_left_open', 2000),
-                ('arm_right_open', 2000),
-                ('arm_left_close', 0),
-                ('arm_right_close', 0),
-                ('arm_left_get_half', 1000),
-                ('arm_right_get_half', 1000),
-                ('guard_left_open', 2000),
-                ('guard_right_open', 2000),
-                ('guard_left_close', 0),
-                ('guard_right_close', 0),
-                ('arm_left_open', 2000),
-                ('arm_right_open', 2000),
-                ('arm_left_close', 0),
-                ('arm_right_close', 0),
-                ('guard_left_open', 2000),
-                ('guard_right_open', 2000),
-                ('guard_left_close', 0),
-                ('guard_right_close', 0),
-                ('shoot_angle_min', 0),
-                ('shoot_angle_max', 2000),
-                ('shoot_angle_at_gate', 1000),
-                ('shoot_push_max', 2000),
-                ('shoot_push_min', 0),
-                ('shoot_push_intake_gate_ready', 100),
-                ('shoot_push_intake_shoot_ready', 200),
-                ('shoot_push_shoot_finish', 300),
-                ('shoot_push_put_gate_finish', 400),
-                ('down_roller_can_id', 0x040),
-                ('right_roller_can_id', 0x041),
-                ('left_roller_can_id', 0x010),
-                ('shoot_roller_1_can_id', 0x011),
-                ('shoot_roller_2_can_id', 0x012),
-                ('shoot_roller_3_can_id', 0x013),
-                ('mini_shoot_can_id', 0x031),
-                ('shoot_motor_speed', 1000),
-                ('ball_get_down_roller_speed', 1000),
-                ('ball_get_up_roller_speed', -1000),
-                ('ball_intake_down_roller_speed', 1000),
-                ('ball_intake_up_roller_speed', -1000),
-                ('ball_put_plate_down_roller_speed', 1000),
-                ('ball_put_plate_up_roller_speed', -1000),
-                ('wait_time_guard', 1.0),
-                ('wait_time_arm', 1.0),
-                ('wait_time_shoot_dir', 1.5),
-                ('wait_time_roller', 1.0),
-                ('wait_time_push', 1.0),
-                ('wait_time_get', 1.0),
-                ('arm_left_get_half', 1000),
-                ('arm_right_get_half', 1000)
-            ]
-        )
 
         self.dyna_extpos_publisher = self.create_publisher(
             DynaTarget, "/dyna_target_extpos", 10)
@@ -108,10 +41,6 @@ class BallGetNode(Node):
             goal_callback=self.goal_callback,
             callback_group=self.cb_group,
         )
-
-        DOWN_ROLLER_CAN_ID = self.get_parameter('down_roller_can_id').value
-        RIGHT_ROLLER_CAN_ID = self.get_parameter('right_roller_can_id').value
-        LEFT_ROLLER_CAN_ID = self.get_parameter('left_roller_can_id').value
 
         #dcモーター立ち上げ
         set_pwm_mode(DOWN_ROLLER_CAN_ID, CAN_BUS)
@@ -151,31 +80,7 @@ class BallGetNode(Node):
     # ここがメインの処理じゃぞ
     async def get_ball(self, execute_mode):
 
-        LEFT_ARM_ID = self.get_parameter('arm_left_id').value
-        RIGHT_ARM_ID = self.get_parameter('arm_right_id').value
-        LEFT_GUARD_ID = self.get_parameter('guard_left_id').value
-        RIGHT_GUARD_ID = self.get_parameter('guard_right_id').value
-        LEFT_ROLLER_CAN_ID = self.get_parameter('left_roller_can_id').value
-        RIGHT_ROLLER_CAN_ID = self.get_parameter('right_roller_can_id').value
-        DOWN_ROLLER_CAN_ID = self.get_parameter('down_roller_can_id').value
-        BALL_GET_DOWN_ROLLER_SPEED = self.get_parameter('ball_get_down_roller_speed').value
-        BALL_GET_UP_ROLLER_SPEED = self.get_parameter('ball_get_up_roller_speed').value
-
-        WAIT_TIME_GUARD = self.get_parameter('wait_time_guard').value
-
-        LEFT_ARM_OPEN = self.get_parameter('arm_left_open').value
-        RIGHT_ARM_OPEN = self.get_parameter('arm_right_open').value
-        LEFT_ARM_CLOSE = self.get_parameter('arm_left_close').value
-        RIGHT_ARM_CLOSE = self.get_parameter('arm_right_close').value
-        LEFT_ARM_GET_HALF = self.get_parameter('arm_left_get_half').value
-        RIGHT_ARM_GET_HALF = self.get_parameter('arm_right_get_half').value
-        LEFT_GUARD_OPEN = self.get_parameter('guard_left_open').value
-        RIGHT_GUARD_OPEN = self.get_parameter('guard_right_open').value
-        LEFT_GUARD_CLOSE = self.get_parameter('guard_left_close').value
-        RIGHT_GUARD_CLOSE = self.get_parameter('guard_right_close').value
-
-        WAIT_TIME_ARM = self.get_parameter('wait_time_arm').value
-        WAIT_TIME_GET = self.get_parameter('wait_time_get').value
+        self.get_logger().info(f"execute_mode = {execute_mode} でget_ballが実行された")
 
         if execute_mode == 1:  # 左
             # 左脇に保持するために左のガードを閉じる
@@ -252,7 +157,6 @@ class BallGetNode(Node):
         finally:
             self.is_executing = False
 
-
 def main(args=None):
     rclpy.init(args=args)
     node = BallGetNode()
@@ -261,7 +165,6 @@ def main(args=None):
     executor.spin()
     node.destroy_node()
     rclpy.shutdown()
-
 
 if __name__ == '__main__':
     main()

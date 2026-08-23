@@ -6,7 +6,7 @@ from sensor_msgs.msg import Joy
 from action_msgs.msg import GoalStatus
 from enum import Enum
 
-from tourobo_2026_interfaces.action import BallGet, BallPutGate, BallPutPlate, BallShoot, BallShootAim, BallGateOperation, BallIntake
+from tourobo_2026_interfaces.action import BallGet, BallPutGate, BallPutPlate, BallShoot, BallShootAim, BallArmOperation, BallIntake
 
 
 class Mechanism_State(Enum):
@@ -55,8 +55,8 @@ class JoyMechanismClient(Node):
 
         # 論理状態の初期化
         self.current_state = Mechanism_State.UNKNOWN
-        self.is_left_gate_open = False
-        self.is_right_gate_open = False
+        self.is_left_arm_open = False
+        self.is_right_arm_open = False
 
         # クライアント設定
         self.ball_get_client = ActionClient(self,
@@ -79,10 +79,10 @@ class JoyMechanismClient(Node):
                                                   BallShootAim,
                                                   'ball_shoot_aim',
                                                   callback_group=self.cb_group)
-        self.ball_gate_operation_client = ActionClient(
+        self.ball_arm_operation_client = ActionClient(
             self,
-            BallGateOperation,
-            'ball_gate_operation',
+            BallArmOperation,
+            'ball_arm_operation',
             callback_group=self.cb_group)
         self.ball_intake_client = ActionClient(self,
                                                BallIntake,
@@ -158,13 +158,13 @@ class JoyMechanismClient(Node):
         return await self.send_action_goal(self.ball_shoot_client, goal_msg,
                                            "ball_shoot")
 
-    async def send_ball_gate_operation_goal(self, target_gate, is_open):
-        goal_msg = BallGateOperation.Goal()
-        goal_msg.target_gate = target_gate
+    async def send_ball_arm_operation_goal(self, target_arm, is_open):
+        goal_msg = BallArmOperation.Goal()
+        goal_msg.target_arm = target_arm
         goal_msg.is_open = is_open
         goal_msg.current_state = self.current_state.value
-        return await self.send_action_goal(self.ball_gate_operation_client, goal_msg,
-                                           "ball_gate_operation")
+        return await self.send_action_goal(self.ball_arm_operation_client, goal_msg,
+                                           "ball_arm_operation")
 
     async def send_ball_shoot_aim_goal(self, direction):
         goal_msg = BallShootAim.Goal()
@@ -200,187 +200,168 @@ class JoyMechanismClient(Node):
 
         #各ボタン機構
         #OPTIONS: 強制リセット
-        #◯: ボールを内側に取り込む(城門用)
-        #□: ボールを射出
-        #△: ボールを城門に入れる
-        #✕: ボールを内側に取り込む(射撃用)
+        #□: ボールを内側に取り込む(射撃用)→もう一度押すとボールを射出
+        #△: ボールを内側に取り込む(城門用)→もう一度押すと城門に設置
+        #◯: 今抱えている方向の反対側へボールを関所に配置
         #L1: 左ゲートを開閉
         #R1: 右ゲートを開閉
-        #L2: 左から取り込んで脇に抱える
-        #R2: 右から取り込んで脇に抱える
-        #L2,R2: すでにどちらか脇に抱えている状態で押したとき、いま抱えている脇の反対側からボールを発射し皿の上に置く
+        #L2: 左から脇に抱える
+        #R2: 右から脇に抱える
         #十字キー上: 射出機構照準を上に向ける
         #十字キー下: 射出機構照準を下に向ける
-
         if self.is_pressed(msg, 9):  # OPTIONSボタンで強制リセット
             self.get_logger().info("OPTIONSボタン: 状態をUNKNOWNにリセットします")
             self.current_state = Mechanism_State.UNKNOWN
             self.is_action_running = False
-            self.is_left_gate_open = False
-            self.is_right_gate_open = False
+            self.is_left_arm_open = False
+            self.is_right_arm_open = False
+            
+        elif self.is_action_running:
+            # 動作中は何のボタンを押しても受け付けない
+            # 何かボタンや軸が操作されたときだけ警告を出す
+            if any(self.is_pressed(msg, b) for b in [2, 3, 4, 5, 6, 7]) or \
+               self.is_axis_changed(msg, 7, 0.5, 1) or self.is_axis_changed(msg, 7, 0.5, -1):
+                self.get_logger().warn('現在他の動作中です')
+
 
         # △: ボールを城門に入れる
         elif self.is_pressed(msg, 2):
-            if not self.is_action_running:
-                if self.current_state == Mechanism_State.INTAKE_GATE:
-                    self.get_logger().info("BallPutGate(城門に入れる)が入力された")
-                    self.is_action_running = True
-                    res = await self.send_ball_put_gate_goal()
-                    if res and res.success:
-                        self.current_state = Mechanism_State(res.next_state)
-                    self.is_action_running = False
-                else:
-                    self.get_logger().warn('BallPutGate は INTAKE_GATE 状態でのみ許可されます')
-            else:
-                self.get_logger().warn('現在他の動作中です')
 
-        # □: ボールを射出
+            self.get_logger().info(f"current_state = {self.current_state.name}")
+            self.get_logger().info("△ボタンが入力された")
+
+            #current_stateがLEFT_CARRYかRIGHT_CARRYならば城門用内側取り込み
+            if self.current_state in [Mechanism_State.LEFT_CARRY, Mechanism_State.RIGHT_CARRY]:
+                self.is_action_running = True
+                res = await self.send_ball_intake_goal(1)
+
+                if res and res.success:
+                    self.current_state = Mechanism_State(res.next_state)
+                self.is_action_running = False
+
+            elif self.current_state == Mechanism_State.INTAKE_GATE:
+                self.is_action_running = True
+                res = await self.send_ball_put_gate_goal()
+
+                if res and res.success:
+                    self.current_state = Mechanism_State(res.next_state)
+                self.is_action_running = False
+
+ 
+
+        # □: 射出用取り込み + ボールを射出
         elif self.is_pressed(msg, 3):
-            if not self.is_action_running:
-                if self.current_state == Mechanism_State.INTAKE_SHOOT:
-                    self.get_logger().info("BallShoot(射出)が入力された")
-                    self.is_action_running = True
-                    res = await self.send_ball_shoot_goal()
-                    if res and res.success:
-                        self.current_state = Mechanism_State(res.next_state)
-                    self.is_action_running = False
-                else:
-                    self.get_logger().warn('BallShoot は INTAKE_SHOOT 状態でのみ許可されます')
-            else:
-                self.get_logger().warn('現在他の動作中です')
 
-        # ◯: ボールを内側に取り込む(城門用)
-        elif self.is_pressed(msg, 1):
-            if not self.is_action_running:
-                if self.current_state in [Mechanism_State.LEFT_CARRY, Mechanism_State.RIGHT_CARRY]:
-                    self.get_logger().info("BallIntake(城門用)が入力された")
-                    self.is_action_running = True
-                    res = await self.send_ball_intake_goal(1)
-                    if res and res.success:
-                        self.current_state = Mechanism_State(res.next_state)
-                    self.is_action_running = False
-                else:
-                    self.get_logger().warn('BallIntake は LEFT_CARRY または RIGHT_CARRY 状態でのみ許可されます')
-            else:
-                self.get_logger().warn('現在他の動作中です')
+            self.get_logger().info(f"current_state ={self.current_state.name}")
+            self.get_logger().info("□ボタンが入力された")
 
-        # ✕: ボールを内側に取り込む(射撃用)
-        elif self.is_pressed(msg, 0):
-            if not self.is_action_running:
-                if self.current_state in [Mechanism_State.LEFT_CARRY, Mechanism_State.RIGHT_CARRY]:
-                    self.get_logger().info("BallIntake(射撃用)が入力された")
-                    self.is_action_running = True
-                    res = await self.send_ball_intake_goal(2)
-                    if res and res.success:
-                        self.current_state = Mechanism_State(res.next_state)
-                    self.is_action_running = False
-                else:
-                    self.get_logger().warn('BallIntake は LEFT_CARRY または RIGHT_CARRY 状態でのみ許可されます')
-            else:
-                self.get_logger().warn('現在他の動作中です')
+            #current_stateがLEFT_CARRYかRIGHT_CARRYならば内側取り込み
+            if self.current_state in [Mechanism_State.LEFT_CARRY, Mechanism_State.RIGHT_CARRY]:
+                self.is_action_running = True
+                res = await self.send_ball_intake_goal()
+
+                if res and res.success:
+                   self.current_state = Mechanism_State(res.next_state)
+                self.is_action_running = False
+
+            #current_stateがならば内側取り込み
+            elif self.current_state == Mechanism_State.INTAKE_SHOOT:
+                self.is_action_running = True
+                res = await self.send_ball_shoot_goal()
+
+                if res and res.success:
+                    self.current_state = Mechanism_State(res.next_state)
+                self.is_action_running= False
+
 
         # L1: 左ゲートを開閉
         elif self.is_pressed(msg, 4):
-            if not self.is_action_running:
-                self.get_logger().info("左ゲート開閉が入力された")
-                self.is_action_running = True
-                target_is_open = not self.is_left_gate_open
-                res = await self.send_ball_gate_operation_goal(1, target_is_open)
-                if res and res.success:
-                    self.is_left_gate_open = target_is_open
-                    if self.current_state == Mechanism_State.LEFT_CARRY and self.is_left_gate_open:
-                        self.current_state = Mechanism_State.NOT_CARRY
-                    else:
-                        self.current_state = Mechanism_State(res.next_state)
-                self.is_action_running = False
-            else:
-                self.get_logger().warn('現在他の動作中です')
+
+            self.get_logger().info("L1が入力された")
+            self.is_action_running = True
+            target_is_open = not self.is_left_arm_open
+            res = await self.send_ball_arm_operation_goal(1, target_is_open)
+
+            if res and res.success:
+                self.is_left_arm_open = target_is_open
+                if self.current_state == Mechanism_State.LEFT_CARRY and self.is_left_arm_open:
+                    self.current_state = Mechanism_State.NOT_CARRY
+                else:
+                    self.current_state = Mechanism_State(res.next_state)
+            self.is_action_running = False
+
 
         # R1: 右ゲートを開閉
         elif self.is_pressed(msg, 5):
-            if not self.is_action_running:
-                self.get_logger().info("右ゲート開閉が入力された")
-                self.is_action_running = True
-                target_is_open = not self.is_right_gate_open
-                res = await self.send_ball_gate_operation_goal(2, target_is_open)
-                if res and res.success:
-                    self.is_right_gate_open = target_is_open
-                    if self.current_state == Mechanism_State.RIGHT_CARRY and self.is_right_gate_open:
-                        self.current_state = Mechanism_State.NOT_CARRY
-                    else:
-                        self.current_state = Mechanism_State(res.next_state)
-                self.is_action_running = False
-            else:
-                self.get_logger().warn('現在他の動作中です')
 
-        # L2, R2: 取り込み or (既にどちらかの脇に抱えているなら)皿に置く
-        elif self.is_pressed(msg, 6) or self.is_pressed(msg, 7):
-            if not self.is_action_running:
-                # 既にどちらかの脇に抱えているなら、L2/R2どちらが押されても逆方向へBallPutPlate
-                if self.current_state in [Mechanism_State.LEFT_CARRY, Mechanism_State.RIGHT_CARRY]:
-                    pressed_btn = "L2" if self.is_pressed(msg, 6) else "R2"
-                    dir_text = "右方向" if self.current_state == Mechanism_State.LEFT_CARRY else "左方向"
-                    self.get_logger().info(f"既に脇に抱えているため、{pressed_btn}入力でBallPutPlate({dir_text}へ)が入力された")
-                    self.is_action_running = True
-                    res = await self.send_ball_put_plate_goal()
-                    if res and res.success:
-                        self.current_state = Mechanism_State(res.next_state)
-                        self.is_left_gate_open = False
-                        self.is_right_gate_open = False
-                    self.is_action_running = False
-                
-                # 何も抱えていない場合は、L2なら左から取得、R2なら右から取得
-                elif self.current_state in [Mechanism_State.NOT_CARRY, Mechanism_State.UNKNOWN]:
-                    if self.is_pressed(msg, 6):
-                        self.get_logger().info("BallGet(左)が入力された")
-                        self.is_action_running = True
-                        res = await self.send_ball_get_goal(1)
-                        if res and res.success:
-                            self.current_state = Mechanism_State(res.next_state)
-                            self.is_left_gate_open = False
-                        self.is_action_running = False
-                    else:
-                        self.get_logger().info("BallGet(右)が入力された")
-                        self.is_action_running = True
-                        res = await self.send_ball_get_goal(2)
-                        if res and res.success:
-                            self.current_state = Mechanism_State(res.next_state)
-                            self.is_right_gate_open = False
-                        self.is_action_running = False
+            self.get_logger().info("R1が入力された")
+            self.is_action_running = True
+            target_is_open = not self.is_right_arm_open
+            res = await self.send_ball_arm_operation_goal(2, target_is_open)
+            if res and res.success:
+                self.is_right_arm_open = target_is_open
+                if self.current_state == Mechanism_State.RIGHT_CARRY and self.is_right_arm_open:
+                    self.current_state = Mechanism_State.NOT_CARRY
                 else:
-                    self.get_logger().warn('L2/R2 は NOT_CARRY, UNKNOWN, LEFT_CARRY, RIGHT_CARRY 状態でのみ許可されます')
-            else:
-                self.get_logger().warn('現在他の動作中です')
+                    self.current_state = Mechanism_State(res.next_state)
+            self.is_action_running = False
+
+        # L2: 左から脇に抱える
+        elif self.is_pressed(msg, 6):
+
+            if not self.is_left_arm_open:
+                self.get_logger().warn('左アームが開いていないため、BallGet(左)は実行できません')
+                return
+                
+            if self.current_state in [Mechanism_State.NOT_CARRY, Mechanism_State.UNKNOWN]:
+                self.get_logger().info("L2が入力された")
+                self.is_action_running = True
+                res = await self.send_ball_get_goal(1)
+                if res and res.success:
+                    self.current_state = Mechanism_State(res.next_state)
+                    self.is_left_arm_open = False
+                self.is_action_running = False
+
+        #R2: 右から脇に抱える
+        elif self.is_pressed(msg, 7):
+            
+            if not self.is_right_arm_open:
+                self.get_logger().warn('右アームが開いていないため、BallGet(右)は実行できません')
+                return
+            
+            if self.current_state in [Mechanism_State.NOT_CARRY, Mechanism_State.UNKNOWN]:
+                self.get_logger().info('R2が入力された')
+                self.is_action_running = True
+                res = await self.send_ball_get_goal(2)
+                if res and res.success:
+                    self.current_state = Mechanism_State(res.next_state)
+                    self.is_right_arm_open = False
+                self.is_action_running = False
+            
 
         # 十字キー上: 射出機構照準を上に向ける
         elif self.is_axis_changed(msg, 7, 0.5, 1):
-            if not self.is_action_running:
-                if self.current_state == Mechanism_State.INTAKE_SHOOT:
-                    self.get_logger().info("十字キー上が押されました(射出機構照準 上)")
-                    self.is_action_running = True
-                    res = await self.send_ball_shoot_aim_goal(1)
-                    if res and res.success:
-                        self.current_state = Mechanism_State(res.next_state)
-                    self.is_action_running = False
-                else:
-                    self.get_logger().warn('射出機構の照準操作(上)は INTAKE_SHOOT 状態でのみ許可されます')
+            if self.current_state == Mechanism_State.INTAKE_SHOOT:
+                self.get_logger().info("十字キー上が押されました(射出機構照準 上)")
+                self.is_action_running = True
+                res = await self.send_ball_shoot_aim_goal(1)
+                if res and res.success:
+                    self.current_state = Mechanism_State(res.next_state)
+                self.is_action_running = False
             else:
-                self.get_logger().warn('現在他の動作中です')
+                self.get_logger().warn("射出機構の照準操作(上)は INTAKE_SHOOT 状態でのみ許可されます")
 
         # 十字キー下: 射出機構照準を下に向ける
         elif self.is_axis_changed(msg, 7, 0.5, -1):
-            if not self.is_action_running:
-                if self.current_state == Mechanism_State.INTAKE_SHOOT:
-                    self.get_logger().info("十字キー下が押されました(射出機構照準 下)")
-                    self.is_action_running = True
-                    res = await self.send_ball_shoot_aim_goal(-1)
-                    if res and res.success:
-                        self.current_state = Mechanism_State(res.next_state)
-                    self.is_action_running = False
-                else:
-                    self.get_logger().warn('射出機構の照準操作(下)は INTAKE_SHOOT 状態でのみ許可されます')
+            if self.current_state == Mechanism_State.INTAKE_SHOOT:
+                self.get_logger().info("十字キー下が押されました(射出機構照準 下)")
+                self.is_action_running = True
+                res = await self.send_ball_shoot_aim_goal(-1)
+                if res and res.success:
+                    self.current_state = Mechanism_State(res.next_state)
+                self.is_action_running = False
             else:
-                self.get_logger().warn('現在他の動作中です')
+                self.get_logger().warn("射出機構の照準操作(下)は INTAKE_SHOOT 状態でのみ許可されます")
 
         self.prev_buttons = msg.buttons
         self.prev_axes = msg.axes

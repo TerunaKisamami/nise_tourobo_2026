@@ -1,27 +1,25 @@
-import can
+"""
+ボールを取り込むアームの開閉をするだけ
+ダイナミクセル　アーム開閉
+"""
 from rclpy.action import ActionServer, GoalResponse
 import rclpy
+import asyncio
 from rclpy.node import Node
 from tourobo_2026_mechanisms.constants import *
 from std_msgs.msg import String
 import os
 import sys
-import asyncio
-import time
+import time 
 
-from tourobo_2026_interfaces.action import BallShoot
 from ah_python_lib.ah_python_can import *
+from tourobo_2026_interfaces.action import BallArmOperation
 from dyna_interfaces.msg import DynaTarget
 
-CAN_BUS = can.interface.Bus(bustype="socketcan",
-                            channel="can0",
-                            asynchronous=True,
-                            bitrate=1000000)
-
-class BallShootNode(Node):
+class BallArmOperationNode(Node):
 
     def __init__(self):
-        super().__init__('ball_shoot_node')
+        super().__init__('ball_arm_operation_node')
         self.is_executing = False
         self.cb_group = rclpy.callback_groups.ReentrantCallbackGroup()
 
@@ -34,22 +32,12 @@ class BallShootNode(Node):
 
         self._action_server = ActionServer(
             self,
-            BallShoot,
-            'ball_shoot',
+            BallArmOperation,
+            'ball_arm_operation',
             self.execute_callback,
             goal_callback=self.goal_callback,
             callback_group=self.cb_group,
         )
-
-        #射出モーターの立ち上げ
-        set_pwm_mode(SHOOT_ROLLER_1_CAN_ID, CAN_BUS)
-        set_pwm_mode(SHOOT_ROLLER_2_CAN_ID, CAN_BUS)
-        set_pwm_mode(SHOOT_ROLLER_3_CAN_ID, CAN_BUS)
-
-        #射出モーターの初期化
-        set_goal_pwm(SHOOT_ROLLER_1_CAN_ID, 0, CAN_BUS)
-        set_goal_pwm(SHOOT_ROLLER_2_CAN_ID, 0, CAN_BUS)
-        set_goal_pwm(SHOOT_ROLLER_3_CAN_ID, 0, CAN_BUS)
 
     def goal_callback(self, goal_request):
         if self.is_executing:
@@ -76,25 +64,36 @@ class BallShootNode(Node):
         msg.target = target
         self.dyna_pos_publisher.publish(msg)
 
-    async def shoot_ball(self):
+    # ここがメインの処理じゃぞ
+    async def operate_ball_arm(self, target_arm, is_open):
 
-        #ボールを発射する処理を書く
+        DIR_NAME = {1: "左", 2: "右", 0: "エラー"}
+
+        if target_arm not in DIR_NAME:
+            self.get_logger().info("エラー: target_armが1(左)または2(右)ではありません")
+            return False
+
+        action_name = "開けます" if is_open else "閉じます"
+        self.get_logger().info(f"{DIR_NAME[target_arm]}アームを{action_name}")
 
 
-        #同時に、3つのモーターを回す
-        set_goal_pwm(SHOOT_ROLLER_1_CAN_ID ,-SHOOT_MOTOR_SPEED, CAN_BUS)
-        set_goal_pwm(SHOOT_ROLLER_2_CAN_ID ,SHOOT_MOTOR_SPEED, CAN_BUS)
-        set_goal_pwm(SHOOT_ROLLER_3_CAN_ID ,SHOOT_MOTOR_SPEED, CAN_BUS)
-        
-        #ろぼますをつかっておしだす
-        set_goal_pos(MINI_SHOOT_CAN_ID, 75000, CAN_BUS)
-        
-        time.sleep(WAIT_TIME_PUSH)
-
-        #射出モーターを停止
-        set_goal_pwm(SHOOT_ROLLER_1_CAN_ID, 0, CAN_BUS)
-        set_goal_pwm(SHOOT_ROLLER_2_CAN_ID, 0, CAN_BUS)
-        set_goal_pwm(SHOOT_ROLLER_3_CAN_ID, 0, CAN_BUS)
+        # モーターを開閉位置に動かす処理をここに書く
+        if target_arm == 1:
+            if is_open:
+                # 左アームを開く動作
+                self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_OPEN)
+            else:
+                # 左アームを閉じる動作
+                self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_CLOSE)
+            time.sleep(WAIT_TIME_ARM)
+        elif target_arm == 2:
+            if is_open:
+                # 右アームを開く動作
+                self.publish_dyna_extpos(RIGHT_ARM_ID, RIGHT_ARM_OPEN)
+            else:
+                # 右アームを閉じる動作
+                self.publish_dyna_extpos(RIGHT_ARM_ID, RIGHT_ARM_CLOSE)
+            time.sleep(WAIT_TIME_ARM)
 
         return True
 
@@ -103,14 +102,14 @@ class BallShootNode(Node):
         self.is_executing = True
         try:
             req = goal_handle.request
-            res = BallShoot.Result()
+            res = BallArmOperation.Result()
             success = False
 
-            success = await self.shoot_ball()
+            success = await self.operate_ball_arm(req.target_arm, req.is_open)
 
             if success:
+                res.next_state = req.current_state  # アーム開閉はメインの論理状態を変えない
                 res.success = True
-                res.next_state = 1  # NOT_CARRY
                 goal_handle.succeed()
             else:
                 goal_handle.abort()
@@ -121,7 +120,7 @@ class BallShootNode(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    node = BallShootNode()
+    node = BallArmOperationNode()
     executor = rclpy.executors.MultiThreadedExecutor()
     executor.add_node(node)
     executor.spin()
@@ -130,4 +129,3 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
-

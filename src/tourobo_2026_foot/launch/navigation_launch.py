@@ -13,7 +13,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 
 def generate_launch_description():
-    robot_package_name = "tourobo_2026_base"
+    robot_package_name = "tourobo_2026_foot"
     ld = LaunchDescription()
     pkg_dir = get_package_share_directory(robot_package_name)
 
@@ -21,8 +21,8 @@ def generate_launch_description():
     nav2_params_path = os.path.join(pkg_dir, "config", "nav2_params.yaml")
 
     # ---- launchs  -----
-    base_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([pkg_dir, '/launch/base_launch.py']))
+    foot_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([pkg_dir, '/launch/foot_launch.py']))
 
     lidar_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([pkg_dir, '/launch/lidar_launch.py']))
@@ -66,7 +66,7 @@ def generate_launch_description():
     ld.add_action(map_server_node)
     ld.add_action(lifecycle_manager_node)
 
-    ld.add_action(base_launch)
+    ld.add_action(foot_launch)
     ld.add_action(lidar_launch)
     ld.add_action(static_tf_launch)
     ld.add_action(action_nodes_launch)
