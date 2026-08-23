@@ -80,7 +80,7 @@ class BallIntakeNode(Node):
         self.dyna_pos_publisher.publish(msg)
 
     # ここがメインの処理じゃぞ
-    async def get_ball(self, current_state, execute_mode, is_push_max):
+    async def get_ball(self, current_state, execute_mode, push_state):
 
         #ダイナミクセルのID
 
@@ -103,7 +103,7 @@ class BallIntakeNode(Node):
                 self.get_logger().info("左脇にあるボールを内側に取り込みます")
 
                 #押し出し機構を上げる
-                if not is_push_max:
+                if push_state != Push_State.MAX.value:
                     set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MAX, CAN_BUS)
                     time.sleep(WAIT_TIME_PUSH)
 
@@ -142,7 +142,7 @@ class BallIntakeNode(Node):
 
                 #押し出し機構を下げる
                 self.publish_dyna_extpos(LEFT_ARM_ID,LEFT_ARM_OPEN)
-                if is_push_max:
+                if push_state != Push_State.MIN.value:
                     set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MIN, CAN_BUS)
                     time.sleep(WAIT_TIME_PUSH)
 
@@ -185,7 +185,7 @@ class BallIntakeNode(Node):
                 self.get_logger().info("右脇にあるボールを内側に取り込みます")
 
                 #押し出し機構を上げる
-                if not is_push_max:
+                if push_state != Push_State.MAX.value:
                     set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MAX, CAN_BUS)
                     time.sleep(WAIT_TIME_PUSH)
 
@@ -223,7 +223,7 @@ class BallIntakeNode(Node):
                 self.get_logger().info("右脇にあるボールを内側に取り込みます")
 
                 #押し出し機構を下げる
-                if is_push_max:
+                if push_state != Push_State.MIN.value:
                     set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MIN, CAN_BUS)
                     time.sleep(WAIT_TIME_PUSH)
 
@@ -271,7 +271,7 @@ class BallIntakeNode(Node):
             res = BallIntake.Result()
             success = False
 
-            success = await self.get_ball(req.current_state, req.execute_mode, req.is_push_max)
+            success = await self.get_ball(req.current_state, req.execute_mode, req.push_state)
 
             if success:
                 res.success = True

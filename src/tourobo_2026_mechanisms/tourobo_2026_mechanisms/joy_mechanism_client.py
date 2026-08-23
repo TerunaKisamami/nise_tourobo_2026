@@ -40,6 +40,13 @@ class Mechanism_State(Enum):
     INTAKE_GATE = 4
     INTAKE_SHOOT = 5
 
+class Shoot_Push_State(Enum):
+    MIN=0
+    GATE_HOLD =1  #城門に設置するまえにボールを支える角度(仮)
+    LOADING =2 #射出機構に装填するときの角度(仮)
+    MAX = 3 #射出機構に近いほどでかい
+
+
 
 class JoyMechanismClient(Node):
 
@@ -55,9 +62,10 @@ class JoyMechanismClient(Node):
 
         # 論理状態の初期化
         self.current_state = Mechanism_State.UNKNOWN
+        self.shoot_push_state = Shoot_Push_State.MIN
         self.is_left_arm_open = False
         self.is_right_arm_open = False
-        self.is_push_max = False
+        self.push_state = Push_State.MIN
 
         # クライアント設定
         self.ball_get_client = ActionClient(self,
@@ -133,7 +141,7 @@ class JoyMechanismClient(Node):
 
     async def send_ball_intake_goal(self, execute_mode):
         goal_msg = BallIntake.Goal()
-        goal_msg.is_push_max = self.is_push_max
+        goal_msg.push_state = self.push_state.value
         goal_msg.execute_mode = execute_mode
         goal_msg.current_state = self.current_state.value
         return await self.send_action_goal(self.ball_intake_client, goal_msg,
@@ -141,7 +149,7 @@ class JoyMechanismClient(Node):
 
     async def send_ball_put_gate_goal(self):
         goal_msg = BallPutGate.Goal()
-        goal_msg.is_push_max = self.is_push_max
+        goal_msg.push_state = self.push_state.value
         goal_msg.execute = True
         goal_msg.current_state = self.current_state.value
         return await self.send_action_goal(self.ball_put_gate_client, goal_msg,
@@ -149,7 +157,7 @@ class JoyMechanismClient(Node):
 
     async def send_ball_put_plate_goal(self):
         goal_msg = BallPutPlate.Goal()
-        goal_msg.is_push_max = self.is_push_max
+        goal_msg.push_state = self.push_state.value
         goal_msg.execute = True
         goal_msg.current_state = self.current_state.value
         return await self.send_action_goal(self.ball_put_plate_client, goal_msg,
@@ -157,7 +165,7 @@ class JoyMechanismClient(Node):
 
     async def send_ball_shoot_goal(self):
         goal_msg = BallShoot.Goal()
-        goal_msg.is_push_max = self.is_push_max
+        goal_msg.push_state = self.push_state.value
         goal_msg.execute = True
         goal_msg.current_state = self.current_state.value
         return await self.send_action_goal(self.ball_shoot_client, goal_msg,
@@ -214,13 +222,15 @@ class JoyMechanismClient(Node):
         #R2: 右から脇に抱える
         #十字キー上: 射出機構照準を上に向ける
         #十字キー下: 射出機構照準を下に向ける
+
+
         if self.is_pressed(msg, 9):  # OPTIONSボタンで強制リセット
             self.get_logger().info("OPTIONSボタン: 状態をUNKNOWNにリセットします")
             self.current_state = Mechanism_State.UNKNOWN
             self.is_action_running = False
             self.is_left_arm_open = False
             self.is_right_arm_open = False
-            self.is_push_max = False
+            self.push_state = Push_State.MIN
             
         elif self.is_action_running:
             # 動作中は何のボタンを押しても受け付けない
@@ -243,7 +253,7 @@ class JoyMechanismClient(Node):
 
                 if res and res.success:
                     self.current_state = Mechanism_State(res.next_state)
-                    self.is_push_max = True
+                    self.push_state = Push_State.MAX
                 self.is_action_running = False
 
             elif self.current_state == Mechanism_State.INTAKE_GATE:
@@ -252,7 +262,7 @@ class JoyMechanismClient(Node):
 
                 if res and res.success:
                     self.current_state = Mechanism_State(res.next_state)
-                    self.is_push_max = False
+                    self.push_state = Push_State.MIN
                 self.is_action_running = False
 
  
@@ -279,7 +289,7 @@ class JoyMechanismClient(Node):
 
                 if res and res.success:
                     self.current_state = Mechanism_State(res.next_state)
-                    self.is_push_max = True
+                    self.push_state = Push_State.MAX
                 self.is_action_running= False
 
 

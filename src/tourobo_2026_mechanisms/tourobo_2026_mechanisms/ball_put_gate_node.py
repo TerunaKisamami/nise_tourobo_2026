@@ -74,7 +74,7 @@ class BallPutGateNode(Node):
         self.dyna_pos_publisher.publish(msg)
 
     #じっさいのどうさぶぶん
-    async def put_ball_in_gate(self, current_state, is_push_max):
+    async def put_ball_in_gate(self, current_state, push_state):
 
         #射出角度をさげる
         self.publish_dyna_extpos(SHOOT_ANGLE_ID, SHOOT_ANGLE_AT_GATE)
@@ -82,7 +82,7 @@ class BallPutGateNode(Node):
 
         #押し出しを城門側へ
         # ロボマスを使って押し出しを城門側へ
-        if is_push_max:
+        if push_state != Push_State.MIN.value:
             set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MIN, CAN_BUS)
         time.sleep(WAIT_TIME_PUSH)
 
@@ -100,7 +100,7 @@ class BallPutGateNode(Node):
             res = BallPutGate.Result()
             success = False
 
-            success = await self.put_ball_in_gate(req.current_state, req.is_push_max)
+            success = await self.put_ball_in_gate(req.current_state, req.push_state)
 
             if success:
                 res.success = True

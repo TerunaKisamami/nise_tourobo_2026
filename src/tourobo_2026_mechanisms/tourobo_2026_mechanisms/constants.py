@@ -41,6 +41,8 @@ SHOOT_ANGLE_AT_GATE = 695 #内部的には3695
 
 #射出機構押し出し機構の位置(初期位置からの相対角度)
 SHOOT_PUSH_MIN = 0 #これを初期位置にする
+SHOOT_PUSH_GATE_HOLD = 30000 #城門に設置するまえにボールを支える角度(仮)
+SHOOT_PUSH_LOADING = 60000 #射出機構に装填するときの角度(仮)
 SHOOT_PUSH_MAX = 78000 #射出機構に近いほどでかい
 
 #射出機構のローラー回転速度
@@ -75,3 +77,11 @@ WAIT_TIME_PUT_PLATE = 1.0
 # 射出機構の押し出し部分の動作時間
 WAIT_TIME_PUSH =6.0
 
+
+from enum import Enum
+class Push_State(Enum):
+    UNKNOWN = -1
+    MIN = 0
+    MAX = 1
+    STATE_A = 2
+    STATE_B = 3
