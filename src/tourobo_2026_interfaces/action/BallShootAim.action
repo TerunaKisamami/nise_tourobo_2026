@@ -1,6 +1,7 @@
 # 1. Goal (クライアントからサーバーへ送信する要求データ)
 # 0:なにもしない 1: 上を向く -1: 下を向く
 int32 direction
+int32 shoot_angle_state
 int32 current_state
 ---
 # 2. Result (処理完了時にサーバーから返す最終結果データ)

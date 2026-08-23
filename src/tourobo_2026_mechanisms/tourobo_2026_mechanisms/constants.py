@@ -78,3 +78,10 @@ WAIT_TIME_PUT_PLATE = 1.0
 WAIT_TIME_PUSH =6.0
 
 
+
+from enum import Enum
+class Shoot_Angle_State(Enum):
+    UNKNOWN = -1
+    MIN = 0
+    MAX = 1
+    GATE = 2

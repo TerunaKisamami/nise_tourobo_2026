@@ -4,6 +4,7 @@ import rclpy
 from rclpy.node import Node
 from tourobo_2026_mechanisms.constants import *
 from tourobo_2026_mechanisms.joy_mechanism_client import Shoot_Push_State
+from tourobo_2026_mechanisms.constants import Shoot_Angle_State
 from std_msgs.msg import String
 import os
 import sys
@@ -83,7 +84,9 @@ class BallIntakeNode(Node):
         self.dyna_pos_publisher.publish(msg)
 
     # ここがメインの処理じゃぞ
-    async def intake_ball(self, current_state, execute_mode, push_state):
+    async def intake_ball(
+        self, current_state, execute_mode, push_state, shoot_angle_state
+    ):
         # 左右両方で共通して実行する処理を書く
         # フィードバック無しのため、常に支柱を下げて待機する
         self.get_logger().info("支柱を下げます")
@@ -266,7 +269,10 @@ class BallIntakeNode(Node):
             success = False
 
             success = await self.intake_ball(
-                req.current_state, req.execute_mode, req.push_state
+                req.current_state,
+                req.execute_mode,
+                req.push_state,
+                req.shoot_angle_state,
             )
 
             if success:
