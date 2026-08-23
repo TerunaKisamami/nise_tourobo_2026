@@ -18,7 +18,6 @@ RIGHT_ARM_ID = 1
 LEFT_GUARD_ID = 2
 RIGHT_GUARD_ID = 3
 SHOOT_ANGLE_ID = 4
-SHOOT_DIRECTION_ID = 4 # Alias if any
 
 #左右アーム開閉時のダイナミクセル値
 LEFT_ARM_OPEN =  1300#内部的には2630
