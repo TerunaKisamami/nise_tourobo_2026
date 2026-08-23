@@ -57,6 +57,7 @@ class JoyMechanismClient(Node):
         self.current_state = Mechanism_State.UNKNOWN
         self.is_left_arm_open = False
         self.is_right_arm_open = False
+        self.is_push_max = False
 
         # クライアント設定
         self.ball_get_client = ActionClient(self,
@@ -132,6 +133,7 @@ class JoyMechanismClient(Node):
 
     async def send_ball_intake_goal(self, execute_mode):
         goal_msg = BallIntake.Goal()
+        goal_msg.is_push_max = self.is_push_max
         goal_msg.execute_mode = execute_mode
         goal_msg.current_state = self.current_state.value
         return await self.send_action_goal(self.ball_intake_client, goal_msg,
@@ -139,6 +141,7 @@ class JoyMechanismClient(Node):
 
     async def send_ball_put_gate_goal(self):
         goal_msg = BallPutGate.Goal()
+        goal_msg.is_push_max = self.is_push_max
         goal_msg.execute = True
         goal_msg.current_state = self.current_state.value
         return await self.send_action_goal(self.ball_put_gate_client, goal_msg,
@@ -146,6 +149,7 @@ class JoyMechanismClient(Node):
 
     async def send_ball_put_plate_goal(self):
         goal_msg = BallPutPlate.Goal()
+        goal_msg.is_push_max = self.is_push_max
         goal_msg.execute = True
         goal_msg.current_state = self.current_state.value
         return await self.send_action_goal(self.ball_put_plate_client, goal_msg,
@@ -153,6 +157,7 @@ class JoyMechanismClient(Node):
 
     async def send_ball_shoot_goal(self):
         goal_msg = BallShoot.Goal()
+        goal_msg.is_push_max = self.is_push_max
         goal_msg.execute = True
         goal_msg.current_state = self.current_state.value
         return await self.send_action_goal(self.ball_shoot_client, goal_msg,
@@ -215,6 +220,7 @@ class JoyMechanismClient(Node):
             self.is_action_running = False
             self.is_left_arm_open = False
             self.is_right_arm_open = False
+            self.is_push_max = False
             
         elif self.is_action_running:
             # 動作中は何のボタンを押しても受け付けない
@@ -237,6 +243,7 @@ class JoyMechanismClient(Node):
 
                 if res and res.success:
                     self.current_state = Mechanism_State(res.next_state)
+                    self.is_push_max = True
                 self.is_action_running = False
 
             elif self.current_state == Mechanism_State.INTAKE_GATE:
@@ -245,6 +252,7 @@ class JoyMechanismClient(Node):
 
                 if res and res.success:
                     self.current_state = Mechanism_State(res.next_state)
+                    self.is_push_max = False
                 self.is_action_running = False
 
  
@@ -271,6 +279,7 @@ class JoyMechanismClient(Node):
 
                 if res and res.success:
                     self.current_state = Mechanism_State(res.next_state)
+                    self.is_push_max = True
                 self.is_action_running= False
 
 

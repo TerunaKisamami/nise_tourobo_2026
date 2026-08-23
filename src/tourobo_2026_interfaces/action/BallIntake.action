@@ -2,6 +2,7 @@
 # execute_mode: 1:城門, 2:射出
 int32 execute_mode
 int32 current_state
+bool is_push_max
 ---
 # 2. Result (処理完了時にサーバーから返す最終結果データ)
 bool success

@@ -76,7 +76,7 @@ class BallShootNode(Node):
         msg.target = target
         self.dyna_pos_publisher.publish(msg)
 
-    async def shoot_ball(self):
+    async def shoot_ball(self, is_push_max):
 
         #ボールを発射する処理を書く
 
@@ -87,7 +87,8 @@ class BallShootNode(Node):
         set_goal_pwm(SHOOT_ROLLER_3_CAN_ID ,SHOOT_MOTOR_SPEED, CAN_BUS)
         
         #ろぼますをつかっておしだす
-        set_goal_pos(MINI_SHOOT_CAN_ID, 75000, CAN_BUS)
+        if not is_push_max:
+            set_goal_pos(MINI_SHOOT_CAN_ID, 75000, CAN_BUS)
         
         time.sleep(WAIT_TIME_PUSH)
 
@@ -106,7 +107,7 @@ class BallShootNode(Node):
             res = BallShoot.Result()
             success = False
 
-            success = await self.shoot_ball()
+            success = await self.shoot_ball(req.is_push_max)
 
             if success:
                 res.success = True

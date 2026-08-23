@@ -80,7 +80,7 @@ class BallIntakeNode(Node):
         self.dyna_pos_publisher.publish(msg)
 
     # ここがメインの処理じゃぞ
-    async def get_ball(self, current_state, execute_mode):
+    async def get_ball(self, current_state, execute_mode, is_push_max):
 
         #ダイナミクセルのID
 
@@ -103,8 +103,9 @@ class BallIntakeNode(Node):
                 self.get_logger().info("左脇にあるボールを内側に取り込みます")
 
                 #押し出し機構を上げる
-                set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MAX, CAN_BUS)
-                time.sleep(WAIT_TIME_PUSH)
+                if not is_push_max:
+                    set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MAX, CAN_BUS)
+                    time.sleep(WAIT_TIME_PUSH)
 
                 #右側のガードを下げる
                 self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_CLOSE)
@@ -140,9 +141,10 @@ class BallIntakeNode(Node):
                 self.get_logger().info("左脇にあるボールを内側に取り込みます")
 
                 #押し出し機構を下げる
-                set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MIN, CAN_BUS)
                 self.publish_dyna_extpos(LEFT_ARM_ID,LEFT_ARM_OPEN)
-                time.sleep(WAIT_TIME_PUSH)
+                if is_push_max:
+                    set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MIN, CAN_BUS)
+                    time.sleep(WAIT_TIME_PUSH)
 
                 #右側のガードを下げる
                 self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_CLOSE)
@@ -183,8 +185,9 @@ class BallIntakeNode(Node):
                 self.get_logger().info("右脇にあるボールを内側に取り込みます")
 
                 #押し出し機構を上げる
-                set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MAX, CAN_BUS)
-                time.sleep(WAIT_TIME_PUSH)
+                if not is_push_max:
+                    set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MAX, CAN_BUS)
+                    time.sleep(WAIT_TIME_PUSH)
 
                 #左側のガードを下げる
                 self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_CLOSE)
@@ -220,8 +223,9 @@ class BallIntakeNode(Node):
                 self.get_logger().info("右脇にあるボールを内側に取り込みます")
 
                 #押し出し機構を下げる
-                set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MIN, CAN_BUS)
-                time.sleep(WAIT_TIME_PUSH)
+                if is_push_max:
+                    set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MIN, CAN_BUS)
+                    time.sleep(WAIT_TIME_PUSH)
 
                 #左側のガードを下げる
                 self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_CLOSE)
@@ -267,7 +271,7 @@ class BallIntakeNode(Node):
             res = BallIntake.Result()
             success = False
 
-            success = await self.get_ball(req.current_state, req.execute_mode)
+            success = await self.get_ball(req.current_state, req.execute_mode, req.is_push_max)
 
             if success:
                 res.success = True

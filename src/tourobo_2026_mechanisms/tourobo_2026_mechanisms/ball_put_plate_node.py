@@ -65,12 +65,13 @@ class BallPutPlateNode(Node):
         return GoalResponse.ACCEPT
 
     #実際の動作部分
-    async def put_ball_in_plate(self, current_state):
+    async def put_ball_in_plate(self, current_state, is_push_max):
 
 
         #左右共通して行う動作
         #押し出し機構を上に上げる
-        set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MAX, CAN_BUS)
+        if not is_push_max:
+            set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MAX, CAN_BUS)
         time.sleep(WAIT_TIME_PUSH)
 
         #射出機構を上げる
@@ -172,7 +173,7 @@ class BallPutPlateNode(Node):
             res = BallPutPlate.Result()
             success = False
 
-            success = await self.put_ball_in_plate(req.current_state)
+            success = await self.put_ball_in_plate(req.current_state, req.is_push_max)
 
             if success:
                 res.success = True

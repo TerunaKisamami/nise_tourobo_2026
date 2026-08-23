@@ -1,6 +1,7 @@
 # 1. Goal (クライアントからサーバーへ送信する要求データ)
 bool execute
 int32 current_state
+bool is_push_max
 ---
 # 2. Result (処理完了時にサーバーから返す最終結果データ)
 bool success
