@@ -68,8 +68,8 @@ WAIT_TIME_GET = 0.7
 # ボール内側取り込み時にボールが内部に入るのを待つ時間
 WAIT_TIME_INTAKE = 2.0
 #射出機構の角度変更にかかる時間
-WAIT_TIME_SHOOT_DIR = 1.5
-WAIT_TIME_SHOOT_DIR_PUT_GATE = 1.5 # Alias if any
+WAIT_TIME_SHOOT_ANGLE = 1.5
+WAIT_TIME_SHOOT_ANGLE_PUT_GATE = 1.5 # Alias if any
 # ボールを関所に置くときに内部を移動するのを待つ時間
 WAIT_TIME_PUT_PLATE = 1.0
 # 射出機構の押し出し部分の動作時間

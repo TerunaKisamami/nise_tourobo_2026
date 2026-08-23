@@ -92,7 +92,7 @@ class BallIntakeNode(Node):
         #フィードバック無しのため、常に支柱を下げて待機する
         self.get_logger().info("支柱を下げます")
         self.publish_dyna_extpos(SHOOT_ANGLE_ID, SHOOT_ANGLE_MIN)
-        time.sleep(WAIT_TIME_SHOOT_DIR)
+        time.sleep(WAIT_TIME_SHOOT_ANGLE)
 
         # current_state は 2: LEFT_CARRY, 3: RIGHT_CARRY
         #left

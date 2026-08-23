@@ -78,7 +78,7 @@ class BallPutGateNode(Node):
 
         #射出角度をさげる
         self.publish_dyna_extpos(SHOOT_ANGLE_ID, SHOOT_ANGLE_AT_GATE)
-        time.sleep(WAIT_TIME_SHOOT_DIR_PUT_GATE)
+        time.sleep(WAIT_TIME_SHOOT_ANGLE_PUT_GATE)
 
         #押し出しを城門側へ
         # ロボマスを使って押し出しを城門側へ

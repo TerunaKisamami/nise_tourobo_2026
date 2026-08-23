@@ -75,7 +75,7 @@ class BallPutPlateNode(Node):
 
         #射出機構を上げる
         self.publish_dyna_extpos(SHOOT_ANGLE_ID, SHOOT_ANGLE_MIN)
-        time.sleep(WAIT_TIME_SHOOT_DIR)
+        time.sleep(WAIT_TIME_SHOOT_ANGLE)
 
         # current_state: 2=LEFT_CARRY, 3=RIGHT_CARRY
         if current_state == 3:
