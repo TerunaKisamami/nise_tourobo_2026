@@ -12,7 +12,7 @@ SHOOT_ROLLER_3_CAN_ID = 0x013
 #小ロボマス(射出機構用)
 MINI_SHOOT_CAN_ID = 0x031
 
-#ダイナミクセルID(仮置き)
+#ダイナミクセルID
 LEFT_ARM_ID = 0
 RIGHT_ARM_ID = 1
 LEFT_GUARD_ID = 2
