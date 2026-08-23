@@ -83,7 +83,7 @@ class BallIntakeNode(Node):
         self.dyna_pos_publisher.publish(msg)
 
     # ここがメインの処理じゃぞ
-    async def get_ball(self, current_state, execute_mode, push_state):
+    async def intake_ball(self, current_state, execute_mode, push_state):
         # 左右両方で共通して実行する処理を書く
         # フィードバック無しのため、常に支柱を下げて待機する
         self.get_logger().info("支柱を下げます")
@@ -265,7 +265,7 @@ class BallIntakeNode(Node):
             res = BallIntake.Result()
             success = False
 
-            success = await self.get_ball(
+            success = await self.intake_ball(
                 req.current_state, req.execute_mode, req.push_state
             )
 
