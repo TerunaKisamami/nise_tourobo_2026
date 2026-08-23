@@ -78,10 +78,3 @@ WAIT_TIME_PUT_PLATE = 1.0
 WAIT_TIME_PUSH =6.0
 
 
-from enum import Enum
-class Push_State(Enum):
-    UNKNOWN = -1
-    MIN = 0
-    MAX = 1
-    STATE_A = 2
-    STATE_B = 3

@@ -3,6 +3,7 @@ from rclpy.action import ActionServer, GoalResponse
 import rclpy
 from rclpy.node import Node
 from tourobo_2026_mechanisms.constants import *
+from tourobo_2026_mechanisms.joy_mechanism_client import Shoot_Push_State
 from std_msgs.msg import String
 import asyncio
 import os
@@ -70,7 +71,7 @@ class BallPutPlateNode(Node):
 
         #左右共通して行う動作
         #押し出し機構を上に上げる
-        if push_state != Push_State.MAX.value:
+        if push_state != Shoot_Push_State.MAX.value:
             set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MAX, CAN_BUS)
         time.sleep(WAIT_TIME_PUSH)
 

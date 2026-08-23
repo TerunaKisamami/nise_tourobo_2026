@@ -4,6 +4,7 @@ from rclpy.action import ActionServer, GoalResponse
 import rclpy
 from rclpy.node import Node
 from tourobo_2026_mechanisms.constants import *
+from tourobo_2026_mechanisms.joy_mechanism_client import Shoot_Push_State
 from std_msgs.msg import String
 import os
 import sys
@@ -82,7 +83,7 @@ class BallPutGateNode(Node):
 
         #押し出しを城門側へ
         # ロボマスを使って押し出しを城門側へ
-        if push_state != Push_State.MIN.value:
+        if push_state != Shoot_Push_State.MIN.value:
             set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MIN, CAN_BUS)
         time.sleep(WAIT_TIME_PUSH)
 

@@ -3,6 +3,7 @@ from rclpy.action import ActionServer, GoalResponse
 import rclpy
 from rclpy.node import Node
 from tourobo_2026_mechanisms.constants import *
+from tourobo_2026_mechanisms.joy_mechanism_client import Shoot_Push_State
 from std_msgs.msg import String
 import os
 import sys
@@ -87,7 +88,7 @@ class BallShootNode(Node):
         set_goal_pwm(SHOOT_ROLLER_3_CAN_ID ,SHOOT_MOTOR_SPEED, CAN_BUS)
         
         #ろぼますをつかっておしだす
-        if push_state != Push_State.MAX.value:
+        if push_state != Shoot_Push_State.MAX.value:
             set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MAX, CAN_BUS)
         
         time.sleep(WAIT_TIME_PUSH)

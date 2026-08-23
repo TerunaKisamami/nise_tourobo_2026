@@ -65,8 +65,7 @@ class JoyMechanismClient(Node):
         self.shoot_push_state = Shoot_Push_State.MIN
         self.is_left_arm_open = False
         self.is_right_arm_open = False
-        self.push_state = Push_State.MIN
-
+        
         # クライアント設定
         self.ball_get_client = ActionClient(self,
                                             BallGet,
@@ -141,7 +140,7 @@ class JoyMechanismClient(Node):
 
     async def send_ball_intake_goal(self, execute_mode):
         goal_msg = BallIntake.Goal()
-        goal_msg.push_state = self.push_state.value
+        goal_msg.push_state = self.shoot_push_state.value
         goal_msg.execute_mode = execute_mode
         goal_msg.current_state = self.current_state.value
         return await self.send_action_goal(self.ball_intake_client, goal_msg,
@@ -149,7 +148,7 @@ class JoyMechanismClient(Node):
 
     async def send_ball_put_gate_goal(self):
         goal_msg = BallPutGate.Goal()
-        goal_msg.push_state = self.push_state.value
+        goal_msg.push_state = self.shoot_push_state.value
         goal_msg.execute = True
         goal_msg.current_state = self.current_state.value
         return await self.send_action_goal(self.ball_put_gate_client, goal_msg,
@@ -157,7 +156,7 @@ class JoyMechanismClient(Node):
 
     async def send_ball_put_plate_goal(self):
         goal_msg = BallPutPlate.Goal()
-        goal_msg.push_state = self.push_state.value
+        goal_msg.push_state = self.shoot_push_state.value
         goal_msg.execute = True
         goal_msg.current_state = self.current_state.value
         return await self.send_action_goal(self.ball_put_plate_client, goal_msg,
@@ -165,7 +164,7 @@ class JoyMechanismClient(Node):
 
     async def send_ball_shoot_goal(self):
         goal_msg = BallShoot.Goal()
-        goal_msg.push_state = self.push_state.value
+        goal_msg.push_state = self.shoot_push_state.value
         goal_msg.execute = True
         goal_msg.current_state = self.current_state.value
         return await self.send_action_goal(self.ball_shoot_client, goal_msg,
@@ -230,8 +229,7 @@ class JoyMechanismClient(Node):
             self.is_action_running = False
             self.is_left_arm_open = False
             self.is_right_arm_open = False
-            self.push_state = Push_State.MIN
-            
+                        
         elif self.is_action_running:
             # 動作中は何のボタンを押しても受け付けない
             # 何かボタンや軸が操作されたときだけ警告を出す
@@ -253,7 +251,7 @@ class JoyMechanismClient(Node):
 
                 if res and res.success:
                     self.current_state = Mechanism_State(res.next_state)
-                    self.push_state = Push_State.MAX
+                    self.shoot_push_state = Shoot_Push_State.MAX
                 self.is_action_running = False
 
             elif self.current_state == Mechanism_State.INTAKE_GATE:
@@ -262,7 +260,7 @@ class JoyMechanismClient(Node):
 
                 if res and res.success:
                     self.current_state = Mechanism_State(res.next_state)
-                    self.push_state = Push_State.MIN
+                    self.shoot_push_state = Shoot_Push_State.MIN
                 self.is_action_running = False
 
  
@@ -276,10 +274,11 @@ class JoyMechanismClient(Node):
             #current_stateがLEFT_CARRYかRIGHT_CARRYならば内側取り込み
             if self.current_state in [Mechanism_State.LEFT_CARRY, Mechanism_State.RIGHT_CARRY]:
                 self.is_action_running = True
-                res = await self.send_ball_intake_goal()
+                res = await self.send_ball_intake_goal(2)
 
                 if res and res.success:
-                   self.current_state = Mechanism_State(res.next_state)
+                    self.current_state = Mechanism_State(res.next_state)
+                    self.shoot_push_state = Shoot_Push_State.MIN
                 self.is_action_running = False
 
             #current_stateがならば内側取り込み
@@ -289,7 +288,7 @@ class JoyMechanismClient(Node):
 
                 if res and res.success:
                     self.current_state = Mechanism_State(res.next_state)
-                    self.push_state = Push_State.MAX
+                    self.shoot_push_state = Shoot_Push_State.MAX
                 self.is_action_running= False
 
 
