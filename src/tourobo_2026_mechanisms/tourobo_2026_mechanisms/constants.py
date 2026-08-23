@@ -74,4 +74,4 @@ WAIT_TIME_SHOOT_ANGLE_PUT_GATE = 1.5 # Alias if any
 WAIT_TIME_PUT_PLATE = 1.0
 # 射出機構の押し出し部分の動作時間
 WAIT_TIME_PUSH =6.0
-WAIT_TIME_ROLLER = 1.0
+

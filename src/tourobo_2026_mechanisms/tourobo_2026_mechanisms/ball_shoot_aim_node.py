@@ -58,14 +58,12 @@ class BallShootAimNode(Node):
     #しゃしゅつきこうのじょうげ
     async def aim_ball(self, direction):
 
-        AIM_UP = SHOOT_ANGLE_MAX
-        AIM_DOWN = SHOOT_ANGLE_MIN
 
         #1: 上げる -1: 下げる 0: 待機
         if direction == 1:
-            self.publish_dyna_pos(SHOOT_ANGLE_ID, AIM_UP)
+            self.publish_dyna_pos(SHOOT_ANGLE_ID, SHOOT_ANGLE_MAX)
         elif direction == -1:
-            self.publish_dyna_pos(SHOOT_ANGLE_ID, AIM_DOWN)
+            self.publish_dyna_pos(SHOOT_ANGLE_ID, SHOOT_ANGLE_MIN)
         elif direction == 0:
             pass
 
