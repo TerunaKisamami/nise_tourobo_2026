@@ -62,9 +62,9 @@ BALL_PUT_PLATE_UP_ROLLER_SPEED = -1000
 
 # 動作待機時間の設定
 # ガードの開閉にかかる時間
-WAIT_TIME_GUARD = 1.0
+WAIT_TIME_GUARD = 0.4
 # アームの開閉にかかる時間
-WAIT_TIME_ARM = 1.0
+WAIT_TIME_ARM =0.4
 # ボール入手の時にボールが入るのを待つ時間
 WAIT_TIME_GET = 0.7
 # ボール内側取り込み時にボールが内部に入るのを待つ時間
