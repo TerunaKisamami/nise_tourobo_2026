@@ -6,7 +6,11 @@ from sensor_msgs.msg import Joy
 from action_msgs.msg import GoalStatus
 from enum import Enum
 
-from tourobo_2026_mechanisms.constants import Shoot_Angle_State
+from tourobo_2026_mechanisms.constants import (
+    Shoot_Angle_State,
+    Mechanism_State,
+    Shoot_Push_State,
+)
 from tourobo_2026_interfaces.action import (
     BallGet,
     BallPutGate,
@@ -16,45 +20,6 @@ from tourobo_2026_interfaces.action import (
     BallArmOperation,
     BallIntake,
 )
-
-
-class Mechanism_State(Enum):
-    UNKNOWN = 0
-    # 最初
-    # できること
-    # 左または右のどちらかのゲートを開閉
-    # 左または右からボールを脇にかかえる動作
-    # LEFT_CARRYかRIGHT_CARRYへ
-    NOT_CARRY = 1
-
-    # ボールを脇に保持
-    # できること
-    # ボールを反対側から排出
-    # NOT_CARRYへ
-    # ボールを内側に取り込む
-    # INTAKEへ
-    # ゲートの開閉
-    # 保持している方向のゲートが開いたら NOT_CARRYへ
-    LEFT_CARRY = 2
-    RIGHT_CARRY = 3
-
-    # ボールを内側に保持
-    # できること
-    # ボールを発射
-    # NOT_CARRYへ
-    # ボールを城門に置く
-    # NOT_CARRYへ
-    # ゲートの開閉
-    # 射出機構を上下する
-    INTAKE_GATE = 4
-    INTAKE_SHOOT = 5
-
-
-class Shoot_Push_State(Enum):
-    MIN = 0
-    GATE_HOLD = 1  # 城門に設置するまえにボールを支える角度(仮)
-    LOADING = 2  # 射出機構に装填するときの角度(仮)
-    MAX = 3  # 射出機構に近いほどでかい
 
 
 class JoyMechanismClient(Node):
@@ -301,7 +266,7 @@ class JoyMechanismClient(Node):
 
                 if res and res.success:
                     self.current_state = Mechanism_State(res.next_state)
-                    self.shoot_push_state = Shoot_Push_State.MAX
+                    self.shoot_push_state = Shoot_Push_State.MIN
                 self.is_action_running = False
 
         # L1: 左ゲートを開閉

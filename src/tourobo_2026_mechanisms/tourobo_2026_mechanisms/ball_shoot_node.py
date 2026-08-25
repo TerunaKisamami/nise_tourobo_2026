@@ -3,7 +3,6 @@ from rclpy.action import ActionServer, GoalResponse
 import rclpy
 from rclpy.node import Node
 from tourobo_2026_mechanisms.constants import *
-from tourobo_2026_mechanisms.joy_mechanism_client import Shoot_Push_State
 from std_msgs.msg import String
 import os
 import sys
@@ -14,49 +13,51 @@ from tourobo_2026_interfaces.action import BallShoot
 from ah_python_lib.ah_python_can import *
 from dyna_interfaces.msg import DynaTarget
 
-CAN_BUS = can.interface.Bus(bustype="socketcan",
-                            channel="can0",
-                            asynchronous=True,
-                            bitrate=1000000)
+CAN_BUS = can.interface.Bus(
+    bustype="socketcan", channel="can0", asynchronous=True, bitrate=1000000
+)
+
 
 class BallShootNode(Node):
-
     def __init__(self):
-        super().__init__('ball_shoot_node')
+        super().__init__("ball_shoot_node")
         self.is_executing = False
         self.cb_group = rclpy.callback_groups.ReentrantCallbackGroup()
 
         self.dyna_extpos_publisher = self.create_publisher(
-            DynaTarget, "/dyna_target_extpos", 10)
-        self.dyna_vel_publisher = self.create_publisher(DynaTarget,
-                                                        "/dyna_target_vel", 10)
-        self.dyna_pos_publisher = self.create_publisher(DynaTarget,
-                                                        "/dyna_target_pos", 10)
+            DynaTarget, "/dyna_target_extpos", 10
+        )
+        self.dyna_vel_publisher = self.create_publisher(
+            DynaTarget, "/dyna_target_vel", 10
+        )
+        self.dyna_pos_publisher = self.create_publisher(
+            DynaTarget, "/dyna_target_pos", 10
+        )
 
         self._action_server = ActionServer(
             self,
             BallShoot,
-            'ball_shoot',
+            "ball_shoot",
             self.execute_callback,
             goal_callback=self.goal_callback,
             callback_group=self.cb_group,
         )
 
-        #射出モーターの立ち上げ
+        # 射出モーターの立ち上げ
         set_pwm_mode(SHOOT_ROLLER_1_CAN_ID, CAN_BUS)
         set_pwm_mode(SHOOT_ROLLER_2_CAN_ID, CAN_BUS)
         set_pwm_mode(SHOOT_ROLLER_3_CAN_ID, CAN_BUS)
 
-        #射出モーターの初期化
+        # 射出モーターの初期化
         set_goal_pwm(SHOOT_ROLLER_1_CAN_ID, 0, CAN_BUS)
         set_goal_pwm(SHOOT_ROLLER_2_CAN_ID, 0, CAN_BUS)
         set_goal_pwm(SHOOT_ROLLER_3_CAN_ID, 0, CAN_BUS)
 
     def goal_callback(self, goal_request):
         if self.is_executing:
-            self.get_logger().warn('現在別の処理を実行中です。新しい指令を拒否します。')
+            self.get_logger().warn("現在別の処理を実行中です。新しい指令を拒否します。")
             return GoalResponse.REJECT
-        self.get_logger().info('新しい指令を受け付けました。')
+        self.get_logger().info("新しい指令を受け付けました。")
         return GoalResponse.ACCEPT
 
     def publish_dyna_extpos(self, id, target):
@@ -79,24 +80,27 @@ class BallShootNode(Node):
 
     async def shoot_ball(self, push_state):
 
-        #ボールを発射する処理を書く
+        # ボールを発射する処理を書く
+        # 同時に3つのモーターを回す
+        set_goal_pwm(SHOOT_ROLLER_1_CAN_ID, -SHOOT_MOTOR_SPEED, CAN_BUS)
+        set_goal_pwm(SHOOT_ROLLER_2_CAN_ID, SHOOT_MOTOR_SPEED, CAN_BUS)
+        set_goal_pwm(SHOOT_ROLLER_3_CAN_ID, SHOOT_MOTOR_SPEED, CAN_BUS)
 
-
-        #同時に、3つのモーターを回す
-        set_goal_pwm(SHOOT_ROLLER_1_CAN_ID ,-SHOOT_MOTOR_SPEED, CAN_BUS)
-        set_goal_pwm(SHOOT_ROLLER_2_CAN_ID ,SHOOT_MOTOR_SPEED, CAN_BUS)
-        set_goal_pwm(SHOOT_ROLLER_3_CAN_ID ,SHOOT_MOTOR_SPEED, CAN_BUS)
-        
-        #ろぼますをつかっておしだす
+        # ろぼますをつかっておしだす
         if push_state != Shoot_Push_State.MAX.value:
             set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MAX, CAN_BUS)
-        
+
         time.sleep(WAIT_TIME_PUSH)
 
-        #射出モーターを停止
+        # 射出モーターを停止
         set_goal_pwm(SHOOT_ROLLER_1_CAN_ID, 0, CAN_BUS)
         set_goal_pwm(SHOOT_ROLLER_2_CAN_ID, 0, CAN_BUS)
         set_goal_pwm(SHOOT_ROLLER_3_CAN_ID, 0, CAN_BUS)
+
+        # ろぼますをつかっておしだす
+        set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MIN, CAN_BUS)
+
+        time.sleep(WAIT_TIME_PUSH)
 
         return True
 
@@ -121,6 +125,7 @@ class BallShootNode(Node):
         finally:
             self.is_executing = False
 
+
 def main(args=None):
     rclpy.init(args=args)
     node = BallShootNode()
@@ -130,6 +135,6 @@ def main(args=None):
     node.destroy_node()
     rclpy.shutdown()
 
-if __name__ == '__main__':
-    main()
 
+if __name__ == "__main__":
+    main()

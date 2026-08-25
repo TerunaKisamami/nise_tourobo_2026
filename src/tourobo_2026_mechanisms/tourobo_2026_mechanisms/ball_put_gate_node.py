@@ -4,8 +4,6 @@ from rclpy.action import ActionServer, GoalResponse
 import rclpy
 from rclpy.node import Node
 from tourobo_2026_mechanisms.constants import *
-from tourobo_2026_mechanisms.joy_mechanism_client import Shoot_Push_State
-from tourobo_2026_mechanisms.constants import Shoot_Angle_State
 from std_msgs.msg import String
 import os
 import sys
@@ -93,6 +91,10 @@ class BallPutGateNode(Node):
         # 押出機構を射出側に戻す
         set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MAX, CAN_BUS)
         time.sleep(WAIT_TIME_PUSH)
+
+        # 射出角度をあげる
+        self.publish_dyna_extpos(SHOOT_ANGLE_ID, SHOOT_PUSH_MIN, CAN_BUS)
+        time.sleep(WAIT_TIME_SHOOT_DIR_PUT_GATE)
 
         return True
 

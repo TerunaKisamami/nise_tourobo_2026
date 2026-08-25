@@ -3,8 +3,6 @@ from rclpy.action import ActionServer, GoalResponse
 import rclpy
 from rclpy.node import Node
 from tourobo_2026_mechanisms.constants import *
-from tourobo_2026_mechanisms.joy_mechanism_client import Shoot_Push_State
-from tourobo_2026_mechanisms.constants import Shoot_Angle_State
 from std_msgs.msg import String
 import os
 import sys
@@ -96,14 +94,15 @@ class BallIntakeNode(Node):
         # current_state は 2: LEFT_CARRY, 3: RIGHT_CARRY
         # 城門
         if execute_mode == 1:
+            # 左右共通して行う前処理
+            # 押し出し機構を上げる
+            if push_state != Shoot_Push_State.MAX.value:
+                set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MAX, CAN_BUS)
+                time.sleep(WAIT_TIME_PUSH)
+
             # left
             if current_state == 2:
-                self.get_logger().info("左脇にあるボールを内側に取り込みます")
-
-                # 押し出し機構を上げる
-                if push_state != Shoot_Push_State.MAX.value:
-                    set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MAX, CAN_BUS)
-                    time.sleep(WAIT_TIME_PUSH)
+                self.get_logger().info("左脇にあるボールをintake(城門)します")
 
                 # 右側のガードを下げる
                 self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_CLOSE)
@@ -117,7 +116,7 @@ class BallIntakeNode(Node):
                 set_goal_pwm(DOWN_ROLLER_CAN_ID, BALL_INTAKE_DOWN_ROLLER_SPEED, CAN_BUS)
 
                 # 上ローラーを回転
-                set_goal_pwm(LEFT_ROLLER_CAN_ID, BALL_INTAKE_UP_ROLLER_SPEED, CAN_BUS)
+                set_goal_pwm(LEFT_ROLLER_CAN_ID, -BALL_INTAKE_UP_ROLLER_SPEED, CAN_BUS)
 
                 # 左アームを下ろす
                 self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_CLOSE)
@@ -130,17 +129,9 @@ class BallIntakeNode(Node):
                 self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_CLOSE)
                 time.sleep(WAIT_TIME_GUARD)
 
-                # ローラーを止める
-                set_goal_pwm(DOWN_ROLLER_CAN_ID, 0, CAN_BUS)
-                set_goal_pwm(LEFT_ROLLER_CAN_ID, 0, CAN_BUS)
-
             # right
             elif current_state == 3:
-                # 押し出し機構を上げる
-                self.get_logger().info("右脇にあるボールを内側に取り込みます")
-                if push_state != Shoot_Push_State.MAX.value:
-                    set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MAX, CAN_BUS)
-                    time.sleep(WAIT_TIME_PUSH)
+                self.get_logger().info("右脇にあるボールをintake(城門)します")
 
                 # 左側のガードを下げる
                 self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_CLOSE)
@@ -167,21 +158,28 @@ class BallIntakeNode(Node):
                 self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_CLOSE)
                 time.sleep(WAIT_TIME_GUARD)
 
-                # ローラーを止める
-                set_goal_pwm(DOWN_ROLLER_CAN_ID, 0, CAN_BUS)
-                set_goal_pwm(RIGHT_ROLLER_CAN_ID, 0, CAN_BUS)
+            # 左右共通して行う後処理
+            # ローラーを止める
+            set_goal_pwm(DOWN_ROLLER_CAN_ID, 0, CAN_BUS)
+            set_goal_pwm(RIGHT_ROLLER_CAN_ID, 0, CAN_BUS)
+            set_goal_pwm(LEFT_ROLLER_CAN_ID, 0, CAN_BUS)
+
+            # ボールが引っかからないように押出機構で支える
+            set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_GATE_HOLD, CAN_BUS)
+            time.sleep(WAIT_TIME_PUSH_HALF)
 
         # 射出
         elif execute_mode == 2:
+            # 左右共通して行う前処理
+            # 押し出し機構を下げる
+            self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_OPEN)
+            if push_state != Shoot_Push_State.MIN.value:
+                set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MIN, CAN_BUS)
+                time.sleep(WAIT_TIME_PUSH)
+
             # left
             if current_state == 2:
                 self.get_logger().info("左脇にあるボールを内側に取り込みます")
-
-                # 押し出し機構を下げる
-                self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_OPEN)
-                if push_state != Shoot_Push_State.MIN.value:
-                    set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MIN, CAN_BUS)
-                    time.sleep(WAIT_TIME_PUSH)
 
                 # 右側のガードを下げる
                 self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_CLOSE)
@@ -195,7 +193,7 @@ class BallIntakeNode(Node):
                 set_goal_pwm(DOWN_ROLLER_CAN_ID, BALL_INTAKE_DOWN_ROLLER_SPEED, CAN_BUS)
 
                 # 上ローラーを回転
-                set_goal_pwm(LEFT_ROLLER_CAN_ID, BALL_INTAKE_UP_ROLLER_SPEED, CAN_BUS)
+                set_goal_pwm(LEFT_ROLLER_CAN_ID, -BALL_INTAKE_UP_ROLLER_SPEED, CAN_BUS)
 
                 # 左アームを下ろす
                 self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_CLOSE)
@@ -208,21 +206,12 @@ class BallIntakeNode(Node):
                 time.sleep(WAIT_TIME_INTAKE)
 
                 # 左ガードを下げる
-
-                # ローラーを止める
-                set_goal_pwm(DOWN_ROLLER_CAN_ID, 0, CAN_BUS)
-                set_goal_pwm(LEFT_ROLLER_CAN_ID, 0, CAN_BUS)
                 # time.sleep(WAIT_TIME_GUARD)
 
             # right
             if current_state == 3:
                 self.get_logger().info("右脇にあるボールを内側に取り込みます")
 
-                # 押し出し機構を下げる
-                if push_state != Shoot_Push_State.MIN.value:
-                    set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MIN, CAN_BUS)
-                    time.sleep(WAIT_TIME_PUSH)
-
                 # 左側のガードを下げる
                 self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_CLOSE)
                 time.sleep(WAIT_TIME_GUARD)
@@ -248,9 +237,15 @@ class BallIntakeNode(Node):
                 self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_CLOSE)
                 time.sleep(WAIT_TIME_GUARD)
 
-                # ローラーを止める
-                set_goal_pwm(DOWN_ROLLER_CAN_ID, 0, CAN_BUS)
-                set_goal_pwm(RIGHT_ROLLER_CAN_ID, 0, CAN_BUS)
+            # 左右共通して行う後処理
+            # ローラーを止める
+            set_goal_pwm(DOWN_ROLLER_CAN_ID, 0, CAN_BUS)
+            set_goal_pwm(RIGHT_ROLLER_CAN_ID, 0, CAN_BUS)
+            set_goal_pwm(LEFT_ROLLER_CAN_ID, 0, CAN_BUS)
+
+            # 射出機構の直前までボールをセットしておく
+            set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_GATE_HOLD, CAN_BUS)
+            time.sleep(WAIT_TIME_PUSH_HALF)
 
         else:
             self.get_logger().error(

@@ -3,8 +3,6 @@ from rclpy.action import ActionServer, GoalResponse
 import rclpy
 from rclpy.node import Node
 from tourobo_2026_mechanisms.constants import *
-from tourobo_2026_mechanisms.joy_mechanism_client import Shoot_Push_State
-from tourobo_2026_mechanisms.constants import Shoot_Angle_State
 from std_msgs.msg import String
 import asyncio
 import os
@@ -69,7 +67,7 @@ class BallPutPlateNode(Node):
         return GoalResponse.ACCEPT
 
     # 実際の動作部分
-    async def put_ball_in_plate(self, current_state, push_state):
+    async def put_ball_in_plate(self, current_state, push_state, shoot_angle_state):
 
         # 左右共通して行う動作
         # 押し出し機構を上に上げる
@@ -135,14 +133,14 @@ class BallPutPlateNode(Node):
             self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_OPEN)
             time.sleep(WAIT_TIME_GUARD)
             # 右側のローラーを回す
-            set_goal_pwm(RIGHT_ROLLER_CAN_ID, BALL_PUT_PLATE_UP_ROLLER_SPEED, CAN_BUS)
+            set_goal_pwm(RIGHT_ROLLER_CAN_ID, -BALL_PUT_PLATE_UP_ROLLER_SPEED, CAN_BUS)
 
             # 左側のガードを上げる
             self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_OPEN)
             time.sleep(WAIT_TIME_GUARD)
 
             # 左側のローラーを回す
-            set_goal_pwm(LEFT_ROLLER_CAN_ID, BALL_PUT_PLATE_UP_ROLLER_SPEED, CAN_BUS)
+            set_goal_pwm(LEFT_ROLLER_CAN_ID, -BALL_PUT_PLATE_UP_ROLLER_SPEED, CAN_BUS)
 
             # 下のローラーを右向きに回す
             set_goal_pwm(DOWN_ROLLER_CAN_ID, BALL_PUT_PLATE_DOWN_ROLLER_SPEED, CAN_BUS)
@@ -182,7 +180,7 @@ class BallPutPlateNode(Node):
             res = BallPutPlate.Result()
             success = False
 
-            success = await self.put_ball_in_plate(req.current_state, req.push_state)
+            success = await self.put_ball_in_plate(req.current_state, req.push_state, req.shoot_angle_state)
 
             if success:
                 res.success = True
