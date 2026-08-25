@@ -86,20 +86,18 @@ class BallShootNode(Node):
         set_goal_pwm(SHOOT_ROLLER_2_CAN_ID, SHOOT_MOTOR_SPEED, CAN_BUS)
         set_goal_pwm(SHOOT_ROLLER_3_CAN_ID, SHOOT_MOTOR_SPEED, CAN_BUS)
 
-        # ろぼますをつかっておしだす
+        # ロボマスを使って押し出す
         if push_state != Shoot_Push_State.MAX.value:
             set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MAX, CAN_BUS)
-
-        time.sleep(WAIT_TIME_PUSH)
+        time.sleep(WAIT_TIME_PUSH_HALF)
 
         # 射出モーターを停止
         set_goal_pwm(SHOOT_ROLLER_1_CAN_ID, 0, CAN_BUS)
         set_goal_pwm(SHOOT_ROLLER_2_CAN_ID, 0, CAN_BUS)
         set_goal_pwm(SHOOT_ROLLER_3_CAN_ID, 0, CAN_BUS)
 
-        # ろぼますをつかっておしだす
+        # 押出機構を下限までさげる
         set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MIN, CAN_BUS)
-
         time.sleep(WAIT_TIME_PUSH)
 
         return True

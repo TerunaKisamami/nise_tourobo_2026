@@ -231,14 +231,15 @@ class JoyMechanismClient(Node):
                     self.shoot_push_state = Shoot_Push_State.MAX
                 self.is_action_running = False
 
+            # current_stateがINTAKE_GATEならば城門に置く
             elif self.current_state == Mechanism_State.INTAKE_GATE:
                 self.is_action_running = True
                 res = await self.send_ball_put_gate_goal()
 
                 if res and res.success:
                     self.current_state = Mechanism_State(res.next_state)
-                    self.shoot_push_state = Shoot_Push_State.MIN
-                    self.shoot_angle_state = Shoot_Angle_State.GATE
+                    self.shoot_push_state = Shoot_Push_State.MAX
+                    self.shoot_angle_state = Shoot_Angle_State.MIN
                 self.is_action_running = False
 
         # □: 射出用取り込み + ボールを射出

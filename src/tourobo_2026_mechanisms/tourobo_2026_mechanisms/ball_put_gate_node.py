@@ -88,13 +88,13 @@ class BallPutGateNode(Node):
             set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MIN, CAN_BUS)
         time.sleep(WAIT_TIME_PUSH)
 
-        # 押出機構を射出側に戻す
+        # 押出機構を上限にあげる
         set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MAX, CAN_BUS)
         time.sleep(WAIT_TIME_PUSH)
 
         # 射出角度をあげる
-        self.publish_dyna_extpos(SHOOT_ANGLE_ID, SHOOT_PUSH_MIN, CAN_BUS)
-        time.sleep(WAIT_TIME_SHOOT_DIR_PUT_GATE)
+        self.publish_dyna_extpos(SHOOT_ANGLE_ID, SHOOT_ANGLE_MIN)
+        time.sleep(WAIT_TIME_SHOOT_ANGLE_PUT_GATE)
 
         return True
 
