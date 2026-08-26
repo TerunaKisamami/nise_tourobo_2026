@@ -78,10 +78,6 @@ class BallPutGateNode(Node):
     # じっさいのどうさぶぶん
     async def put_ball_in_gate(self, current_state, push_state):
 
-        # 射出角度をさげる
-        self.publish_dyna_extpos(SHOOT_ANGLE_ID, SHOOT_ANGLE_AT_GATE)
-        time.sleep(WAIT_TIME_SHOOT_DIR_PUT_GATE)
-
         # 押し出しを城門側へ
         # ロボマスを使って押し出しを城門側へ
         if push_state != Shoot_Push_State.MIN.value:
@@ -95,6 +91,11 @@ class BallPutGateNode(Node):
         # 射出角度をあげる
         self.publish_dyna_extpos(SHOOT_ANGLE_ID, SHOOT_ANGLE_MIN)
         time.sleep(WAIT_TIME_SHOOT_ANGLE_PUT_GATE)
+
+        #ガードを戻す
+        self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_OPEN)
+        self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_OPEN)
+        time.sleep(WAIT_TIME_GUARD)
 
         return True
 

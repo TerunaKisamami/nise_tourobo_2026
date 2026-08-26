@@ -25,14 +25,14 @@ def generate_launch_description():
         executable="static_transform_publisher",
         output="screen",
         arguments=[
-            "0.225",
-            "0.250",
-            "0.0",
-            "3.1416",
-            "0.0",
-            "0.0",
+            "-0.310",        #x
+            "0.0",           #y    
+            "0.0",           #z
+            "3.1416",        #roll
+            "0.0",           #pitch
+            "0.0",           #yaw
             "base_link",
-            "laser_a3",
+            "laser",
         ],
     )
 
@@ -58,7 +58,7 @@ def generate_launch_description():
         package="tf2_ros",
         executable="static_transform_publisher",
         arguments=[
-            "0.0",
+            "-0.310",
             "0.0",
             "0.0",
             "0.0",

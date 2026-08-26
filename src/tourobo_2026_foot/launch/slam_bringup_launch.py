@@ -12,16 +12,17 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 
 def generate_launch_description():
-    robot_package_name = "tourobo_2026_foot"
+    robot_package_name = "tourobo_2026_base"
     ld = LaunchDescription()
     pkg_dir = get_package_share_directory(robot_package_name)
+
     #---- Params ----
     # SLAM用パラメータ
     slam_params = PathJoinSubstitution([pkg_dir, "config", "slam_params.yaml"])
 
     # ---- launchs  -----
-    foot_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([pkg_dir, '/launch/foot_launch.py']))
+    base_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([pkg_dir, '/launch/base_launch.py']))
 
     lidar_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([pkg_dir, '/launch/lidar_launch.py']))
@@ -51,7 +52,7 @@ def generate_launch_description():
     ld.add_action(joy_node)
     ld.add_action(slam_tool_box)
 
-    ld.add_action(foot_launch)
+    ld.add_action(base_launch)
     ld.add_action(lidar_launch)
     ld.add_action(static_tf_launch)
     ld.add_action(action_nodes_launch)

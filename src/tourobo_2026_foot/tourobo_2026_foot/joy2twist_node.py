@@ -10,6 +10,7 @@ import numpy as np
 from geometry_msgs.msg import TransformStamped, Twist
 from tf2_ros import TransformBroadcaster
 from nav_msgs.msg import Odometry
+from rclpy.qos import QoSProfile,ReliabilityPolicy,HistoryPolicy
 
 import tf_transformations
 from tf_transformations import euler_from_quaternion
@@ -23,8 +24,8 @@ def rot(vec, theta):
     cos, sin = np.cos(theta), np.sin(theta)
 
     R = np.array([
-        [cos, -sin],
-        [sin, cos],
+        [cos, sin],
+        [-sin, cos],
     ])
 
     return R @ vec
@@ -34,11 +35,17 @@ class Joy2Twist(Node):
 
     def __init__(self):
         super().__init__("joy2twist")
+
+        qos_profile = QoSProfile(
+                reliability=ReliabilityPolicy.BEST_EFFORT,
+                history=HistoryPolicy.KEEP_LAST,
+                depth=1
+                )
         self.subscription_joy = self.create_subscription(
             Joy,  # メッセージの型
             "/joy",  # 購読するトピック名
             self.joy_callback,  # 呼び出すコールバック関数
-            10,
+            qos_profile,
         )
         self.subscription_joy
 
@@ -82,13 +89,13 @@ class Joy2Twist(Node):
         v = np.array([twist_x, twist_y])
         Rv = rot(v, self.yaw_rad)
 
-        #twist.linear.x = float(Rv[1])
-        #twist.linear.y = float(Rv[0])
-        #twist.angular.z = axes_values[3]
+        twist.linear.x = float(Rv[0])
+        twist.linear.y = float(Rv[1])
+        twist.angular.z = axes_values[3]
 
-        twist.linear.x = twist_x
-        twist.linear.y = twist_y
-        twist.angular.z = w
+        #twist.linear.x = twist_x
+        #twist.linear.y = twist_y
+        #twist.angular.z = w
 
         self.twist_publisher.publish(twist)
 

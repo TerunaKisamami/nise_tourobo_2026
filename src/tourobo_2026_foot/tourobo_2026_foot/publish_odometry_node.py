@@ -16,10 +16,8 @@ import tf_transformations
 #自作ライブラリ
 import os
 import sys
+from ah_python_lib.recv_feedback import *
 
-target_dir = os.path.abspath("/home/aratahorie/ah_python_libraries")
-sys.path.append(target_dir)
-from recv_feedback import *
 
 
 def calc_delta_odometry(x_vel, y_vel, theta, ang_z_vel, dt):

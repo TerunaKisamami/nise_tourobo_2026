@@ -44,14 +44,21 @@ class BallShootNode(Node):
         )
 
         # 射出モーターの立ち上げ
-        set_pwm_mode(SHOOT_ROLLER_1_CAN_ID, CAN_BUS)
-        set_pwm_mode(SHOOT_ROLLER_2_CAN_ID, CAN_BUS)
-        set_pwm_mode(SHOOT_ROLLER_3_CAN_ID, CAN_BUS)
+        #モーターの初期化
+        set_enc_vel_mode(SHOOT_ROLLER_1_CAN_ID, CAN_BUS)
+        set_enc_vel_mode(SHOOT_ROLLER_2_CAN_ID, CAN_BUS)
+        set_enc_vel_mode(SHOOT_ROLLER_3_CAN_ID, CAN_BUS)
 
-        # 射出モーターの初期化
-        set_goal_pwm(SHOOT_ROLLER_1_CAN_ID, 0, CAN_BUS)
-        set_goal_pwm(SHOOT_ROLLER_2_CAN_ID, 0, CAN_BUS)
-        set_goal_pwm(SHOOT_ROLLER_3_CAN_ID, 0, CAN_BUS)
+        #回転方向設定
+        set_motor_rot_dir(SHOOT_ROLLER_1_CAN_ID, 1, CAN_BUS)
+        set_motor_rot_dir(SHOOT_ROLLER_2_CAN_ID, 1, CAN_BUS)
+        set_motor_rot_dir(SHOOT_ROLLER_3_CAN_ID, 1, CAN_BUS)
+
+        #ゲインの設定
+        set_vel_pid_gain(SHOOT_ROLLER_1_CAN_ID, 10.0, 300.0, 0.0, CAN_BUS)
+        set_vel_pid_gain(SHOOT_ROLLER_2_CAN_ID, 10.0, 300.0, 0.0, CAN_BUS)
+        set_vel_pid_gain(SHOOT_ROLLER_3_CAN_ID, 10.0, 300.0, 0.0, CAN_BUS)
+
 
     def goal_callback(self, goal_request):
         if self.is_executing:
@@ -82,9 +89,9 @@ class BallShootNode(Node):
 
         # ボールを発射する処理を書く
         # 同時に3つのモーターを回す
-        set_goal_pwm(SHOOT_ROLLER_1_CAN_ID, -SHOOT_MOTOR_SPEED, CAN_BUS)
-        set_goal_pwm(SHOOT_ROLLER_2_CAN_ID, SHOOT_MOTOR_SPEED, CAN_BUS)
-        set_goal_pwm(SHOOT_ROLLER_3_CAN_ID, SHOOT_MOTOR_SPEED, CAN_BUS)
+        set_goal_vel(SHOOT_ROLLER_1_CAN_ID, SHOOT_MOTOR_SPEED, CAN_BUS)
+        set_goal_vel(SHOOT_ROLLER_2_CAN_ID, -SHOOT_MOTOR_SPEED, CAN_BUS)
+        set_goal_vel(SHOOT_ROLLER_3_CAN_ID, -SHOOT_MOTOR_SPEED, CAN_BUS)
 
         # ロボマスを使って押し出す
         if push_state != Shoot_Push_State.MAX.value:
@@ -92,9 +99,9 @@ class BallShootNode(Node):
         time.sleep(WAIT_TIME_PUSH_HALF)
 
         # 射出モーターを停止
-        set_goal_pwm(SHOOT_ROLLER_1_CAN_ID, 0, CAN_BUS)
-        set_goal_pwm(SHOOT_ROLLER_2_CAN_ID, 0, CAN_BUS)
-        set_goal_pwm(SHOOT_ROLLER_3_CAN_ID, 0, CAN_BUS)
+        set_goal_vel(SHOOT_ROLLER_1_CAN_ID, 0, CAN_BUS)
+        set_goal_vel(SHOOT_ROLLER_2_CAN_ID, 0, CAN_BUS)
+        set_goal_vel(SHOOT_ROLLER_3_CAN_ID, 0, CAN_BUS)
 
         # 押出機構を下限までさげる
         set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MIN, CAN_BUS)

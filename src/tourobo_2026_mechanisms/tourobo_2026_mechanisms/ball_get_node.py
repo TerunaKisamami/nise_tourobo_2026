@@ -80,13 +80,17 @@ class BallGetNode(Node):
     # ここがメインの処理じゃぞ
     async def get_ball(self, execute_mode):
 
+        #左右共通して行う処理
         self.get_logger().info(f"execute_mode = {execute_mode} でget_ballが実行された")
+        self.publish_dyna_extpos(LEFT_GUARD_ID,LEFT_GUARD_OPEN)
+        self.publish_dyna_extpos(RIGHT_GUARD_ID,RIGHT_GUARD_OPEN)
+        time.sleep(WAIT_TIME_GUARD)
 
         if execute_mode == 1:  # 左
             # 左脇に保持するために左のガードを閉じる
-            self.get_logger().info("左のガードを閉じます")
-            self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_CLOSE)
-            time.sleep(WAIT_TIME_GUARD)
+#            self.get_logger().info("左のガードを閉じます")
+#            self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_CLOSE)
+#            time.sleep(WAIT_TIME_GUARD)
 
             # 上のローラーを回す
             set_goal_pwm(LEFT_ROLLER_CAN_ID, -BALL_GET_UP_ROLLER_SPEED,CAN_BUS)
@@ -109,14 +113,14 @@ class BallGetNode(Node):
 
         elif execute_mode == 2:  # 右
             #右脇に保持するために右のガードを閉じる
-            self.get_logger().info("右のガードを閉じます")
-            self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_CLOSE)
-            time.sleep(WAIT_TIME_GUARD)
+#            self.get_logger().info("右のガードを閉じます")
+#            self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_CLOSE)
+#            time.sleep(WAIT_TIME_GUARD)
 
             # 右のローラーを回す
             set_goal_pwm(RIGHT_ROLLER_CAN_ID, BALL_GET_UP_ROLLER_SPEED,CAN_BUS)
             # 下のローラーを回す
-            set_goal_pwm(DOWN_ROLLER_CAN_ID, BALL_GET_DOWN_ROLLER_SPEED,CAN_BUS)
+            set_goal_pwm(DOWN_ROLLER_CAN_ID, -BALL_GET_DOWN_ROLLER_SPEED,CAN_BUS)
 
             # ダイナミクセルでゲートを閉じる
             self.get_logger().info("右のゲートを閉じます")

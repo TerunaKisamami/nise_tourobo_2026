@@ -71,14 +71,20 @@ class BallPutPlateNode(Node):
 
         # 左右共通して行う動作
         # 押し出し機構を上に上げる
-        if push_state != Shoot_Push_State.MAX.value:
-            set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MAX, CAN_BUS)
-        time.sleep(WAIT_TIME_PUSH)
+        #if push_state != Shoot_Push_State.MAX.value:
+        #    set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MAX, CAN_BUS)
+        #time.sleep(WAIT_TIME_PUSH)
 
         # 射出機構を上げる
         if shoot_angle_state != Shoot_Angle_State.MIN.value:
             self.publish_dyna_extpos(SHOOT_ANGLE_ID, SHOOT_ANGLE_MIN)
             time.sleep(WAIT_TIME_SHOOT_ANGLE)
+
+        #押出機構を下げる
+        if push_state != Shoot_Push_State.MIN.value:
+            set_goal_pos(MINI_SHOOT_CAN_ID,SHOOT_PUSH_MIN,CAN_BUS)
+            time.sleep(WAIT_TIME_PUSH)
+
 
         # current_state: 2=LEFT_CARRY, 3=RIGHT_CARRY
         if current_state == 3:

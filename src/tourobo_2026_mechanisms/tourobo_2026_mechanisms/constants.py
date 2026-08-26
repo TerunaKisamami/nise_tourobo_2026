@@ -6,9 +6,9 @@ RIGHT_ROLLER_CAN_ID = 0x041
 # 左ローラー
 LEFT_ROLLER_CAN_ID = 0x010
 # 射出機構ローラー
-SHOOT_ROLLER_1_CAN_ID = 0x011
-SHOOT_ROLLER_2_CAN_ID = 0x012
-SHOOT_ROLLER_3_CAN_ID = 0x013
+SHOOT_ROLLER_1_CAN_ID = 0x011#左下
+SHOOT_ROLLER_2_CAN_ID = 0x012#上
+SHOOT_ROLLER_3_CAN_ID = 0x013#右下
 # 小ロボマス(射出機構用)
 MINI_SHOOT_CAN_ID = 0x031
 
@@ -25,7 +25,7 @@ RIGHT_ARM_OPEN = -1300  # 内部的には1040
 LEFT_ARM_CLOSE = 0  # 内部的には1467
 RIGHT_ARM_CLOSE = 0  # 内部的には2216
 LEFT_ARM_GET_HALF = 910  # 内部的には2251
-RIGHT_ARM_GET_HALF = -910  # 内部的には1353
+RIGHT_ARM_GET_HALF = -750  # 内部的には1353
 
 # ガード開閉時のダイナミクセル値
 LEFT_GUARD_OPEN = 0  # 内部的には317
@@ -41,20 +41,20 @@ SHOOT_ANGLE_AT_GATE = 695  # 内部的には3695
 
 # 射出機構押し出し機構の位置(初期位置からの相対角度)
 SHOOT_PUSH_MIN = 0  # これを初期位置にする
-SHOOT_PUSH_GATE_HOLD = 30000  # 城門に設置するまえにボールを支える角度(仮)
-SHOOT_PUSH_LOADING = 60000  # 射出機構に装填するときの角度(仮)
+SHOOT_PUSH_GATE_HOLD = 65000  # 城門に設置するまえにボールを支える角度(仮)
+SHOOT_PUSH_LOADING = 40000  # 射出機構に装填するときの角度(仮)
 SHOOT_PUSH_MAX = 78000  # 射出機構に近いほどでかい
 
 # 射出機構のローラー回転速度
-SHOOT_MOTOR_SPEED = 800
+SHOOT_MOTOR_SPEED = 50
 
 # ボール入手のローラー回転速度
 BALL_GET_DOWN_ROLLER_SPEED = 1000
 BALL_GET_UP_ROLLER_SPEED = -1000
 
 # ボール内側取り込みローラー回転速度
-BALL_INTAKE_DOWN_ROLLER_SPEED = 1000
-BALL_INTAKE_UP_ROLLER_SPEED = -1000
+BALL_INTAKE_DOWN_ROLLER_SPEED = 600
+BALL_INTAKE_UP_ROLLER_SPEED = -700
 
 # ぼーるを関所におくときのローラー回転速度
 BALL_PUT_PLATE_DOWN_ROLLER_SPEED = 1000
@@ -62,21 +62,21 @@ BALL_PUT_PLATE_UP_ROLLER_SPEED = -1000
 
 # 動作待機時間の設定
 # ガードの開閉にかかる時間
-WAIT_TIME_GUARD = 0.4
+WAIT_TIME_GUARD = 0.6
 # アームの開閉にかかる時間
 WAIT_TIME_ARM = 0.4
 # ボール入手の時にボールが入るのを待つ時間
-WAIT_TIME_GET = 0.7
+WAIT_TIME_GET = 0.5
 # ボール内側取り込み時にボールが内部に入るのを待つ時間
-WAIT_TIME_INTAKE = 2.0
+WAIT_TIME_INTAKE = 2.8
 # 射出機構の角度変更にかかる時間
 WAIT_TIME_SHOOT_ANGLE = 1.5
 WAIT_TIME_SHOOT_ANGLE_PUT_GATE = 1.5
 # ボールを関所に置くときに内部を移動するのを待つ時間
-WAIT_TIME_PUT_PLATE = 2.0
+WAIT_TIME_PUT_PLATE = 3.0
 # 射出機構の押し出し部分の動作時間
-WAIT_TIME_PUSH = 6.0
-WAIT_TIME_PUSH_HALF = 3.0
+WAIT_TIME_PUSH = 4.5
+WAIT_TIME_PUSH_HALF = 2.3
 
 
 from enum import Enum

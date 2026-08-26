@@ -142,7 +142,7 @@ class BallIntakeNode(Node):
                 time.sleep(WAIT_TIME_GUARD)
 
                 # 下ローラーを左側へ回転
-                set_goal_pwm(DOWN_ROLLER_CAN_ID, BALL_INTAKE_DOWN_ROLLER_SPEED, CAN_BUS)
+                set_goal_pwm(DOWN_ROLLER_CAN_ID, -BALL_INTAKE_DOWN_ROLLER_SPEED, CAN_BUS)
 
                 # 上ローラーを回転
                 set_goal_pwm(RIGHT_ROLLER_CAN_ID, BALL_INTAKE_UP_ROLLER_SPEED, CAN_BUS)
@@ -168,14 +168,19 @@ class BallIntakeNode(Node):
             set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_GATE_HOLD, CAN_BUS)
             time.sleep(WAIT_TIME_PUSH_HALF)
 
+            #射出角度をさげる
+            self.publish_dyna_extpos(SHOOT_ANGLE_ID, SHOOT_ANGLE_AT_GATE)
+            time.sleep(WAIT_TIME_SHOOT_ANGLE_PUT_GATE)
+
+
         # 射出
         elif execute_mode == 2:
             # 左右共通して行う前処理
             # 押し出し機構を下げる
-            self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_OPEN)
             if push_state != Shoot_Push_State.MIN.value:
                 set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MIN, CAN_BUS)
                 time.sleep(WAIT_TIME_PUSH)
+
 
             # left
             if current_state == 2:
@@ -199,13 +204,15 @@ class BallIntakeNode(Node):
                 self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_CLOSE)
                 time.sleep(WAIT_TIME_ARM)
 
-                self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_CLOSE)
-                set_goal_pwm(DOWN_ROLLER_CAN_ID, 0, CAN_BUS)
-
                 # ボールが完全に内側に入るのを待つ
                 time.sleep(WAIT_TIME_INTAKE)
 
                 # 左ガードを下げる
+                self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_CLOSE)
+
+                set_goal_pwm(DOWN_ROLLER_CAN_ID, 0, CAN_BUS)
+
+
                 # time.sleep(WAIT_TIME_GUARD)
 
             # right
@@ -221,7 +228,7 @@ class BallIntakeNode(Node):
                 time.sleep(WAIT_TIME_GUARD)
 
                 # 下ローラーを左側へ回転
-                set_goal_pwm(DOWN_ROLLER_CAN_ID, BALL_INTAKE_DOWN_ROLLER_SPEED, CAN_BUS)
+                set_goal_pwm(DOWN_ROLLER_CAN_ID, -BALL_INTAKE_DOWN_ROLLER_SPEED, CAN_BUS)
 
                 # 上ローラーを回転
                 set_goal_pwm(RIGHT_ROLLER_CAN_ID, BALL_INTAKE_UP_ROLLER_SPEED, CAN_BUS)
@@ -244,7 +251,7 @@ class BallIntakeNode(Node):
             set_goal_pwm(LEFT_ROLLER_CAN_ID, 0, CAN_BUS)
 
             # 射出機構の直前までボールをセットしておく
-            set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_GATE_HOLD, CAN_BUS)
+            set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_LOADING,CAN_BUS)
             time.sleep(WAIT_TIME_PUSH_HALF)
 
         else:

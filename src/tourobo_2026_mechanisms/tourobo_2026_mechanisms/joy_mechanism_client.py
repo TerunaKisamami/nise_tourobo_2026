@@ -213,6 +213,34 @@ class JoyMechanismClient(Node):
             ):
                 self.get_logger().warn("現在他の動作中です")
 
+        # × :ボールを城門に入れる
+        elif self.is_pressed(msg, 0):
+            self.get_logger().info(f"current_state = {self.current_state.name}")
+            self.get_logger().info("×ボタンが入力された")
+
+            # current_stateがLEFT_CARRYならば右の関所へ
+            if self.current_state == Mechanism_State.LEFT_CARRY:
+                self.is_action_running = True
+                res = await self.send_ball_put_plate_goal()
+
+                if res and res.success:
+                    self.current_state = Mechanism_State(res.next_state)
+                    self.shoot_push_state = Shoot_Push_State.MIN
+                    self.is_right_arm_open = True
+                self.is_action_running = False
+
+            # current_stateがRIGHT_CARRYならば左の関所へ
+            elif self.current_state == Mechanism_State.RIGHT_CARRY:
+                self.is_action_running = True
+                res = await self.send_ball_put_plate_goal()
+
+                if res and res.success:
+                    self.current_state = Mechanism_State(res.next_state)
+                    self.shoot_push_state = Shoot_Push_State.MIN
+                    self.is_left_arm_open = True
+                self.is_action_running = False
+
+
         # △: ボールを城門に入れる
         elif self.is_pressed(msg, 2):
             self.get_logger().info(f"current_state = {self.current_state.name}")
@@ -228,7 +256,7 @@ class JoyMechanismClient(Node):
 
                 if res and res.success:
                     self.current_state = Mechanism_State(res.next_state)
-                    self.shoot_push_state = Shoot_Push_State.MAX
+                    self.shoot_push_state = Shoot_Push_State.GATE_HOLD
                 self.is_action_running = False
 
             # current_stateがINTAKE_GATEならば城門に置く
@@ -257,10 +285,10 @@ class JoyMechanismClient(Node):
 
                 if res and res.success:
                     self.current_state = Mechanism_State(res.next_state)
-                    self.shoot_push_state = Shoot_Push_State.MIN
+                    self.shoot_push_state = Shoot_Push_State.LOADING
                 self.is_action_running = False
 
-            # current_stateがならば内側取り込み
+            # current_stateがなら射出
             elif self.current_state == Mechanism_State.INTAKE_SHOOT:
                 self.is_action_running = True
                 res = await self.send_ball_shoot_goal()
@@ -272,6 +300,7 @@ class JoyMechanismClient(Node):
 
         # L1: 左ゲートを開閉
         elif self.is_pressed(msg, 4):
+            self.get_logger().info(f"current_state ={self.current_state.name}")
             self.get_logger().info("L1が入力された")
             self.is_action_running = True
             target_is_open = not self.is_left_arm_open
@@ -281,7 +310,6 @@ class JoyMechanismClient(Node):
                 self.is_left_arm_open = target_is_open
                 if (
                     self.current_state == Mechanism_State.LEFT_CARRY
-                    and self.is_left_arm_open
                 ):
                     self.current_state = Mechanism_State.NOT_CARRY
                 else:
@@ -290,6 +318,7 @@ class JoyMechanismClient(Node):
 
         # R1: 右ゲートを開閉
         elif self.is_pressed(msg, 5):
+            self.get_logger().info(f"current_state ={self.current_state.name}")
             self.get_logger().info("R1が入力された")
             self.is_action_running = True
             target_is_open = not self.is_right_arm_open
@@ -298,7 +327,6 @@ class JoyMechanismClient(Node):
                 self.is_right_arm_open = target_is_open
                 if (
                     self.current_state == Mechanism_State.RIGHT_CARRY
-                    and self.is_right_arm_open
                 ):
                     self.current_state = Mechanism_State.NOT_CARRY
                 else:
@@ -307,6 +335,7 @@ class JoyMechanismClient(Node):
 
         # L2: 左から脇に抱える
         elif self.is_pressed(msg, 6):
+            self.get_logger().info(f"current_state ={self.current_state.name}")
             if not self.is_left_arm_open:
                 self.get_logger().warn(
                     "左アームが開いていないため、BallGet(左)は実行できません"
@@ -327,6 +356,7 @@ class JoyMechanismClient(Node):
 
         # R2: 右から脇に抱える
         elif self.is_pressed(msg, 7):
+            self.get_logger().info(f"current_state ={self.current_state.name}")
             if not self.is_right_arm_open:
                 self.get_logger().warn(
                     "右アームが開いていないため、BallGet(右)は実行できません"

@@ -42,10 +42,6 @@ def generate_launch_description():
         executable="joy2twist_node",
     )
 
-    joy_node = Node(
-        package="joy",
-        executable="joy_node",
-    )
 
     ekf_node = Node(
         package="robot_localization",
@@ -56,14 +52,13 @@ def generate_launch_description():
 
     dyna_node = Node(
         package="ah_ros2_dynamixel",
-        executable="dyna_handler_sync_node",
+        executable="dyna_handler_node_v2",
         parameters=[dyna_config_path],
     )
 
     ld.add_action(sub_twist_node)
-#    ld.add_action(pub_odometry_node)
-#    ld.add_action(ekf_node)
-#    ld.add_action(joy_node)
+    ld.add_action(pub_odometry_node)
+    ld.add_action(ekf_node)
     ld.add_action(joy2twist_node)
     ld.add_action(dyna_node)
 
