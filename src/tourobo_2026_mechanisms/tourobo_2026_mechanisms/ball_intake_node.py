@@ -87,9 +87,10 @@ class BallIntakeNode(Node):
     ):
         # 左右両方で共通して実行する処理を書く
         # フィードバック無しのため、常に支柱を下げて待機する
-        self.get_logger().info("支柱を下げます")
-        self.publish_dyna_extpos(SHOOT_ANGLE_ID, SHOOT_ANGLE_MIN)
-        time.sleep(WAIT_TIME_SHOOT_ANGLE)
+        if shoot_angle_state != Shoot_Angle_State.MIN.value:
+            self.get_logger().info("支柱を下げます")
+            self.publish_dyna_extpos(SHOOT_ANGLE_ID, SHOOT_ANGLE_MIN)
+            time.sleep(WAIT_TIME_SHOOT_ANGLE)
 
         # current_state は 2: LEFT_CARRY, 3: RIGHT_CARRY
         # 城門
@@ -278,7 +279,7 @@ class BallIntakeNode(Node):
             success = False
 
             success = await self.intake_ball(
-                req.current_state,
+                req.carry,
                 req.execute_mode,
                 req.push_state,
                 req.shoot_angle_state,

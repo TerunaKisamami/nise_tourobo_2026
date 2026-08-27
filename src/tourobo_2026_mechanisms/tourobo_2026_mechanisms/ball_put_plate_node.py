@@ -80,11 +80,10 @@ class BallPutPlateNode(Node):
             self.publish_dyna_extpos(SHOOT_ANGLE_ID, SHOOT_ANGLE_MIN)
             time.sleep(WAIT_TIME_SHOOT_ANGLE)
 
-        #押出機構を下げる
-        if push_state != Shoot_Push_State.MIN.value:
-            set_goal_pos(MINI_SHOOT_CAN_ID,SHOOT_PUSH_MIN,CAN_BUS)
+        # 押出機構がMAXでもMINでもない場合はMINにする
+        if push_state not in [Shoot_Push_State.MIN.value, Shoot_Push_State.MAX.value]:
+            set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MIN, CAN_BUS)
             time.sleep(WAIT_TIME_PUSH)
-
 
         # carry: 1=LEFT, 2=RIGHT
         if carry == BALL_CARRY.RIGHT.value:
@@ -196,7 +195,8 @@ class BallPutPlateNode(Node):
             success = await self.put_ball_in_plate(req.carry, req.push_state, req.shoot_angle_state)
 
             if success:
-                res.next_push_state = Shoot_Push_State.MIN.value
+                if req.push_state not in [Shoot_Push_State.MIN.value, Shoot_Push_State.MAX.value]:
+                    res.next_push_state = Shoot_Push_State.MIN.value
                 if req.current_state == Mechanism_State.SINGLE_CARRY.value and req.carry == BALL_CARRY.LEFT.value: # LEFT_CARRY
                     res.next_is_right_arm_open = True
                 elif req.current_state == Mechanism_State.SINGLE_CARRY.value and req.carry == BALL_CARRY.RIGHT.value: # RIGHT_CARRY
