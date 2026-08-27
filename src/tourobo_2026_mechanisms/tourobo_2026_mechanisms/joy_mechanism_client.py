@@ -72,14 +72,19 @@ class JoyMechanismClient(Node):
         goal_msg.is_right_arm_open = self.state.is_right_arm_open
 
     def update_states(self, res):
-        if res and res.success:
-            if res.next_state != Mechanism_State.UNKNOWN.value:
+        if res and hasattr(res, 'success') and res.success:
+            if hasattr(res, 'next_state') and res.next_state != Mechanism_State.UNKNOWN.value:
                 self.state.current = Mechanism_State(res.next_state)
-            self.state.carry = BALL_CARRY(res.next_carry)
-            self.state.shoot_push = Shoot_Push_State(res.next_push_state)
-            self.state.shoot_angle = Shoot_Angle_State(res.next_shoot_angle_state)
-            self.state.is_left_arm_open = res.next_is_left_arm_open
-            self.state.is_right_arm_open = res.next_is_right_arm_open
+            if hasattr(res, 'next_carry'):
+                self.state.carry = BALL_CARRY(res.next_carry)
+            if hasattr(res, 'next_push_state'):
+                self.state.shoot_push = Shoot_Push_State(res.next_push_state)
+            if hasattr(res, 'next_shoot_angle_state'):
+                self.state.shoot_angle = Shoot_Angle_State(res.next_shoot_angle_state)
+            if hasattr(res, 'next_is_left_arm_open'):
+                self.state.is_left_arm_open = res.next_is_left_arm_open
+            if hasattr(res, 'next_is_right_arm_open'):
+                self.state.is_right_arm_open = res.next_is_right_arm_open
 
     # action送信共通関数
     async def send_action_goal(self, client, goal_msg, action_name):

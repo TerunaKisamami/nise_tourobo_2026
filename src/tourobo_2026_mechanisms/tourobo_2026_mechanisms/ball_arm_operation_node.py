@@ -117,14 +117,16 @@ class BallArmOperationNode(Node):
             if success:
                 if req.target_arm == 1:
                     res.next_is_left_arm_open = req.is_open
-                    if req.current_state == Mechanism_State.SINGLE_CARRY.value and req.carry == BALL_CARRY.LEFT.value:
-                        res.next_state = Mechanism_State.NOT_CARRY.value
+                    if req.is_open and req.carry == BALL_CARRY.LEFT.value:
                         res.next_carry = BALL_CARRY.NOT.value
+                        if req.current_state == Mechanism_State.SINGLE_CARRY.value:
+                            res.next_state = Mechanism_State.NOT_CARRY.value
                 elif req.target_arm == 2:
                     res.next_is_right_arm_open = req.is_open
-                    if req.current_state == Mechanism_State.SINGLE_CARRY.value and req.carry == BALL_CARRY.RIGHT.value:
-                        res.next_state = Mechanism_State.NOT_CARRY.value
+                    if req.is_open and req.carry == BALL_CARRY.RIGHT.value:
                         res.next_carry = BALL_CARRY.NOT.value
+                        if req.current_state == Mechanism_State.SINGLE_CARRY.value:
+                            res.next_state = Mechanism_State.NOT_CARRY.value
 
                 # (Removed overwrite of next_state here)
                 res.success = True
