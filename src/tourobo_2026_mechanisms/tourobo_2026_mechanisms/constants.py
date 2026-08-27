@@ -74,6 +74,8 @@ WAIT_TIME_SHOOT_ANGLE = 1.5
 WAIT_TIME_SHOOT_ANGLE_PUT_GATE = 1.5
 # ボールを関所に置くときに内部を移動するのを待つ時間
 WAIT_TIME_PUT_PLATE = 3.3
+# ボール吐き出し動作の待機時間
+WAIT_TIME_VOMIT = 1.0
 # 射出機構の押し出し部分の動作時間
 WAIT_TIME_PUSH = 4.5
 WAIT_TIME_PUSH_HALF = 2.3

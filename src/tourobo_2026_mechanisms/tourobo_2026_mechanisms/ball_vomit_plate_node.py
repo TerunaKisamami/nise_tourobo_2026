@@ -14,6 +14,7 @@ CAN_BUS = can.interface.Bus(
     bustype="socketcan", channel="can0", asynchronous=True, bitrate=1000000
 )
 
+
 class BallVomitPlateNode(Node):
     def __init__(self):
         super().__init__("ball_vomit_plate_node")
@@ -47,24 +48,30 @@ class BallVomitPlateNode(Node):
         self.dyna_extpos_publisher.publish(msg)
 
     async def execute_vomit_plate_action(self, carry, push_state, shoot_angle_state):
-        self.get_logger().info(f"〇ボタンの処理を実行します。現在のcarry: {carry}")
-        
-        # ==========================================
-        # ここにモーターなどの具体的な処理を記述してください
-        # ==========================================
-        
+
         if carry == BALL_CARRY.LEFT.value:
-            self.get_logger().info("左脇のボールに対する処理...")
-            # 左アームを開くなど
-            # self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_OPEN)
-            # time.sleep(WAIT_TIME_ARM)
+            self.get_logger().info("左脇抱えなので左側にボールを吐き出します")
+
+            # 左アームを開く
+            self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_OPEN)
+            time.sleep(WAIT_TIME_ARM)
+
+            # 左上のローラーを外向きに回す
+
+            # 下のローラーを左向きに回す
+
         elif carry == BALL_CARRY.RIGHT.value:
-            self.get_logger().info("右脇のボールに対する処理...")
-            # 右アームを開くなど
-            # self.publish_dyna_extpos(RIGHT_ARM_ID, RIGHT_ARM_OPEN)
-            # time.sleep(WAIT_TIME_ARM)
-            
-        time.sleep(1.0) # 仮の待機時間
+            self.get_logger().info("右脇抱えなので右側にボールを吐き出します")
+
+            # 右アームを開く
+            self.publish_dyna_extpos(RIGHT_ARM_ID, RIGHT_ARM_OPEN)
+            time.sleep(WAIT_TIME_ARM)
+
+            # 左上のローラーを外向きに回す
+
+            # 下のローラーを右向きに回す
+        
+        time.sleep(WAIT_TIME_VOMIT)
         return True
 
     async def execute_callback(self, goal_handle):
@@ -80,17 +87,19 @@ class BallVomitPlateNode(Node):
             res.next_is_left_arm_open = req.is_left_arm_open
             res.next_is_right_arm_open = req.is_right_arm_open
 
-            success = await self.execute_vomit_plate_action(req.carry, req.push_state, req.shoot_angle_state)
+            success = await self.execute_vomit_plate_action(
+                req.carry, req.push_state, req.shoot_angle_state
+            )
 
             if success:
                 # 実行後は抱えているアームに対してステートを変化させ、抱えを解除する
                 if req.carry == BALL_CARRY.LEFT.value:
-                    res.next_is_left_arm_open = True # 仮: アームを開いた状態にする
+                    res.next_is_left_arm_open = True  # 仮: アームを開いた状態にする
                 elif req.carry == BALL_CARRY.RIGHT.value:
                     res.next_is_right_arm_open = True
-                
+
                 res.next_carry = BALL_CARRY.NOT.value
-                
+
                 # もしSINGLE_CARRY(脇に1つだけ抱えている状態)だったなら、NOT_CARRYに戻す
                 if req.current_state == Mechanism_State.SINGLE_CARRY.value:
                     res.next_state = Mechanism_State.NOT_CARRY.value
@@ -104,6 +113,7 @@ class BallVomitPlateNode(Node):
         finally:
             self.is_executing = False
 
+
 def main(args=None):
     rclpy.init(args=args)
     node = BallVomitPlateNode()
@@ -116,6 +126,7 @@ def main(args=None):
     finally:
         node.destroy_node()
         rclpy.shutdown()
+
 
 if __name__ == "__main__":
     main()
