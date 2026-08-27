@@ -5,7 +5,7 @@ import asyncio
 import time
 
 from tourobo_2026_mechanisms.constants import *
-from tourobo_2026_interfaces.action import BallCircle
+from tourobo_2026_interfaces.action import BallVomitPlate
 from dyna_interfaces.msg import DynaTarget
 from ah_python_lib.ah_python_can import *
 import can
@@ -14,16 +14,16 @@ CAN_BUS = can.interface.Bus(
     bustype="socketcan", channel="can0", asynchronous=True, bitrate=1000000
 )
 
-class BallCircleNode(Node):
+class BallVomitPlateNode(Node):
     def __init__(self):
-        super().__init__("ball_circle_node")
+        super().__init__("ball_vomit_plate_node")
         self.is_executing = False
         self.cb_group = rclpy.callback_groups.ReentrantCallbackGroup()
 
         self._action_server = ActionServer(
             self,
-            BallCircle,
-            "ball_circle",
+            BallVomitPlate,
+            "ball_vomit_plate",
             self.execute_callback,
             goal_callback=self.goal_callback,
             callback_group=self.cb_group,
@@ -46,7 +46,7 @@ class BallCircleNode(Node):
         msg.target = target
         self.dyna_extpos_publisher.publish(msg)
 
-    async def execute_circle_action(self, carry, push_state, shoot_angle_state):
+    async def execute_vomit_plate_action(self, carry, push_state, shoot_angle_state):
         self.get_logger().info(f"〇ボタンの処理を実行します。現在のcarry: {carry}")
         
         # ==========================================
@@ -71,7 +71,7 @@ class BallCircleNode(Node):
         self.is_executing = True
         try:
             req = goal_handle.request
-            res = BallCircle.Result()
+            res = BallVomitPlate.Result()
             # 初期状態をそのまま引き継ぐ
             res.next_state = req.current_state
             res.next_carry = req.carry
@@ -80,7 +80,7 @@ class BallCircleNode(Node):
             res.next_is_left_arm_open = req.is_left_arm_open
             res.next_is_right_arm_open = req.is_right_arm_open
 
-            success = await self.execute_circle_action(req.carry, req.push_state, req.shoot_angle_state)
+            success = await self.execute_vomit_plate_action(req.carry, req.push_state, req.shoot_angle_state)
 
             if success:
                 # 実行後は抱えているアームに対してステートを変化させ、抱えを解除する
@@ -106,7 +106,7 @@ class BallCircleNode(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    node = BallCircleNode()
+    node = BallVomitPlateNode()
     executor = rclpy.executors.MultiThreadedExecutor()
     executor.add_node(node)
     try:

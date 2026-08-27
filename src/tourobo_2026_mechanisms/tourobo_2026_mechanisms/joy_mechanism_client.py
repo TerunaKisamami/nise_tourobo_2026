@@ -55,8 +55,8 @@ class JoyMechanismClient(Node):
         self.mechanism_reset_client = ActionClient(
             self, MechanismReset, "mechanism_reset", callback_group=self.cb_group
         )
-        self.ball_circle_client = ActionClient(
-            self, BallCircle, "ball_circle", callback_group=self.cb_group
+        self.ball_vomit_plate_client = ActionClient(
+            self, BallVomitPlate, "ball_vomit_plate", callback_group=self.cb_group
         )
 
         # ボタンの状態保持用
@@ -170,11 +170,11 @@ class JoyMechanismClient(Node):
             self.mechanism_reset_client, goal_msg, "mechanism_reset"
         )
 
-    async def send_ball_circle_goal(self):
-        goal_msg = BallCircle.Goal()
+    async def send_ball_vomit_plate_goal(self):
+        goal_msg = BallVomitPlate.Goal()
         self.set_goal_states(goal_msg)
         return await self.send_action_goal(
-            self.ball_circle_client, goal_msg, "ball_circle"
+            self.ball_vomit_plate_client, goal_msg, "ball_vomit_plate"
         )
 
     # ボタンが押された瞬間だけ取る
@@ -255,7 +255,7 @@ class JoyMechanismClient(Node):
             if self.state.carry != BALL_CARRY.NOT:
                 self.get_logger().info("◯ボタンが入力された（ボール抱え解除）")
                 self.is_action_running = True
-                res = await self.send_ball_circle_goal()
+                res = await self.send_ball_vomit_plate_goal()
                 if res and res.success:
                     self.update_states(res)
                 self.is_action_running = False
