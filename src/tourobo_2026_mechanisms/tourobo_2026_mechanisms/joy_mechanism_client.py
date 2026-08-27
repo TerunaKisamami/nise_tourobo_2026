@@ -16,7 +16,6 @@ class RobotState:
     carry: BALL_CARRY = BALL_CARRY.NOT
     shoot_push: Shoot_Push_State = Shoot_Push_State.MIN
     shoot_angle: Shoot_Angle_State = Shoot_Angle_State.MIN
-    ball_carry: BALL_CARRY = BALL_CARRY.NOT
     is_left_arm_open: bool = False
     is_right_arm_open: bool = False
 
