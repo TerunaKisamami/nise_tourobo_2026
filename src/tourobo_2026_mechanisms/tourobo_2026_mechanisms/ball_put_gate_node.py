@@ -78,24 +78,32 @@ class BallPutGateNode(Node):
     # じっさいのどうさぶぶん
     async def put_ball_in_gate(self, current_state, push_state):
 
+        #ga-do wo tojiru
+        self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_CLOSE)
+        self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_CLOSE)
+ 
         # 押し出しを城門側へ
         # ロボマスを使って押し出しを城門側へ
         if push_state != Shoot_Push_State.MIN.value:
             set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MIN, CAN_BUS)
         time.sleep(WAIT_TIME_PUSH)
 
+         #ガードを戻す
+        self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_OPEN)
+        self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_OPEN)
+        #time.sleep(WAIT_TIME_GUARD)
+
         # 押出機構を上限にあげる
-        set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MAX, CAN_BUS)
-        time.sleep(WAIT_TIME_PUSH)
+        set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_GATE_HOLD, CAN_BUS)
+        time.sleep(WAIT_TIME_PUSH_HALF)
 
         # 射出角度をあげる
         self.publish_dyna_extpos(SHOOT_ANGLE_ID, SHOOT_ANGLE_MIN)
         time.sleep(WAIT_TIME_SHOOT_ANGLE_PUT_GATE)
 
-        #ガードを戻す
-        self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_OPEN)
-        self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_OPEN)
-        time.sleep(WAIT_TIME_GUARD)
+        # osidasi kicou wo sageru
+        set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MIN ,CAN_BUS)
+        time.sleep(WAIT_TIME_PUSH_HALF)
 
         return True
 
@@ -117,7 +125,7 @@ class BallPutGateNode(Node):
             success = await self.put_ball_in_gate(req.current_state, req.push_state)
 
             if success:
-                res.next_push_state = Shoot_Push_State.MAX.value
+                res.next_push_state = Shoot_Push_State.MIN.value
                 res.next_shoot_angle_state = Shoot_Angle_State.MIN.value
 
                 res.success = True

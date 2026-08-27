@@ -16,7 +16,7 @@ class RobotState:
     carry: BALL_CARRY = BALL_CARRY.NOT
     shoot_push: Shoot_Push_State = Shoot_Push_State.MIN
     shoot_angle: Shoot_Angle_State = Shoot_Angle_State.MIN
-    ball_carry: Ball_Carry = Ball_Carry.NOT
+    ball_carry: BALL_CARRY = BALL_CARRY.NOT
     is_left_arm_open: bool = False
     is_right_arm_open: bool = False
 
@@ -208,7 +208,15 @@ class JoyMechanismClient(Node):
 
         # ボタンが押された瞬間に一括でステートをログ表示する
         if not self.is_action_running and any(self.is_pressed(msg, prev_buttons, b) for b in [0, 2, 3, 4, 5, 6, 7, 9]):
-            self.get_logger().info(f"--- Button Pressed --- state = {self.state}")
+            state_str = (
+                f"\n  current: {self.state.current.name}"
+                f"\n  carry: {self.state.carry.name}"
+                f"\n  shoot_push: {self.state.shoot_push.name}"
+                f"\n  shoot_angle: {self.state.shoot_angle.name}"
+                f"\n  left_arm_open: {self.state.is_left_arm_open}"
+                f"\n  right_arm_open: {self.state.is_right_arm_open}"
+            )
+            self.get_logger().info(f"--- Button Pressed --- state = {state_str}")
 
         if self.is_pressed(msg, prev_buttons, 9):  # OPTIONSボタンで強制リセット
             self.get_logger().info(
