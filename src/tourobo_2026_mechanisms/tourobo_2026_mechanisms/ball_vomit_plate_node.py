@@ -58,9 +58,9 @@ class BallVomitPlateNode(Node):
             time.sleep(WAIT_TIME_ARM)
 
             # 左上のローラーを外向きに回す
-            set_goal_pwm(LEFT_ROLLER_CAN_ID, UP_ROLLER_SPEED)
-
+            set_goal_pwm(LEFT_ROLLER_CAN_ID, BALL_VOMIT_UP_ROLLER_SPEED, CAN_BUS)
             # 下のローラーを左向きに回す
+            set_goal_pwm(DOWN_ROLLER_CAN_ID, -BALL_VOMIT_DOWN_ROLLER_SPEED, CAN_BUS)
 
         elif carry == BALL_CARRY.RIGHT.value:
             self.get_logger().info("右脇抱えなので右側にボールを吐き出します")
@@ -69,13 +69,19 @@ class BallVomitPlateNode(Node):
             self.publish_dyna_extpos(RIGHT_ARM_ID, RIGHT_ARM_OPEN)
             time.sleep(WAIT_TIME_ARM)
 
-            # 左上のローラーを外向きに回す
-
+            # 右上のローラーを外向きに回す
+            set_goal_pwm(RIGHT_ROLLER_CAN_ID, -BALL_VOMIT_UP_ROLLER_SPEED, CAN_BUS)
             # 下のローラーを右向きに回す
-
+            set_goal_pwm(DOWN_ROLLER_CAN_ID, BALL_VOMIT_DOWN_ROLLER_SPEED, CAN_BUS)
+        
         # 左右共通して行う後処理
         time.sleep(WAIT_TIME_VOMIT)
-
+        
+        # ローラーを止める
+        set_goal_pwm(LEFT_ROLLER_CAN_ID, 0, CAN_BUS)
+        set_goal_pwm(RIGHT_ROLLER_CAN_ID, 0, CAN_BUS)
+        set_goal_pwm(DOWN_ROLLER_CAN_ID, 0, CAN_BUS)
+        
         return True
 
     async def execute_callback(self, goal_handle):
