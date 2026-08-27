@@ -1,5 +1,4 @@
 import can
-from sympy import false
 from rclpy.action import ActionServer, GoalResponse
 import rclpy
 import asyncio
@@ -117,11 +116,8 @@ class BallGetNode(Node):
         time.sleep(WAIT_TIME_GET)
 
         # ろーらーをとめる
-        if execute_mode == 1:
-            set_goal_pwm(LEFT_ROLLER_CAN_ID, 0, CAN_BUS)
-        elif execute_mode == 2:
-            set_goal_pwm(RIGHT_ROLLER_CAN_ID, 0, CAN_BUS)
-            
+        set_goal_pwm(LEFT_ROLLER_CAN_ID, 0, CAN_BUS)
+        set_goal_pwm(RIGHT_ROLLER_CAN_ID, 0, CAN_BUS)
         set_goal_pwm(DOWN_ROLLER_CAN_ID, 0, CAN_BUS)
 
         return True

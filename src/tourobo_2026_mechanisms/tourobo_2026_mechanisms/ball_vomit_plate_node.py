@@ -59,6 +59,7 @@ class BallVomitPlateNode(Node):
 
             # 左上のローラーを外向きに回す
             set_goal_pwm(LEFT_ROLLER_CAN_ID, BALL_VOMIT_UP_ROLLER_SPEED, CAN_BUS)
+
             # 下のローラーを左向きに回す
             set_goal_pwm(DOWN_ROLLER_CAN_ID, -BALL_VOMIT_DOWN_ROLLER_SPEED, CAN_BUS)
 
@@ -73,15 +74,15 @@ class BallVomitPlateNode(Node):
             set_goal_pwm(RIGHT_ROLLER_CAN_ID, -BALL_VOMIT_UP_ROLLER_SPEED, CAN_BUS)
             # 下のローラーを右向きに回す
             set_goal_pwm(DOWN_ROLLER_CAN_ID, BALL_VOMIT_DOWN_ROLLER_SPEED, CAN_BUS)
-        
+
         # 左右共通して行う後処理
         time.sleep(WAIT_TIME_VOMIT)
-        
+
         # ローラーを止める
         set_goal_pwm(LEFT_ROLLER_CAN_ID, 0, CAN_BUS)
         set_goal_pwm(RIGHT_ROLLER_CAN_ID, 0, CAN_BUS)
         set_goal_pwm(DOWN_ROLLER_CAN_ID, 0, CAN_BUS)
-        
+
         return True
 
     async def execute_callback(self, goal_handle):
