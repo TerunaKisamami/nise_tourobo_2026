@@ -20,6 +20,7 @@ def generate_launch_description():
     ball_arm_operation = Node(package=pkg_name, executable="ball_arm_operation_node", name="ball_arm_operation_node")
     ball_intake = Node(package=pkg_name, executable="ball_intake_node", name="ball_intake_node")
     ball_shoot_aim = Node(package=pkg_name, executable="ball_shoot_aim_node", name="ball_shoot_aim_node")
+    ball_circle = Node(package=pkg_name, executable="ball_circle_node", name="ball_circle_node")
 
     joy_client = Node(package=pkg_name, executable="joy_mechanism_client", name="joy_mechanism_client")
 
@@ -32,6 +33,7 @@ def generate_launch_description():
     ld.add_action(ball_arm_operation)
     ld.add_action(ball_intake)
 #    ld.add_action(ball_shoot_aim)
+    ld.add_action(ball_circle)
     ld.add_action(joy_client)
 
     return ld

@@ -55,6 +55,9 @@ class JoyMechanismClient(Node):
         self.mechanism_reset_client = ActionClient(
             self, MechanismReset, "mechanism_reset", callback_group=self.cb_group
         )
+        self.ball_circle_client = ActionClient(
+            self, BallCircle, "ball_circle", callback_group=self.cb_group
+        )
 
         # ボタンの状態保持用
         self.prev_buttons = []
@@ -167,6 +170,13 @@ class JoyMechanismClient(Node):
             self.mechanism_reset_client, goal_msg, "mechanism_reset"
         )
 
+    async def send_ball_circle_goal(self):
+        goal_msg = BallCircle.Goal()
+        self.set_goal_states(goal_msg)
+        return await self.send_action_goal(
+            self.ball_circle_client, goal_msg, "ball_circle"
+        )
+
     # ボタンが押された瞬間だけ取る
     def is_pressed(self, msg, prev_buttons, idx):
         if idx < len(msg.buttons) and idx < len(prev_buttons):
@@ -207,7 +217,7 @@ class JoyMechanismClient(Node):
         # R2: 右から脇に抱える
 
         # ボタンが押された瞬間に一括でステートをログ表示する
-        if not self.is_action_running and any(self.is_pressed(msg, prev_buttons, b) for b in [0, 2, 3, 4, 5, 6, 7, 9]):
+        if not self.is_action_running and any(self.is_pressed(msg, prev_buttons, b) for b in [0, 1, 2, 3, 4, 5, 6, 7, 9]):
             state_str = (
                 f"\n  current: {self.state.current.name}"
                 f"\n  carry: {self.state.carry.name}"
@@ -237,10 +247,22 @@ class JoyMechanismClient(Node):
         elif self.is_action_running:
             # 動作中は何のボタンを押しても受け付けない
             # 何かボタンや軸が操作されたときだけ警告を出す
-            if any(self.is_pressed(msg, prev_buttons, b) for b in [2, 3, 4, 5, 6, 7]):
+            if any(self.is_pressed(msg, prev_buttons, b) for b in [1, 2, 3, 4, 5, 6, 7]):
                 self.get_logger().warn("現在他の動作中です")
 
-        # × :ボールを城門に入れる
+        # ◯ : 新機能
+        elif self.is_pressed(msg, prev_buttons, 1):
+            if self.state.carry != BALL_CARRY.NOT:
+                self.get_logger().info("◯ボタンが入力された（ボール抱え解除）")
+                self.is_action_running = True
+                res = await self.send_ball_circle_goal()
+                if res and res.success:
+                    self.update_states(res)
+                self.is_action_running = False
+            else:
+                self.get_logger().warn("脇にボールを抱えていないため、〇ボタンのアクションは実行できません")
+
+        # × :ボールを関所に入れる
         elif self.is_pressed(msg, prev_buttons, 0):
             self.get_logger().info("×ボタンが入力された")
 
