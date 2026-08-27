@@ -47,6 +47,7 @@ class BallVomitPlateNode(Node):
         msg.target = target
         self.dyna_extpos_publisher.publish(msg)
 
+    # 実際の動作部分
     async def execute_vomit_plate_action(self, carry, push_state, shoot_angle_state):
 
         if carry == BALL_CARRY.LEFT.value:
@@ -57,6 +58,7 @@ class BallVomitPlateNode(Node):
             time.sleep(WAIT_TIME_ARM)
 
             # 左上のローラーを外向きに回す
+            set_goal_pwm(LEFT_ROLLER_CAN_ID, UP_ROLLER_SPEED)
 
             # 下のローラーを左向きに回す
 
@@ -70,8 +72,10 @@ class BallVomitPlateNode(Node):
             # 左上のローラーを外向きに回す
 
             # 下のローラーを右向きに回す
-        
+
+        # 左右共通して行う後処理
         time.sleep(WAIT_TIME_VOMIT)
+
         return True
 
     async def execute_callback(self, goal_handle):

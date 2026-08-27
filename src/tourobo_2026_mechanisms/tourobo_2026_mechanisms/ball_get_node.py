@@ -89,11 +89,6 @@ class BallGetNode(Node):
         time.sleep(WAIT_TIME_GUARD)
 
         if execute_mode == 1:  # 左
-            # 左脇に保持するために左のガードを閉じる
-            #            self.get_logger().info("左のガードを閉じます")
-            #            self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_CLOSE)
-            #            time.sleep(WAIT_TIME_GUARD)
-
             # 上のローラーを回す
             set_goal_pwm(LEFT_ROLLER_CAN_ID, -BALL_GET_UP_ROLLER_SPEED, CAN_BUS)
             # 下のローラーを回す
@@ -102,23 +97,8 @@ class BallGetNode(Node):
             # ダイナミクセルでゲートを閉じる
             self.get_logger().info("左のゲートを閉じます")
             self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_GET_HALF)
-            #       time.sleep(WAIT_TIME_ARM)
-
-            # ぼーるが入るのを待つ
-            time.sleep(WAIT_TIME_GET)
-
-            # ろーらーをとめる
-            set_goal_pwm(LEFT_ROLLER_CAN_ID, 0, CAN_BUS)
-            set_goal_pwm(DOWN_ROLLER_CAN_ID, 0, CAN_BUS)
-
-            return True
 
         elif execute_mode == 2:  # 右
-            # 右脇に保持するために右のガードを閉じる
-            #            self.get_logger().info("右のガードを閉じます")
-            #            self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_CLOSE)
-            #            time.sleep(WAIT_TIME_GUARD)
-
             # 右のローラーを回す
             set_goal_pwm(RIGHT_ROLLER_CAN_ID, BALL_GET_UP_ROLLER_SPEED, CAN_BUS)
             # 下のローラーを回す
@@ -127,20 +107,24 @@ class BallGetNode(Node):
             # ダイナミクセルでゲートを閉じる
             self.get_logger().info("右のゲートを閉じます")
             self.publish_dyna_extpos(RIGHT_ARM_ID, RIGHT_ARM_GET_HALF)
-            time.sleep(WAIT_TIME_ARM)
-
-            # ボールが入るのを待つ
-            #       time.sleep(WAIT_TIME_GET)
-
-            # ろーらーをとめる
-            set_goal_pwm(RIGHT_ROLLER_CAN_ID, 0, CAN_BUS)
-            set_goal_pwm(DOWN_ROLLER_CAN_ID, 0, CAN_BUS)
-
-            return True
 
         else:  # エラー
             self.get_logger().info("エラー: dir_numが1または2ではありません")
             return False
+
+        # 左右共通して行う後処理
+        # ボールが入るのを待つ
+        time.sleep(WAIT_TIME_GET)
+
+        # ろーらーをとめる
+        if execute_mode == 1:
+            set_goal_pwm(LEFT_ROLLER_CAN_ID, 0, CAN_BUS)
+        elif execute_mode == 2:
+            set_goal_pwm(RIGHT_ROLLER_CAN_ID, 0, CAN_BUS)
+            
+        set_goal_pwm(DOWN_ROLLER_CAN_ID, 0, CAN_BUS)
+
+        return True
 
     async def execute_callback(self, goal_handle):
         self.is_executing = True
@@ -166,7 +150,10 @@ class BallGetNode(Node):
 
                 res.success = True
                 # execute_mode 1=左 -> LEFT_CARRY(2), 2=右 -> RIGHT_CARRY(3)
-                if req.current_state in [Mechanism_State.INTAKE_GATE.value, Mechanism_State.INTAKE_SHOOT.value]:
+                if req.current_state in [
+                    Mechanism_State.INTAKE_GATE.value,
+                    Mechanism_State.INTAKE_SHOOT.value,
+                ]:
                     res.next_state = req.current_state
                 else:
                     res.next_state = Mechanism_State.SINGLE_CARRY.value
