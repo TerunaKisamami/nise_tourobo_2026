@@ -304,12 +304,15 @@ class JoyMechanismClient(Node):
 
             # current_stateがINTAKE_GATEならば城門に置く
             elif self.state.current == Mechanism_State.INTAKE_GATE:
-                self.is_action_running = True
-                res = await self.send_ball_put_gate_goal()
+                if self.state.carry == BALL_CARRY.NOT:
+                    self.is_action_running = True
+                    res = await self.send_ball_put_gate_goal()
 
-                if res and res.success:
-                    self.update_states(res)
-                self.is_action_running = False
+                    if res and res.success:
+                        self.update_states(res)
+                    self.is_action_running = False
+                else:
+                    self.get_logger().warn("脇にボールを抱えているため、城門への設置は実行できません")
 
         # □: 射出用取り込み + ボールを射出
         elif self.is_pressed(msg, prev_buttons, 3):
