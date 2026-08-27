@@ -193,6 +193,8 @@ class JoyMechanismClient(Node):
         # 以前の状態をローカルに保存してから上書きする (await後の巻き戻りを防ぐため)
         prev_buttons = self.prev_buttons
         prev_axes = self.prev_axes
+        self.prev_buttons = msg.buttons
+        self.prev_axes = msg.axes
 
         # 各ボタン機構
         # OPTIONS: 強制リセット
