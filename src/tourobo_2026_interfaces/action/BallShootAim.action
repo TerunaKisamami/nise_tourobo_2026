@@ -1,11 +1,20 @@
 # 1. Goal (クライアントからサーバーへ送信する要求データ)
 # 0:なにもしない 1: 上を向く -1: 下を向く
 int32 direction
-int32 shoot_angle_state
 int32 current_state
+int32 carry
+int32 push_state
+int32 shoot_angle_state
+bool is_left_arm_open
+bool is_right_arm_open
 ---
 # 2. Result (処理完了時にサーバーから返す最終結果データ)
 bool success
 int32 next_state
+int32 next_carry
+int32 next_push_state
+int32 next_shoot_angle_state
+bool next_is_left_arm_open
+bool next_is_right_arm_open
 ---
 # 3. Feedback (処理実行中にサーバーから定期的に送信する進捗データ)

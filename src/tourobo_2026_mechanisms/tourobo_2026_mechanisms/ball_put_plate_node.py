@@ -67,7 +67,7 @@ class BallPutPlateNode(Node):
         return GoalResponse.ACCEPT
 
     # 実際の動作部分
-    async def put_ball_in_plate(self, current_state, push_state, shoot_angle_state):
+    async def put_ball_in_plate(self, carry, push_state, shoot_angle_state):
 
         # 左右共通して行う動作
         # 押し出し機構を上に上げる
@@ -86,8 +86,8 @@ class BallPutPlateNode(Node):
             time.sleep(WAIT_TIME_PUSH)
 
 
-        # current_state: 2=LEFT_CARRY, 3=RIGHT_CARRY
-        if current_state == 3:
+        # carry: 1=LEFT, 2=RIGHT
+        if carry == BALL_CARRY.RIGHT.value:
             self.get_logger().info(
                 "右脇で保持している状態から、左側へボールを関所に置きます"
             )
@@ -125,7 +125,7 @@ class BallPutPlateNode(Node):
             set_goal_pwm(RIGHT_ROLLER_CAN_ID, 0, CAN_BUS)
             set_goal_pwm(DOWN_ROLLER_CAN_ID, 0, CAN_BUS)
 
-        elif current_state == 2:
+        elif carry == BALL_CARRY.LEFT.value:
             self.get_logger().info(
                 "左脇で保持している状態から、右側へボールを関所に置きます"
             )
@@ -165,7 +165,7 @@ class BallPutPlateNode(Node):
 
         else:
             self.get_logger().error(
-                f"エラー: 想定外の current_state ({current_state}) です。"
+                f"エラー: 想定外の carry ({carry}) です。"
             )
             return False
 
@@ -184,13 +184,27 @@ class BallPutPlateNode(Node):
         try:
             req = goal_handle.request
             res = BallPutPlate.Result()
+            res.next_state = req.current_state
+            res.next_carry = req.carry
+            res.next_push_state = req.push_state
+            res.next_shoot_angle_state = req.shoot_angle_state
+            res.next_is_left_arm_open = req.is_left_arm_open
+            res.next_is_right_arm_open = req.is_right_arm_open
+
             success = False
 
-            success = await self.put_ball_in_plate(req.current_state, req.push_state, req.shoot_angle_state)
+            success = await self.put_ball_in_plate(req.carry, req.push_state, req.shoot_angle_state)
 
             if success:
+                res.next_push_state = Shoot_Push_State.MIN.value
+                if req.current_state == Mechanism_State.SINGLE_CARRY.value and req.carry == BALL_CARRY.LEFT.value: # LEFT_CARRY
+                    res.next_is_right_arm_open = True
+                elif req.current_state == Mechanism_State.SINGLE_CARRY.value and req.carry == BALL_CARRY.RIGHT.value: # RIGHT_CARRY
+                    res.next_is_left_arm_open = True
+
                 res.success = True
-                res.next_state = 1  # NOT_CARRY
+                res.next_state = Mechanism_State.NOT_CARRY.value
+                res.next_carry = 0  # NOT_CARRY
                 goal_handle.succeed()
             else:
                 goal_handle.abort()

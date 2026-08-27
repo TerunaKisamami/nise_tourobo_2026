@@ -36,6 +36,7 @@ setup(
             "ball_arm_operation_node = tourobo_2026_mechanisms.ball_arm_operation_node:main",
             "ball_intake_node = tourobo_2026_mechanisms.ball_intake_node:main",
             "ball_shoot_aim_node = tourobo_2026_mechanisms.ball_shoot_aim_node:main",
+            "mechanism_reset_node = tourobo_2026_mechanisms.mechanism_reset_node:main",
         ],
     },
 )

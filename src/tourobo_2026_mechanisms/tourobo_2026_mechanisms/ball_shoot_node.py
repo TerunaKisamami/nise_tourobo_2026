@@ -115,13 +115,27 @@ class BallShootNode(Node):
         try:
             req = goal_handle.request
             res = BallShoot.Result()
+            res.next_state = req.current_state
+            res.next_carry = req.carry
+            res.next_push_state = req.push_state
+            res.next_shoot_angle_state = req.shoot_angle_state
+            res.next_is_left_arm_open = req.is_left_arm_open
+            res.next_is_right_arm_open = req.is_right_arm_open
+
             success = False
 
             success = await self.shoot_ball(req.push_state)
 
             if success:
+                res.next_push_state = Shoot_Push_State.MIN.value
+
                 res.success = True
-                res.next_state = 1  # NOT_CARRY
+                if req.carry != BALL_CARRY.NOT.value:
+                    res.next_state = Mechanism_State.SINGLE_CARRY.value
+                    res.next_carry = req.carry
+                else:
+                    res.next_state = Mechanism_State.NOT_CARRY.value
+                    res.next_carry = BALL_CARRY.NOT.value
                 goal_handle.succeed()
             else:
                 goal_handle.abort()

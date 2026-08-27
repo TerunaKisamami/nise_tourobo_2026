@@ -6,9 +6,9 @@ RIGHT_ROLLER_CAN_ID = 0x041
 # 左ローラー
 LEFT_ROLLER_CAN_ID = 0x010
 # 射出機構ローラー
-SHOOT_ROLLER_1_CAN_ID = 0x011#左下
-SHOOT_ROLLER_2_CAN_ID = 0x012#上
-SHOOT_ROLLER_3_CAN_ID = 0x013#右下
+SHOOT_ROLLER_1_CAN_ID = 0x011  # 左下
+SHOOT_ROLLER_2_CAN_ID = 0x012  # 上
+SHOOT_ROLLER_3_CAN_ID = 0x013  # 右下
 # 小ロボマス(射出機構用)
 MINI_SHOOT_CAN_ID = 0x031
 
@@ -106,8 +106,7 @@ class Mechanism_State(Enum):
     # INTAKEへ
     # ゲートの開閉
     # 保持している方向のゲートが開いたら NOT_CARRYへ
-    LEFT_CARRY = 2
-    RIGHT_CARRY = 3
+    SINGLE_CARRY = 2
 
     # ボールを内側に保持
     # できること
@@ -117,8 +116,14 @@ class Mechanism_State(Enum):
     # NOT_CARRYへ
     # ゲートの開閉
     # 射出機構を上下する
-    INTAKE_GATE = 4
-    INTAKE_SHOOT = 5
+    INTAKE_GATE = 3
+    INTAKE_SHOOT = 4
+
+
+class BALL_CARRY(Enum):
+    NOT = 0
+    LEFT = 1
+    RIGHT = 2
 
 
 class Shoot_Push_State(Enum):

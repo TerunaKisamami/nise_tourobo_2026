@@ -103,12 +103,30 @@ class BallArmOperationNode(Node):
         try:
             req = goal_handle.request
             res = BallArmOperation.Result()
+            res.next_state = req.current_state
+            res.next_carry = req.carry
+            res.next_push_state = req.push_state
+            res.next_shoot_angle_state = req.shoot_angle_state
+            res.next_is_left_arm_open = req.is_left_arm_open
+            res.next_is_right_arm_open = req.is_right_arm_open
+
             success = False
 
             success = await self.operate_ball_arm(req.target_arm, req.is_open)
 
             if success:
-                res.next_state = req.current_state  # アーム開閉はメインの論理状態を変えない
+                if req.target_arm == 1:
+                    res.next_is_left_arm_open = req.is_open
+                    if req.current_state == Mechanism_State.SINGLE_CARRY.value and req.carry == BALL_CARRY.LEFT.value:
+                        res.next_state = Mechanism_State.NOT_CARRY.value
+                        res.next_carry = BALL_CARRY.NOT.value
+                elif req.target_arm == 2:
+                    res.next_is_right_arm_open = req.is_open
+                    if req.current_state == Mechanism_State.SINGLE_CARRY.value and req.carry == BALL_CARRY.RIGHT.value:
+                        res.next_state = Mechanism_State.NOT_CARRY.value
+                        res.next_carry = BALL_CARRY.NOT.value
+
+                # (Removed overwrite of next_state here)
                 res.success = True
                 goal_handle.succeed()
             else:

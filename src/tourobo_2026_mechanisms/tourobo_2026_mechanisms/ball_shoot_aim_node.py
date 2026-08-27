@@ -81,11 +81,24 @@ class BallShootAimNode(Node):
         try:
             req = goal_handle.request
             res = BallShootAim.Result()
+            res.next_state = req.current_state
+            res.next_carry = req.carry
+            res.next_push_state = req.push_state
+            res.next_shoot_angle_state = req.shoot_angle_state
+            res.next_is_left_arm_open = req.is_left_arm_open
+            res.next_is_right_arm_open = req.is_right_arm_open
+
             success = False
 
             success = await self.aim_ball(req.direction)
 
             if success:
+                if req.direction == 1:
+                    res.next_shoot_angle_state = Shoot_Angle_State.MAX.value
+                elif req.direction == -1:
+                    res.next_shoot_angle_state = Shoot_Angle_State.MIN.value
+
+                res.success = True
                 goal_handle.succeed()
             else:
                 goal_handle.abort()

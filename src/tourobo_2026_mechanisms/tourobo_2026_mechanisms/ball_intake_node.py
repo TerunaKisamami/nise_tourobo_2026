@@ -83,7 +83,7 @@ class BallIntakeNode(Node):
 
     # ここがメインの処理じゃぞ
     async def intake_ball(
-        self, current_state, execute_mode, push_state, shoot_angle_state
+        self, carry, execute_mode, push_state, shoot_angle_state
     ):
         # 左右両方で共通して実行する処理を書く
         # フィードバック無しのため、常に支柱を下げて待機する
@@ -101,7 +101,7 @@ class BallIntakeNode(Node):
                 time.sleep(WAIT_TIME_PUSH)
 
             # left
-            if current_state == 2:
+            if carry == 1:
                 self.get_logger().info("左脇にあるボールをintake(城門)します")
 
                 # 右側のガードを下げる
@@ -130,7 +130,7 @@ class BallIntakeNode(Node):
                 time.sleep(WAIT_TIME_GUARD)
 
             # right
-            elif current_state == 3:
+            elif carry == 2:
                 self.get_logger().info("右脇にあるボールをintake(城門)します")
 
                 # 左側のガードを下げる
@@ -183,7 +183,7 @@ class BallIntakeNode(Node):
 
 
             # left
-            if current_state == 2:
+            if carry == 1:
                 self.get_logger().info("左脇にあるボールを内側に取り込みます")
 
                 # 右側のガードを下げる
@@ -216,7 +216,7 @@ class BallIntakeNode(Node):
                 # time.sleep(WAIT_TIME_GUARD)
 
             # right
-            if current_state == 3:
+            if carry == 2:
                 self.get_logger().info("右脇にあるボールを内側に取り込みます")
 
                 # 左側のガードを下げる
@@ -268,6 +268,13 @@ class BallIntakeNode(Node):
         try:
             req = goal_handle.request
             res = BallIntake.Result()
+            res.next_state = req.current_state
+            res.next_carry = req.carry
+            res.next_push_state = req.push_state
+            res.next_shoot_angle_state = req.shoot_angle_state
+            res.next_is_left_arm_open = req.is_left_arm_open
+            res.next_is_right_arm_open = req.is_right_arm_open
+
             success = False
 
             success = await self.intake_ball(
@@ -278,13 +285,20 @@ class BallIntakeNode(Node):
             )
 
             if success:
+                if req.execute_mode == 1:
+                    res.next_push_state = Shoot_Push_State.GATE_HOLD.value
+                elif req.execute_mode == 2:
+                    res.next_push_state = Shoot_Push_State.LOADING.value
+
                 res.success = True
                 # 城門
                 if req.execute_mode == 1:
-                    res.next_state = 4  # INTAKE
+                    res.next_state = Mechanism_State.INTAKE_GATE.value
                 # 射出
                 elif req.execute_mode == 2:
-                    res.next_state = 5  # INTAKE
+                    res.next_state = Mechanism_State.INTAKE_SHOOT.value
+                
+                res.next_carry = BALL_CARRY.NOT.value
                 goal_handle.succeed()
             else:
                 goal_handle.abort()
