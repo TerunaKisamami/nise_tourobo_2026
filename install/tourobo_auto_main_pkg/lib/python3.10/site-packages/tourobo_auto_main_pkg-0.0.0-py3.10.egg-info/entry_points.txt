@@ -1,3 +1,0 @@
-[console_scripts]
-yolo_node = tourobo_auto_main_pkg.yolo_node:main
-
