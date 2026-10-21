@@ -1,0 +1,28 @@
+// generated from rosidl_adapter/resource/action.idl.em
+// with input from tourobo_2026_interfaces/action/MechanismReset.action
+// generated code does not contain a copyright notice
+
+
+module tourobo_2026_interfaces {
+  module action {
+    struct MechanismReset_Goal {
+      boolean execute;
+    };
+    struct MechanismReset_Result {
+      boolean success;
+
+      int32 next_state;
+
+      int32 next_carry;
+
+      int32 next_push_state;
+
+      boolean next_is_left_arm_open;
+
+      boolean next_is_right_arm_open;
+    };
+    struct MechanismReset_Feedback {
+      uint8 structure_needs_at_least_one_member;
+    };
+  };
+};

@@ -1,0 +1,9 @@
+/home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_interfaces/rosidl_adapter/tourobo_2026_interfaces:action/BallGet.idl
+/home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_interfaces/rosidl_adapter/tourobo_2026_interfaces:action/BallPutGate.idl
+/home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_interfaces/rosidl_adapter/tourobo_2026_interfaces:action/BallPutPlate.idl
+/home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_interfaces/rosidl_adapter/tourobo_2026_interfaces:action/BallShoot.idl
+/home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_interfaces/rosidl_adapter/tourobo_2026_interfaces:action/BallShootAim.idl
+/home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_interfaces/rosidl_adapter/tourobo_2026_interfaces:action/BallIntake.idl
+/home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_interfaces/rosidl_adapter/tourobo_2026_interfaces:action/BallArmOperation.idl
+/home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_interfaces/rosidl_adapter/tourobo_2026_interfaces:action/MechanismReset.idl
+/home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_interfaces/rosidl_adapter/tourobo_2026_interfaces:action/BallVomitPlate.idl

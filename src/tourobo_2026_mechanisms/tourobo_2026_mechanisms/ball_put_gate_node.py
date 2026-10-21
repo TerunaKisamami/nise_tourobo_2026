@@ -88,6 +88,9 @@ class BallPutGateNode(Node):
             set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MIN, CAN_BUS)
         time.sleep(WAIT_TIME_PUSH)
 
+        #ボールが転がるまでちょっと待つ
+        time.sleep(1.0)
+
          #ガードを戻す
         self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_OPEN)
         self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_OPEN)

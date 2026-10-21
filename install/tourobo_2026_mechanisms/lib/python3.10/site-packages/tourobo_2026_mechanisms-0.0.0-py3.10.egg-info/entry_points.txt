@@ -1,0 +1,13 @@
+[console_scripts]
+ball_arm_operation_node = tourobo_2026_mechanisms.ball_arm_operation_node:main
+ball_get_node = tourobo_2026_mechanisms.ball_get_node:main
+ball_intake_node = tourobo_2026_mechanisms.ball_intake_node:main
+ball_put_gate_node = tourobo_2026_mechanisms.ball_put_gate_node:main
+ball_put_plate_node = tourobo_2026_mechanisms.ball_put_plate_node:main
+ball_shoot_aim_node = tourobo_2026_mechanisms.ball_shoot_aim_node:main
+ball_shoot_node = tourobo_2026_mechanisms.ball_shoot_node:main
+ball_vomit_plate_node = tourobo_2026_mechanisms.ball_vomit_plate_node:main
+joy_mechanism_client = tourobo_2026_mechanisms.joy_mechanism_client:main
+mechanism_reset_node = tourobo_2026_mechanisms.mechanism_reset_node:main
+yolo_node = tourobo_2026_mechanisms.yolo_node:main
+

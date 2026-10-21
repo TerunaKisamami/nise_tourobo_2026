@@ -1,0 +1,29 @@
+running egg_info
+writing ../../build/tourobo_2026_mechanisms/tourobo_2026_mechanisms.egg-info/PKG-INFO
+writing dependency_links to ../../build/tourobo_2026_mechanisms/tourobo_2026_mechanisms.egg-info/dependency_links.txt
+writing entry points to ../../build/tourobo_2026_mechanisms/tourobo_2026_mechanisms.egg-info/entry_points.txt
+writing requirements to ../../build/tourobo_2026_mechanisms/tourobo_2026_mechanisms.egg-info/requires.txt
+writing top-level names to ../../build/tourobo_2026_mechanisms/tourobo_2026_mechanisms.egg-info/top_level.txt
+reading manifest file '../../build/tourobo_2026_mechanisms/tourobo_2026_mechanisms.egg-info/SOURCES.txt'
+writing manifest file '../../build/tourobo_2026_mechanisms/tourobo_2026_mechanisms.egg-info/SOURCES.txt'
+running build
+running build_py
+running install
+running install_lib
+running install_data
+running install_egg_info
+removing '/home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_mechanisms/lib/python3.10/site-packages/tourobo_2026_mechanisms-0.0.0-py3.10.egg-info' (and everything under it)
+Copying ../../build/tourobo_2026_mechanisms/tourobo_2026_mechanisms.egg-info to /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_mechanisms/lib/python3.10/site-packages/tourobo_2026_mechanisms-0.0.0-py3.10.egg-info
+running install_scripts
+Installing ball_arm_operation_node script to /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_mechanisms/lib/tourobo_2026_mechanisms
+Installing ball_get_node script to /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_mechanisms/lib/tourobo_2026_mechanisms
+Installing ball_intake_node script to /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_mechanisms/lib/tourobo_2026_mechanisms
+Installing ball_put_gate_node script to /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_mechanisms/lib/tourobo_2026_mechanisms
+Installing ball_put_plate_node script to /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_mechanisms/lib/tourobo_2026_mechanisms
+Installing ball_shoot_aim_node script to /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_mechanisms/lib/tourobo_2026_mechanisms
+Installing ball_shoot_node script to /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_mechanisms/lib/tourobo_2026_mechanisms
+Installing ball_vomit_plate_node script to /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_mechanisms/lib/tourobo_2026_mechanisms
+Installing joy_mechanism_client script to /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_mechanisms/lib/tourobo_2026_mechanisms
+Installing mechanism_reset_node script to /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_mechanisms/lib/tourobo_2026_mechanisms
+Installing yolo_node script to /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_mechanisms/lib/tourobo_2026_mechanisms
+writing list of installed files to '/home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_mechanisms/install.log'

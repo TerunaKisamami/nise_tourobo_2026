@@ -1,0 +1,72 @@
+running egg_info
+creating ../../build/tourobo_2026_foot/tourobo_2026_foot.egg-info
+writing ../../build/tourobo_2026_foot/tourobo_2026_foot.egg-info/PKG-INFO
+writing dependency_links to ../../build/tourobo_2026_foot/tourobo_2026_foot.egg-info/dependency_links.txt
+writing entry points to ../../build/tourobo_2026_foot/tourobo_2026_foot.egg-info/entry_points.txt
+writing requirements to ../../build/tourobo_2026_foot/tourobo_2026_foot.egg-info/requires.txt
+writing top-level names to ../../build/tourobo_2026_foot/tourobo_2026_foot.egg-info/top_level.txt
+writing manifest file '../../build/tourobo_2026_foot/tourobo_2026_foot.egg-info/SOURCES.txt'
+reading manifest file '../../build/tourobo_2026_foot/tourobo_2026_foot.egg-info/SOURCES.txt'
+writing manifest file '../../build/tourobo_2026_foot/tourobo_2026_foot.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_foot/build
+creating /home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_foot/build/lib
+creating /home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_foot/build/lib/tourobo_2026_foot
+copying tourobo_2026_foot/omni_pure_pursuit_action_node_v2.py -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_foot/build/lib/tourobo_2026_foot
+copying tourobo_2026_foot/follow_spline_node.py -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_foot/build/lib/tourobo_2026_foot
+copying tourobo_2026_foot/__init__.py -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_foot/build/lib/tourobo_2026_foot
+copying tourobo_2026_foot/robot_client_node.py -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_foot/build/lib/tourobo_2026_foot
+copying tourobo_2026_foot/publish_odometry_node.py -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_foot/build/lib/tourobo_2026_foot
+copying tourobo_2026_foot/subscribe_twist_node.py -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_foot/build/lib/tourobo_2026_foot
+copying tourobo_2026_foot/joy2twist_node.py -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_foot/build/lib/tourobo_2026_foot
+running install
+running install_lib
+creating /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/lib/python3.10/site-packages/tourobo_2026_foot
+copying /home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_foot/build/lib/tourobo_2026_foot/omni_pure_pursuit_action_node_v2.py -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/lib/python3.10/site-packages/tourobo_2026_foot
+copying /home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_foot/build/lib/tourobo_2026_foot/follow_spline_node.py -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/lib/python3.10/site-packages/tourobo_2026_foot
+copying /home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_foot/build/lib/tourobo_2026_foot/__init__.py -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/lib/python3.10/site-packages/tourobo_2026_foot
+copying /home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_foot/build/lib/tourobo_2026_foot/robot_client_node.py -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/lib/python3.10/site-packages/tourobo_2026_foot
+copying /home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_foot/build/lib/tourobo_2026_foot/publish_odometry_node.py -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/lib/python3.10/site-packages/tourobo_2026_foot
+copying /home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_foot/build/lib/tourobo_2026_foot/subscribe_twist_node.py -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/lib/python3.10/site-packages/tourobo_2026_foot
+copying /home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_foot/build/lib/tourobo_2026_foot/joy2twist_node.py -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/lib/python3.10/site-packages/tourobo_2026_foot
+byte-compiling /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/lib/python3.10/site-packages/tourobo_2026_foot/omni_pure_pursuit_action_node_v2.py to omni_pure_pursuit_action_node_v2.cpython-310.pyc
+byte-compiling /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/lib/python3.10/site-packages/tourobo_2026_foot/follow_spline_node.py to follow_spline_node.cpython-310.pyc
+byte-compiling /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/lib/python3.10/site-packages/tourobo_2026_foot/__init__.py to __init__.cpython-310.pyc
+byte-compiling /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/lib/python3.10/site-packages/tourobo_2026_foot/robot_client_node.py to robot_client_node.cpython-310.pyc
+byte-compiling /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/lib/python3.10/site-packages/tourobo_2026_foot/publish_odometry_node.py to publish_odometry_node.cpython-310.pyc
+byte-compiling /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/lib/python3.10/site-packages/tourobo_2026_foot/subscribe_twist_node.py to subscribe_twist_node.cpython-310.pyc
+byte-compiling /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/lib/python3.10/site-packages/tourobo_2026_foot/joy2twist_node.py to joy2twist_node.cpython-310.pyc
+running install_data
+creating /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/share/ament_index
+creating /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/share/ament_index/resource_index
+creating /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/share/ament_index/resource_index/packages
+copying resource/tourobo_2026_foot -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/share/ament_index/resource_index/packages
+copying package.xml -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/share/tourobo_2026_foot
+creating /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/share/tourobo_2026_foot/launch
+copying launch/navigation_launch.py -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/share/tourobo_2026_foot/launch
+copying launch/lidar_launch.py -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/share/tourobo_2026_foot/launch
+copying launch/action_nodes_launch.py -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/share/tourobo_2026_foot/launch
+copying launch/foot_launch.py -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/share/tourobo_2026_foot/launch
+copying launch/static_tf_launch.py -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/share/tourobo_2026_foot/launch
+copying launch/slam_bringup_launch.py -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/share/tourobo_2026_foot/launch
+creating /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/share/tourobo_2026_foot/config
+copying config/slam_params.yaml -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/share/tourobo_2026_foot/config
+copying config/ekf.yaml -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/share/tourobo_2026_foot/config
+copying config/nav2_params.yaml -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/share/tourobo_2026_foot/config
+copying config/omni_pure_pursuit_map.yaml -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/share/tourobo_2026_foot/config
+copying config/laser_filter.yaml -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/share/tourobo_2026_foot/config
+copying config/dyna_params.yaml -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/share/tourobo_2026_foot/config
+copying config/omni_pure_pursuit_odom.yaml -> /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/share/tourobo_2026_foot/config
+creating /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/share/tourobo_2026_foot/map
+creating /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/share/tourobo_2026_foot/path
+running install_egg_info
+Copying ../../build/tourobo_2026_foot/tourobo_2026_foot.egg-info to /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/lib/python3.10/site-packages/tourobo_2026_foot-0.0.0-py3.10.egg-info
+running install_scripts
+Installing follow_spline_node script to /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/lib/tourobo_2026_foot
+Installing joy2twist_node script to /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/lib/tourobo_2026_foot
+Installing omni_pure_pursuit_action_node script to /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/lib/tourobo_2026_foot
+Installing publish_odometry_node script to /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/lib/tourobo_2026_foot
+Installing robot_client_node script to /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/lib/tourobo_2026_foot
+Installing subscribe_twist_node script to /home/teruna-kisamami/robobobo/nise_tourobo_2026/install/tourobo_2026_foot/lib/tourobo_2026_foot
+writing list of installed files to '/home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_foot/install.log'

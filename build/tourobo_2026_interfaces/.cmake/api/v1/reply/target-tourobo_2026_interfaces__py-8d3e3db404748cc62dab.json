@@ -1,0 +1,79 @@
+{
+	"backtrace" : 1,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_custom_target"
+		],
+		"files" : 
+		[
+			"/home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_interfaces/tourobo_2026_interfaces__py/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 34,
+				"parent" : 0
+			}
+		]
+	},
+	"dependencies" : 
+	[
+		{
+			"id" : "tourobo_2026_interfaces::@6890427a1f51a3e7e1df"
+		}
+	],
+	"id" : "tourobo_2026_interfaces__py::@4ac91e197b2b8e3741e5",
+	"name" : "tourobo_2026_interfaces__py",
+	"paths" : 
+	{
+		"build" : "tourobo_2026_interfaces__py",
+		"source" : "/home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_interfaces/tourobo_2026_interfaces__py"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "",
+			"sourceIndexes" : 
+			[
+				0
+			]
+		},
+		{
+			"name" : "CMake Rules",
+			"sourceIndexes" : 
+			[
+				1,
+				2
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 1,
+			"isGenerated" : true,
+			"path" : "/home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_interfaces/tourobo_2026_interfaces__py/CMakeFiles/tourobo_2026_interfaces__py",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "/home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_interfaces/tourobo_2026_interfaces__py/CMakeFiles/tourobo_2026_interfaces__py.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "/home/teruna-kisamami/robobobo/nise_tourobo_2026/build/tourobo_2026_interfaces/rosidl_generator_py/tourobo_2026_interfaces/_tourobo_2026_interfaces_s.ep.rosidl_typesupport_fastrtps_c.c.rule",
+			"sourceGroupIndex" : 1
+		}
+	],
+	"type" : "UTILITY"
+}

@@ -1,0 +1,14 @@
+{
+  "package_name": "tourobo_2026_interfaces",
+  "non_idl_tuples": [
+    "/home/teruna-kisamami/robobobo/nise_tourobo_2026/src/tourobo_2026_interfaces:action/BallGet.action",
+    "/home/teruna-kisamami/robobobo/nise_tourobo_2026/src/tourobo_2026_interfaces:action/BallPutGate.action",
+    "/home/teruna-kisamami/robobobo/nise_tourobo_2026/src/tourobo_2026_interfaces:action/BallPutPlate.action",
+    "/home/teruna-kisamami/robobobo/nise_tourobo_2026/src/tourobo_2026_interfaces:action/BallShoot.action",
+    "/home/teruna-kisamami/robobobo/nise_tourobo_2026/src/tourobo_2026_interfaces:action/BallShootAim.action",
+    "/home/teruna-kisamami/robobobo/nise_tourobo_2026/src/tourobo_2026_interfaces:action/BallIntake.action",
+    "/home/teruna-kisamami/robobobo/nise_tourobo_2026/src/tourobo_2026_interfaces:action/BallArmOperation.action",
+    "/home/teruna-kisamami/robobobo/nise_tourobo_2026/src/tourobo_2026_interfaces:action/MechanismReset.action",
+    "/home/teruna-kisamami/robobobo/nise_tourobo_2026/src/tourobo_2026_interfaces:action/BallVomitPlate.action"
+  ]
+}

@@ -1,0 +1,3 @@
+[console_scripts]
+main_strategy_node = tourobo_2026_auto_strategy.main_strategy_node:main
+

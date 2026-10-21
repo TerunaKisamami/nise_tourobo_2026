@@ -1,0 +1,63 @@
+map_server:
+  ros__parameters:
+    use_sim_time: false
+    yaml_filename: "map_01.yaml"
+
+amcl:
+  ros__parameters:
+    # --- 座標系とフレーム ---
+    base_frame_id: "base_link"
+    global_frame_id: "map"
+    odom_frame_id: "odom"
+    scan_topic: "scan_filtered"
+    map_topic: "map"
+    
+    # --- オドメトリ信頼性 (alpha) : 小さくするほどオドメトリを信頼 ---
+    # EKFでIMUを統合している前提で、かなり絞っています
+    alpha1: 0.2  # 回転に伴う回転誤差
+    alpha2: 0.2  # 直進に伴う回転誤差
+    alpha3: 0.1  # 直進に伴う直進誤差
+    alpha4: 0.1  # 回転に伴う直進誤差
+    alpha5: 0.1  # オムニモデル用（Differentialでも記述して問題なし）
+
+    # --- 更新頻度 : 小さくするほど補正が滑らかになる ---
+    update_min_a: 0.01   # 約5.7度。旋回中のワープを防ぐ
+    update_min_d: 0.1  # 5cm。こまめに補正することで1回のジャンプ量を最小化
+    # --- 計測モデル (LIDAR) : フィールドの壁を強く信頼する設定 ---
+    laser_model_type: "likelihood_field"
+    z_hit: 0.90        # 地図（壁）と一致する確率。大幅にアップ
+    z_rand: 0.10       # ノイズの確率。大幅にダウン
+    z_max: 0.05
+    z_short: 0.05
+    sigma_hit: 0.1     # 0.2から0.1へ。一致判定をシビアにして精度向上
+    laser_likelihood_max_dist: 2.0
+    laser_max_range: 30.0  # 100mから短縮。フィールド外の誤検知をカット
+    laser_min_range: 0.2
+    max_beams: 60    # 計算負荷と精度のバランス
+
+    # --- 粒子フィルタの挙動 ---
+    min_particles: 1000
+    max_particles: 3000
+    pf_err: 0.05       # 収束判定を厳しく（0.05 -> 0.01）
+    pf_z: 0.99
+    resample_interval: 1
+    recovery_alpha_fast: 0.0
+    recovery_alpha_slow: 0.0
+
+    # --- システム・TF設定 ---
+    transform_tolerance: 0.2  # 1.0秒から短縮。TFの遅延による制御のガタつきを防止
+    tf_broadcast: true
+    save_pose_rate: 0.5
+    introspection_mode: "disabled"
+
+    # --- ロボットモデル ---
+    # 四輪オムニやメカナム等の全方位移動なら "nav2_amcl::OmniMotionModel" への変更も検討
+    robot_model_type: "nav2_amcl::OmniMotionModel"
+
+    # --- 初期姿勢 ---
+    set_initial_pose: true
+    initial_pose:
+      x: 0.01782
+      y: 0.0422
+      z: 0.0
+      yaw: 0.0
