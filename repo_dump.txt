@@ -1,0 +1,5263 @@
+
+
+===== FILE: src/tourobo_2026_auto_strategy/package.xml =====
+
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>tourobo_2026_auto_strategy</name>
+  <version>0.0.0</version>
+  <description>TODO: Package description</description>
+  <maintainer email="teruna1493kisamami@gmail.com">hatsu</maintainer>
+  <license>TODO: License declaration</license>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
+
+
+===== FILE: src/tourobo_2026_auto_strategy/setup.py =====
+
+from setuptools import find_packages, setup
+
+package_name = 'tourobo_2026_auto_strategy'
+
+setup(
+    name=package_name,
+    version='0.0.0',
+    packages=find_packages(exclude=['test']),
+    data_files=[
+        ('share/ament_index/resource_index/packages',
+            ['resource/' + package_name]),
+        ('share/' + package_name, ['package.xml']),
+    ],
+    install_requires=['setuptools'],
+    zip_safe=True,
+    maintainer='hatsu',
+    maintainer_email='teruna1493kisamami@gmail.com',
+    description='TODO: Package description',
+    license='TODO: License declaration',
+    extras_require={
+        'test': [
+            'pytest',
+        ],
+    },
+    entry_points={
+        'console_scripts': [
+            'main_strategy_node = tourobo_2026_auto_strategy.main_strategy_node:main',
+        ],
+    },
+)
+
+
+===== FILE: src/tourobo_2026_auto_strategy/test/test_copyright.py =====
+
+# Copyright 2015 Open Source Robotics Foundation, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+from ament_copyright.main import main
+import pytest
+
+
+# Remove the `skip` decorator once the source file(s) have a copyright header
+@pytest.mark.skip(reason='No copyright header has been placed in the generated source file.')
+@pytest.mark.copyright
+@pytest.mark.linter
+def test_copyright():
+    rc = main(argv=['.', 'test'])
+    assert rc == 0, 'Found errors'
+
+
+===== FILE: src/tourobo_2026_auto_strategy/test/test_flake8.py =====
+
+# Copyright 2017 Open Source Robotics Foundation, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+from ament_flake8.main import main_with_errors
+import pytest
+
+
+@pytest.mark.flake8
+@pytest.mark.linter
+def test_flake8():
+    rc, errors = main_with_errors(argv=[])
+    assert rc == 0, \
+        'Found %d code style errors / warnings:\n' % len(errors) + \
+        '\n'.join(errors)
+
+
+===== FILE: src/tourobo_2026_auto_strategy/test/test_pep257.py =====
+
+# Copyright 2015 Open Source Robotics Foundation, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+from ament_pep257.main import main
+import pytest
+
+
+@pytest.mark.linter
+@pytest.mark.pep257
+def test_pep257():
+    rc = main(argv=['.', 'test'])
+    assert rc == 0, 'Found code style errors / warnings'
+
+
+===== FILE: src/tourobo_2026_auto_strategy/tourobo_2026_auto_strategy/__init__.py =====
+
+
+
+===== FILE: src/tourobo_2026_auto_strategy/tourobo_2026_auto_strategy/main_strategy_node.py =====
+
+import rclpy
+from rclpy.node import Node
+from enum import Enum, auto
+
+# 仮想的なインターフェースのインポート例 (実際のものに書き換えてください)
+# from tourobo_2026_interfaces.action import BallGet
+# from rclpy.action import ActionClient
+
+#自動機の状態遷移を制御するプログラム
+
+#各状態
+class StrategyState(Enum):
+    #初期
+    INIT = auto()
+    
+    SEARCHING_BALL = auto()
+    MOVING_TO_BALL = auto()
+    GETTING_BALL = auto()
+    READY_TO_SHOOT = auto()
+
+class MainStrategyNode(Node):
+    def __init__(self):
+        super().__init__('main_strategy_node')
+        self.get_logger().info('自動制御(戦略)ノードが起動しました。')
+        
+        # 現在の状態を保持
+        self.current_state = StrategyState.INIT
+        
+        # 状態遷移を管理するタイマー（ここでは 0.1秒 = 10Hz で回す例）
+        self.timer = self.create_timer(0.1, self.strategy_loop)
+        
+        # 必要なAction ClientやSubscriber、Publisherを初期化する
+        # self.ball_get_client = ActionClient(self, BallGet, 'ball_get')
+        # self.camera_sub = self.create_subscription(...)
+
+    def strategy_loop(self):
+        """
+        一定周期で呼ばれ、現在の状態に応じた処理と状態遷移（ステートマシン）を行う
+        """
+        if self.current_state == StrategyState.INIT:
+            # throttle_duration_secを指定すると、毎回出力されず指定秒数に1回だけ出力されます(ログのスパム防止)
+            self.get_logger().info('状態: 初期化処理中...', throttle_duration_sec=2.0)
+            
+            # 初期化(各種センサーの起動待ちなど)が完了したと仮定して次の状態へ
+            self.current_state = StrategyState.SEARCHING_BALL
+            
+        elif self.current_state == StrategyState.SEARCHING_BALL:
+            self.get_logger().info('状態: ボールを探索中...', throttle_duration_sec=2.0)
+            
+            # TODO: センサーやカメラからの情報(Subscriber)を元に判断する
+            # 例:
+            # if self.is_ball_found:
+            #     self.current_state = StrategyState.MOVING_TO_BALL
+            
+        elif self.current_state == StrategyState.MOVING_TO_BALL:
+            self.get_logger().info('状態: ボールへ移動中...', throttle_duration_sec=2.0)
+            # TODO: モーター駆動系への目標値パブリッシュなど
+            
+        elif self.current_state == StrategyState.GETTING_BALL:
+            self.get_logger().info('状態: ボール回収アクション実行中...', throttle_duration_sec=2.0)
+            # TODO: Actionを投げて、完了結果が返ってくるのを待つ
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = MainStrategyNode()
+    
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+
+
+===== FILE: src/tourobo_2026_foot/config/dyna_params.yaml =====
+
+dyna_handler_node:
+  ros__parameters:
+    port_name: "/dev/ttyUSB-Dynamixel"
+    motor_ids: [0, 1, 2, 3, 4]
+    motors:
+      id0:
+        operating_mode: 4
+      id1:
+        operating_mode: 4
+      id2:
+        operating_mode: 4
+      id3:
+        operating_mode: 4
+      id4:
+        operating_mode: 4
+
+
+===== FILE: src/tourobo_2026_foot/config/ekf.yaml =====
+
+### ekf.yaml ###
+ekf_filter_node:
+  ros__parameters:
+    frequency: 100.0       # フィルタの更新頻度 (Hz)
+    two_d_mode: true      # 2DロボットなのでTrue (Z軸, Roll, Pitchを無視)
+    publish_tf: true      # odom -> base_link のTFを配信する
+    listens_to_initialpose: true
+
+    # フレーム設定
+    map_frame: map
+    odom_frame: odom
+    base_link_frame: base_link
+    world_frame: odom     # odomフレームを基準にする
+
+    # --- オドメトリ設定 (/odom) ---
+    # Pythonノードが出力しているトピック名に合わせてください
+    odom0: /odom
+    
+    # [x, y, z, 
+    #  roll, pitch, yaw, 
+    #  vx, vy, vz, 
+    #  vroll, vpitch, vyaw, 
+    #  ax, ay, az]
+    
+    # vx,vyのみ
+    odom0_config: [false, false, false,
+                   false, false, false,
+                   true,  true,  false,
+                   false, false, false,
+                   false, false, false]
+                   
+    # オドメトリの共分散を使用するか (Python側で設定したのでtrue推奨)
+    odom0_differential: false
+    odom0_queue_size: 10
+
+    imu0: /imu/data
+    # --- IMU設定 (/imu/data) ---
+    
+    # yawとvyawのみ
+    imu0_config: [false, false, false,
+                  false, false, true,
+                  false, false, false,
+                  false, false, true,
+                  false,  false, false] 
+                  
+    imu0_differential: true
+    imu0_relative: false
+    imu0_queue_size: 10
+    
+    # IMUの加速度から重力を除去するか
+    imu0_remove_gravitational_acceleration: true
+
+
+===== FILE: src/tourobo_2026_foot/config/laser_filter.yaml =====
+
+scan_to_scan_filter_chain:
+  ros__parameters:
+    filter1:
+      name: box_filter
+      type: laser_filters/LaserScanBoxFilter
+      params:
+        box_frame: base_link
+        invert: false
+        max_x: 0.4
+        max_y: 0.22
+        max_z: 1.0 
+        min_x: -0.4
+        min_y: -0.22
+        min_z: -1.0
+
+
+
+===== FILE: src/tourobo_2026_foot/config/nav2_params.yaml =====
+
+map_server:
+  ros__parameters:
+    use_sim_time: false
+    yaml_filename: "map_01.yaml"
+
+amcl:
+  ros__parameters:
+    # --- 座標系とフレーム ---
+    base_frame_id: "base_link"
+    global_frame_id: "map"
+    odom_frame_id: "odom"
+    scan_topic: "scan_filtered"
+    map_topic: "map"
+    
+    # --- オドメトリ信頼性 (alpha) : 小さくするほどオドメトリを信頼 ---
+    # EKFでIMUを統合している前提で、かなり絞っています
+    alpha1: 0.2  # 回転に伴う回転誤差
+    alpha2: 0.2  # 直進に伴う回転誤差
+    alpha3: 0.1  # 直進に伴う直進誤差
+    alpha4: 0.1  # 回転に伴う直進誤差
+    alpha5: 0.1  # オムニモデル用（Differentialでも記述して問題なし）
+
+    # --- 更新頻度 : 小さくするほど補正が滑らかになる ---
+    update_min_a: 0.01   # 約5.7度。旋回中のワープを防ぐ
+    update_min_d: 0.1  # 5cm。こまめに補正することで1回のジャンプ量を最小化
+    # --- 計測モデル (LIDAR) : フィールドの壁を強く信頼する設定 ---
+    laser_model_type: "likelihood_field"
+    z_hit: 0.90        # 地図（壁）と一致する確率。大幅にアップ
+    z_rand: 0.10       # ノイズの確率。大幅にダウン
+    z_max: 0.05
+    z_short: 0.05
+    sigma_hit: 0.1     # 0.2から0.1へ。一致判定をシビアにして精度向上
+    laser_likelihood_max_dist: 2.0
+    laser_max_range: 30.0  # 100mから短縮。フィールド外の誤検知をカット
+    laser_min_range: 0.2
+    max_beams: 60    # 計算負荷と精度のバランス
+
+    # --- 粒子フィルタの挙動 ---
+    min_particles: 1000
+    max_particles: 3000
+    pf_err: 0.05       # 収束判定を厳しく（0.05 -> 0.01）
+    pf_z: 0.99
+    resample_interval: 1
+    recovery_alpha_fast: 0.0
+    recovery_alpha_slow: 0.0
+
+    # --- システム・TF設定 ---
+    transform_tolerance: 0.2  # 1.0秒から短縮。TFの遅延による制御のガタつきを防止
+    tf_broadcast: true
+    save_pose_rate: 0.5
+    introspection_mode: "disabled"
+
+    # --- ロボットモデル ---
+    # 四輪オムニやメカナム等の全方位移動なら "nav2_amcl::OmniMotionModel" への変更も検討
+    robot_model_type: "nav2_amcl::OmniMotionModel"
+
+    # --- 初期姿勢 ---
+    set_initial_pose: true
+    initial_pose:
+      x: 0.01782
+      y: 0.0422
+      z: 0.0
+      yaw: 0.0
+
+
+===== FILE: src/tourobo_2026_foot/config/omni_pure_pursuit_map.yaml =====
+
+pure_pursuit_map:
+  ros__parameters:
+    global_frame: "map"
+    robot_frame: "base_link"
+    action_name: "follow_path_map"
+
+    max_linear_vel: 2.0
+    accel_limit: 0.5
+
+    min_lookahead_dist: 0.2
+    lookahead_gain: 0.2
+
+    max_angular_vel: 0.6
+    kp_yaw: 2.0
+
+    goal_tolerance: 0.005
+    yaw_tolerance: 0.02
+
+    v_floor: 0.2
+    v_min_push: 0.02
+
+    min_vel_enforce_dist: 0.3
+
+    control_frequency: 50.0
+
+    # --- その他設定（必要に応じてプログラム側で追加・利用可能） ---
+    use_sim_time: False
+
+
+===== FILE: src/tourobo_2026_foot/config/omni_pure_pursuit_odom.yaml =====
+
+pure_pursuit_odom:
+  ros__parameters:
+    global_frame: "odom"
+    robot_frame: "base_link"
+    action_name: "follow_path_odom"
+
+    max_linear_vel: 0.3
+    accel_limit: 0.1
+
+    min_lookahead_dist: 0.1
+    lookahead_gain: 0.1
+
+    max_angular_vel: 0.6
+    kp_yaw: 2.0
+
+    goal_tolerance: 0.005
+    yaw_tolerance: 0.02
+
+    v_floor: 0.2
+    v_min_push: 0.02
+
+    min_vel_enforce_dist: 0.3
+
+    control_frequency: 50.0
+
+    # --- その他設定（必要に応じてプログラム側で追加・利用可能） ---
+    use_sim_time: False
+
+
+===== FILE: src/tourobo_2026_foot/config/slam_params.yaml =====
+
+slam_toolbox:
+  ros__parameters:
+    # --------------------------------------------------------
+    # 1. フレーム・トピック設定
+    # --------------------------------------------------------
+    odom_frame: odom
+    map_frame: map
+    base_frame: base_link        # URDFのルートリンク名と一致させること
+    scan_topic: /scan
+    mode: mapping                # 地図生成モード (自己位置推定のみなら 'localization')
+
+    # --------------------------------------------------------
+    # 2. 地図更新のしきい値
+    # --------------------------------------------------------
+    # ロボットがこれだけ動いた時だけスキャンマッチング・地図更新が走る
+    # テスト中は小さく、本番マッピングでは大きくするとCPU負荷が下がる
+    minimum_travel_distance: 0.3      # [m]   テスト時: 0.01
+    minimum_travel_heading: 0.26      # [rad] テスト時: 0.01 (~15度)
+
+    # --------------------------------------------------------
+    # 3. 処理・発行周期
+    # --------------------------------------------------------
+    transform_publish_period: 0.01    # TF発行周期 [秒] = 100Hz (小さいほどNav2が安定)
+    map_update_interval: 0.1          # 地図配信間隔 [秒] = 10Hz
+    resolution: 0.05                  # グリッド解像度 [m/cell] (精度重視: 0.03 / 軽量化: 0.1)
+    tf_buffer_duration: 30.0          # TFバッファ保持時間 [秒] (bag再生・シミュレーションで重要)
+
+    # --------------------------------------------------------
+    # 4. LiDARレンジ設定 (使用するLiDARのスペックに合わせること)
+    # --------------------------------------------------------
+    max_laser_range: 20.0             # LiDARの最大距離 [m]
+    min_laser_range: 0.15             # 近距離ノイズ除去のため0より大きい値を推奨 [m]
+
+    # --------------------------------------------------------
+    # 5. スキャンバッファ設定
+    # --------------------------------------------------------
+    scan_buffer_size: 10                       # マッチングに使うスキャン履歴数 (1は不安定、10〜20推奨)
+    scan_buffer_maximum_scan_distance: 10.0    # バッファに入れるスキャンの最大距離 [m]
+
+    # --------------------------------------------------------
+    # 6. スキャンマッチング
+    # --------------------------------------------------------
+    use_scan_matching: true
+    use_scan_barycenter: true
+
+    # --------------------------------------------------------
+    # 7. ループクロージャー設定
+    # --------------------------------------------------------
+    do_loop_closing: true
+    loop_search_maximum_distance: 3.0      # ループ候補を探す範囲 [m] (環境の広さに合わせて調整)
+    loop_match_minimum_response_fine: 0.45
+    loop_match_maximum_variance_coarse: 3.0
+
+    # --------------------------------------------------------
+    # 8. ソルバー設定 (基本はいじらなくてOK)
+    # --------------------------------------------------------
+    solver_plugin: solver_plugins::CeresSolver
+    ceres_linear_solver: SPARSE_NORMAL_CHOLESKY
+    ceres_preconditioner: SCHUR_JACOBI
+    ceres_trust_strategy: LEVENBERG_MARQUARDT
+    ceres_dogleg_type: TRADITIONAL_DOGLEG
+
+
+===== FILE: src/tourobo_2026_foot/launch/action_nodes_launch.py =====
+
+"""
+action nodeを立ち上げるlaunch
+"""
+
+import os
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, GroupAction, TimerAction
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch_ros.substitutions import FindPackageShare
+from launch_ros.actions import Node, PushRosNamespace
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+
+
+def generate_launch_description():
+    robot_package_name = "tourobo_2026_base"
+    ld = LaunchDescription()
+    pkg_dir = get_package_share_directory(robot_package_name)
+
+    map_pure_pursuit_config_path = os.path.join(pkg_dir, "config",
+                                                "omni_pure_pursuit_map.yaml")
+    odom_pure_pursuit_config_path = os.path.join(pkg_dir, "config",
+                                                 "omni_pure_pursuit_odom.yaml")
+
+    # ---- action node ----
+    pure_pursuit_map_node = Node(
+        package=robot_package_name,
+        executable="omni_pure_pursuit_action_node_v2",
+        name="pure_pursuit_map",
+        parameters=[map_pure_pursuit_config_path],
+    )
+
+    pure_pursuit_odom_node = Node(
+        package=robot_package_name,
+        executable="omni_pure_pursuit_action_node_v2",
+        name="pure_pursuit_odom",
+        parameters=[odom_pure_pursuit_config_path],
+    )
+
+    ld.add_action(pure_pursuit_map_node)
+    ld.add_action(pure_pursuit_odom_node)
+
+
+===== FILE: src/tourobo_2026_foot/launch/foot_launch.py =====
+
+"""
+基本となるnodeを立ち上げるlaunch
+  subscribe_twist_node
+  publish_odometry_node
+  joy2twist_node
+  ekf_node
+  dyna_node
+"""
+import os
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, GroupAction, TimerAction
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch_ros.substitutions import FindPackageShare
+from launch_ros.actions import Node, PushRosNamespace
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+
+
+def generate_launch_description():
+    robot_package_name = "tourobo_2026_foot"
+    ld = LaunchDescription()
+
+    # ---- Params ----
+    pkg_dir = get_package_share_directory(robot_package_name)
+
+    ekf_config_path = os.path.join(pkg_dir, "config", "ekf.yaml")
+    dyna_config_path = os.path.join(pkg_dir, "config", "dyna_params.yaml")
+
+    # ノード定義
+    sub_twist_node = Node(
+        package=robot_package_name,
+        executable="subscribe_twist_node",
+    )
+
+    pub_odometry_node = Node(
+        package=robot_package_name,
+        executable="publish_odometry_node",
+    )
+
+    joy2twist_node = Node(
+        package=robot_package_name,
+        executable="joy2twist_node",
+    )
+
+
+    ekf_node = Node(
+        package="robot_localization",
+        executable="ekf_node",
+        name="ekf_filter_node",
+        parameters=[ekf_config_path],
+    )
+
+    dyna_node = Node(
+        package="ah_ros2_dynamixel",
+        executable="dyna_handler_node_v2",
+        parameters=[dyna_config_path],
+    )
+
+    ld.add_action(sub_twist_node)
+    ld.add_action(pub_odometry_node)
+    ld.add_action(ekf_node)
+    ld.add_action(joy2twist_node)
+    ld.add_action(dyna_node)
+
+    return ld
+
+
+===== FILE: src/tourobo_2026_foot/launch/lidar_launch.py =====
+
+"""
+lidar関連nodeを立ち上げるlaunch
+"""
+
+import os
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, GroupAction, TimerAction
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch_ros.substitutions import FindPackageShare
+from launch_ros.actions import Node, PushRosNamespace
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+
+
+def generate_launch_description():
+    robot_package_name = "tourobo_2026_foot"
+    ld = LaunchDescription()
+    package_dir = get_package_share_directory(robot_package_name)
+
+    lidar_launch = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(get_package_share_directory('urg_node2'), 'launch', 'urg_node2.launch.py')
+            )
+    )
+
+    ld.add_action(lidar_launch)
+
+    return ld
+
+
+===== FILE: src/tourobo_2026_foot/launch/navigation_launch.py =====
+
+"""
+navigationを開始するメインlaunch
+"""
+
+import os
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, GroupAction, TimerAction
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch_ros.substitutions import FindPackageShare
+from launch_ros.actions import Node, PushRosNamespace
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+
+
+def generate_launch_description():
+    robot_package_name = "tourobo_2026_base"
+    ld = LaunchDescription()
+    pkg_dir = get_package_share_directory(robot_package_name)
+
+    map_file_path = os.path.join(pkg_dir, "map", "map.yaml")
+    nav2_params_path = os.path.join(pkg_dir, "config", "nav2_params.yaml")
+
+    # ---- launchs  -----
+    base_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([pkg_dir, '/launch/base_launch.py']))
+
+    lidar_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([pkg_dir, '/launch/lidar_launch.py']))
+
+    static_tf_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([pkg_dir, '/launch/static_tf_launch.py']))
+
+    action_nodes_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            [pkg_dir, '/launch/action_nodes_launch.py']))
+
+    # map server node
+    map_server_node = Node(
+        package="nav2_map_server",
+        executable="map_server",
+        name="map_server",
+        parameters=[nav2_params_path, {
+            "yaml_filename": map_file_path
+        }],
+    )
+
+    # amcl
+    amcl_node = Node(package="nav2_amcl",
+                     executable="amcl",
+                     parameters=[nav2_params_path])
+
+    # life cycle node
+    lifecycle_manager_node = Node(
+        package="nav2_lifecycle_manager",
+        executable="lifecycle_manager",
+        name="lifecycle_manager_control",
+        output="screen",
+        parameters=[{
+            "autostart": True,
+            "node_names": ["map_server", "amcl"],
+            "bond_timeout": 0.0,
+        }],
+    )
+
+    ld.add_action(amcl_node)
+    ld.add_action(map_server_node)
+    ld.add_action(lifecycle_manager_node)
+
+    ld.add_action(base_launch)
+    ld.add_action(lidar_launch)
+    ld.add_action(static_tf_launch)
+    ld.add_action(action_nodes_launch)
+
+    return ld
+
+
+===== FILE: src/tourobo_2026_foot/launch/slam_bringup_launch.py =====
+
+"""
+slamを開始するメインlaunch
+"""
+import os
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, GroupAction, TimerAction
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch_ros.substitutions import FindPackageShare
+from launch_ros.actions import Node, PushRosNamespace
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+
+
+def generate_launch_description():
+    robot_package_name = "tourobo_2026_base"
+    ld = LaunchDescription()
+    pkg_dir = get_package_share_directory(robot_package_name)
+
+    #---- Params ----
+    # SLAM用パラメータ
+    slam_params = PathJoinSubstitution([pkg_dir, "config", "slam_params.yaml"])
+
+    # ---- launchs  -----
+    base_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([pkg_dir, '/launch/base_launch.py']))
+
+    lidar_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([pkg_dir, '/launch/lidar_launch.py']))
+
+    static_tf_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([pkg_dir, '/launch/static_tf_launch.py']))
+
+    action_nodes_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            [pkg_dir, '/launch/action_nodes_launch.py']))
+
+    # ----ノード定義----
+    joy_node = Node(
+        package="joy_linux",
+        executable="joy_linux_node",
+    )
+
+    slam_tool_box = Node(
+        package="slam_toolbox",
+        executable="async_slam_toolbox_node",
+        name="slam_toolbox",
+        output="screen",
+        parameters=[slam_params],
+        remappings=[("/scan", "/scan_filtered")],
+    )
+
+    ld.add_action(joy_node)
+    ld.add_action(slam_tool_box)
+
+    ld.add_action(base_launch)
+    ld.add_action(lidar_launch)
+    ld.add_action(static_tf_launch)
+    ld.add_action(action_nodes_launch)
+
+    return ld
+
+
+===== FILE: src/tourobo_2026_foot/launch/static_tf_launch.py =====
+
+"""
+静的tfを立ち上げるlaunch
+base_link->lidar
+base_link->footprint
+base_link->imu_link
+"""
+
+import os
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, GroupAction, TimerAction
+from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node, PushRosNamespace
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+
+
+def generate_launch_description():
+    robot_package_name = "tourobo_2026_foot"
+    ld = LaunchDescription()
+    pkg_dir = get_package_share_directory(robot_package_name)
+
+    # ---- 静的tfの配信----
+    static_tf_hokuyo = Node(
+        package="tf2_ros",
+        executable="static_transform_publisher",
+        output="screen",
+        arguments=[
+            "-0.310",        #x
+            "0.0",           #y    
+            "0.0",           #z
+            "3.1416",        #roll
+            "0.0",           #pitch
+            "0.0",           #yaw
+            "base_link",
+            "laser",
+        ],
+    )
+
+    # base_link -> base_footprint
+    static_transform_publisher_footprint_node = Node(
+        package="tf2_ros",
+        executable="static_transform_publisher",
+        output="screen",
+        arguments=[
+            "0.0",
+            "0.0",
+            "0.0",
+            "0.0",
+            "0.0",
+            "0.0",
+            "base_link",
+            "base_footprint",
+        ],
+    )
+
+    # base_link->imu_link
+    static_transform_publisher_imu_node = Node(
+        package="tf2_ros",
+        executable="static_transform_publisher",
+        arguments=[
+            "-0.310",
+            "0.0",
+            "0.0",
+            "0.0",
+            "0.0",
+            "0.0",
+            "base_link",
+            "imu_link",
+        ])
+
+    ld.add_action(static_tf_hokuyo)
+    ld.add_action(static_transform_publisher_imu_node)
+    ld.add_action(static_transform_publisher_footprint_node)
+
+    return ld
+
+
+===== FILE: src/tourobo_2026_foot/package.xml =====
+
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>tourobo_2026_foot</name>
+  <version>0.0.0</version>
+  <description>TODO: Package description</description>
+  <maintainer email="aratahorie89@gmail.com">aratahorie</maintainer>
+  <license>TODO: License declaration</license>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
+
+
+===== FILE: src/tourobo_2026_foot/setup.py =====
+
+from setuptools import find_packages, setup
+import os
+from glob import glob
+
+package_name = 'tourobo_2026_foot'
+
+setup(
+    name=package_name,
+    version='0.0.0',
+    packages=find_packages(exclude=['test']),
+    data_files=[
+        ('share/ament_index/resource_index/packages',
+         ['resource/' + package_name]),
+        ('share/' + package_name, ['package.xml']),
+        (os.path.join("share", package_name, "launch"), glob("launch/*.py")),
+        (os.path.join("share", package_name, "config"), glob("config/*.yaml")),
+        (os.path.join("share", package_name, "map"), glob("map/*")),
+        (os.path.join("share", package_name, "path"), glob("path/*")),
+    ],
+    install_requires=['setuptools'],
+    zip_safe=True,
+    maintainer='aratahorie',
+    maintainer_email='aratahorie89@gmail.com',
+    description='TODO: Package description',
+    license='TODO: License declaration',
+    extras_require={
+        'test': ['pytest',],
+    },
+    entry_points={
+        'console_scripts': [
+            "subscribe_twist_node = tourobo_2026_foot.subscribe_twist_node:main",
+            "joy2twist_node = tourobo_2026_foot.joy2twist_node:main",
+            "publish_odometry_node = tourobo_2026_foot.publish_odometry_node:main",
+            "follow_spline_node = tourobo_2026_foot.follow_spline_node:main",
+            "omni_pure_pursuit_action_node = tourobo_2026_foot.omni_pure_pursuit_action_node_v2:main",
+            "robot_client_node = tourobo_2026_foot.robot_client_node:main",
+        ],
+    },
+)
+
+
+===== FILE: src/tourobo_2026_foot/test/test_copyright.py =====
+
+# Copyright 2015 Open Source Robotics Foundation, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+from ament_copyright.main import main
+import pytest
+
+
+# Remove the `skip` decorator once the source file(s) have a copyright header
+@pytest.mark.skip(reason='No copyright header has been placed in the generated source file.')
+@pytest.mark.copyright
+@pytest.mark.linter
+def test_copyright():
+    rc = main(argv=['.', 'test'])
+    assert rc == 0, 'Found errors'
+
+
+===== FILE: src/tourobo_2026_foot/test/test_flake8.py =====
+
+# Copyright 2017 Open Source Robotics Foundation, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+from ament_flake8.main import main_with_errors
+import pytest
+
+
+@pytest.mark.flake8
+@pytest.mark.linter
+def test_flake8():
+    rc, errors = main_with_errors(argv=[])
+    assert rc == 0, \
+        'Found %d code style errors / warnings:\n' % len(errors) + \
+        '\n'.join(errors)
+
+
+===== FILE: src/tourobo_2026_foot/test/test_pep257.py =====
+
+# Copyright 2015 Open Source Robotics Foundation, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+from ament_pep257.main import main
+import pytest
+
+
+@pytest.mark.linter
+@pytest.mark.pep257
+def test_pep257():
+    rc = main(argv=['.', 'test'])
+    assert rc == 0, 'Found code style errors / warnings'
+
+
+===== FILE: src/tourobo_2026_foot/tourobo_2026_foot/__init__.py =====
+
+
+
+===== FILE: src/tourobo_2026_foot/tourobo_2026_foot/follow_spline_node.py =====
+
+"""
+1点目、2点目はclicked_pointを受け取る
+3点目のみgoal_poseをうけとり、最終的にyaw角も合わせる
+"""
+
+import rclpy
+from rclpy.node import Node
+from rclpy.action import ActionClient
+from geometry_msgs.msg import PointStamped, PoseStamped
+from nav_msgs.msg import Path
+from nav2_msgs.action import FollowPath
+import numpy as np
+from scipy.interpolate import CubicSpline
+from scipy.spatial.transform import Rotation as R
+import math
+
+
+class RvizSplineFollower(Node):
+
+    def __init__(self):
+        super().__init__("rviz_spline_follower")
+
+        self.points = []
+
+        # publish pointの受取
+        self.point_sub = self.create_subscription(PointStamped,
+                                                  "/clicked_point",
+                                                  self.point_callback, 10)
+
+        # 3点目を受け取るサブスクライバ
+        self.goal_sub = self.create_subscription(PoseStamped, "/goal_pose",
+                                                 self.goal_callback, 10)
+
+        self.path_pub = self.create_publisher(Path, "/visual_spline_path", 10)
+        self._action_client = ActionClient(self, FollowPath, "follow_path_map")
+
+        self.get_logger().info("RVizでpublish_pointを3回クリックしてください")
+
+    def point_callback(self, msg):
+        """rviz_publish_pointがクリックされると呼び出し
+
+        Args:
+            msg
+        """
+
+        if len(self.points) < 2:
+            self.points.append([msg.point.x, msg.point.y])
+            self.get_logger().info(f"地点追加: {len(self.points)}点目")
+
+    def goal_callback(self, msg):
+        if len(self.points) != 2:
+            self.get_logger().warn("先に通過点を2点クリックしてください")
+            return
+        self.points.append([msg.pose.position.x, msg.pose.position.y])
+
+        q = msg.pose.orientation
+        final_yaw = math.atan2(2.0 * (q.w * q.z + q.x * q.y),
+                               1.0 - 2.0 * (q.y * q.y + q.z * q.z))
+
+        self.get_logger().info("終点と向きを受理、経路を生成します")
+        path_msg = self.generate_path(self.points, final_yaw)
+        self.path_pub.publish(path_msg)
+        self.send_goal(path_msg)
+        self.points = []
+
+    def generate_path(self, pts, final_yaw):
+        """pathをスプライン補完で生成
+
+        Args:
+            pts ([]): [list]
+        """
+        pts = np.array(pts)
+        t = np.array([0, 1, 2])
+        cs = CubicSpline(t, pts, bc_type="natural")
+
+        t_fine = np.linspace(0, 2, 50)
+        smooth_pts = cs(t_fine)
+
+        path = Path()
+        path.header.frame_id = "map"
+        path.header.stamp = self.get_clock().now().to_msg()
+
+        for i in range(len(smooth_pts)):
+            pose = PoseStamped()
+            pose.header = path.header
+            x, y = float(smooth_pts[i][0]), float(smooth_pts[i][1])
+            pose.pose.position.x = x
+            pose.pose.position.y = y
+
+            if i < len(smooth_pts) - 1:
+                next_x = float(smooth_pts[i + 1][0])
+                next_y = float(smooth_pts[i + 1][1])
+                #yaw = math.atan2(next_y - y, next_x - x)  #全方向移動台車であれば、yawは指定しない
+            else:
+                yaw = final_yaw
+                quat = R.from_euler("z", yaw).as_quat()
+
+                (
+                    pose.pose.orientation.x,
+                    pose.pose.orientation.y,
+                    pose.pose.orientation.z,
+                    pose.pose.orientation.w,
+                ) = quat
+
+            path.poses.append(pose)
+
+        return path
+
+    def send_goal(self, path_msg):
+        if not self._action_client.wait_for_server(timeout_sec=1.0):
+            return
+        goal_msg = FollowPath.Goal()
+        goal_msg.path = path_msg
+        goal_msg.controller_id = "FollowPath"
+        self._action_client.send_goal_async(goal_msg)
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    rclpy.spin(RvizSplineFollower())
+    rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+
+
+===== FILE: src/tourobo_2026_foot/tourobo_2026_foot/joy2twist_node.py =====
+
+"""joyを受け取って、twistをpubilshする
+"""
+
+import rclpy
+from rclpy.node import Node
+from std_msgs.msg import String
+from sensor_msgs.msg import Joy, Imu
+import math
+import numpy as np
+from geometry_msgs.msg import TransformStamped, Twist
+from tf2_ros import TransformBroadcaster
+from nav_msgs.msg import Odometry
+from rclpy.qos import QoSProfile,ReliabilityPolicy,HistoryPolicy
+
+import tf_transformations
+from tf_transformations import euler_from_quaternion
+
+from dyna_interfaces.msg import DynaFeedback, DynaTarget
+
+
+def rot(vec, theta):
+    vec = vec.reshape(-1, 1)
+
+    cos, sin = np.cos(theta), np.sin(theta)
+
+    R = np.array([
+        [cos, sin],
+        [-sin, cos],
+    ])
+
+    return R @ vec
+
+
+class Joy2Twist(Node):
+
+    def __init__(self):
+        super().__init__("joy2twist")
+
+        qos_profile = QoSProfile(
+                reliability=ReliabilityPolicy.BEST_EFFORT,
+                history=HistoryPolicy.KEEP_LAST,
+                depth=1
+                )
+        self.subscription_joy = self.create_subscription(
+            Joy,  # メッセージの型
+            "/joy",  # 購読するトピック名
+            self.joy_callback,  # 呼び出すコールバック関数
+            qos_profile,
+        )
+        self.subscription_joy
+
+        self.twist_publisher = self.create_publisher(Twist, "/cmd_vel", 10)
+
+        self.subscription_imu = self.create_subscription(
+            Imu,
+            "imu/data",
+            self.imu_callback,
+            10,
+        )
+        self.subscription_imu
+        self.yaw_rad = 0
+
+        # -----robot parameter-----
+        self.twist_x_gain = 1.0
+        self.twist_y_gain = 1.0
+        self.omega_gain = 1.0
+
+    def imu_callback(self, msg):
+        q = msg.orientation
+
+        euler = tf_transformations.euler_from_quaternion([q.x, q.y, q.z, q.w])
+        self.yaw_rad = euler[2]
+
+    def joy_callback(self, msg):
+        axes_values = msg.axes
+
+        if abs(axes_values[1]) < 0.1:
+            axes_values[1] = 0
+        if abs(axes_values[0]) < 0.1:
+            axes_values[0] = 0
+        if abs(axes_values[3]) < 0.1:
+            axes_values[3] = 0
+
+        twist_y = axes_values[0] * self.twist_y_gain
+        twist_x = axes_values[1] * self.twist_x_gain
+        w = axes_values[3] * self.omega_gain
+
+        twist = Twist()
+        v = np.array([twist_x, twist_y])
+        Rv = rot(v, self.yaw_rad)
+
+        twist.linear.x = float(Rv[0])
+        twist.linear.y = float(Rv[1])
+        twist.angular.z = axes_values[3]
+
+        #twist.linear.x = twist_x
+        #twist.linear.y = twist_y
+        #twist.angular.z = w
+
+        self.twist_publisher.publish(twist)
+
+
+def main():
+    rclpy.init()  # rclpyライブラリの初期化
+
+    joy2twist_node = Joy2Twist()
+
+    rclpy.spin(joy2twist_node)  # ノードをスピンさせる
+    joy2twist_node.destroy_node()  # ノードを停止する
+    rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+
+
+===== FILE: src/tourobo_2026_foot/tourobo_2026_foot/omni_pure_pursuit_action_node_v2.py =====
+
+#!/usr/bin/env python3
+import math
+import rclpy
+from rclpy.node import Node
+from rclpy.action import ActionServer, CancelResponse, GoalResponse
+from rclpy.callback_groups import ReentrantCallbackGroup
+from rclpy.executors import MultiThreadedExecutor
+
+from nav_msgs.msg import Path
+from geometry_msgs.msg import Twist
+from std_msgs.msg import Float32
+from nav2_msgs.action import FollowPath
+
+from tf2_ros import Buffer, TransformListener
+
+
+class OmniPurePursuitActionServer(Node):
+
+    def __init__(self):
+        super().__init__("omni_pure_pursuit_action_server")
+
+        # --- 1. 走行パラメータ ---
+        self.declare_parameter("global_frame", "map")
+        self.declare_parameter("robot_frame", "base_link")
+        self.declare_parameter("max_linear_vel", 2.0)
+        self.declare_parameter("accel_limit", 2.0)
+        self.declare_parameter("min_lookahead_dist", 0.2)
+        self.declare_parameter("lookahead_gain", 0.2)
+        self.declare_parameter("max_angular_vel", 1.5)
+        self.declare_parameter("kp_yaw", 1.8)  # 旋回をキビキビさせるため少し上げ
+
+        # --- 2. 判定パラメータ ---
+        self.declare_parameter("goal_tolerance", 0.01)
+        self.declare_parameter("yaw_tolerance", 0.01)
+        self.declare_parameter("v_floor", 0.4)
+        self.declare_parameter("v_min_push", 0.18)
+        self.declare_parameter("min_vel_enforce_dist", 0.15)
+        self.declare_parameter("decel_start_dist", 0.5)
+
+        self.declare_parameter("action_name", "follow_path_map")
+        action_name = self.get_parameter("action_name").value
+
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer, self)
+        self.cmd_pub = self.create_publisher(Twist, "/cmd_vel", 10)
+        self.v_debug_pub = self.create_publisher(Float32, "/debug/v_final", 10)
+
+        self._action_server = ActionServer(
+            self,
+            FollowPath,
+            action_name,
+            execute_callback=self.execute_callback,
+            goal_callback=self.goal_callback,
+            cancel_callback=self.cancel_callback,
+            callback_group=ReentrantCallbackGroup())
+
+        self.get_logger().info(
+            f"NHK2026 Pure Pursuit: [Translation/Rotation Split Mode]")
+
+    def goal_callback(self, goal_request):
+        return GoalResponse.ACCEPT
+
+    def cancel_callback(self, goal_handle):
+        return CancelResponse.ACCEPT
+
+    def get_quaternion_to_euler(self, q):
+        return 0.0, 0.0, math.atan2(2.0 * (q.w * q.z + q.x * q.y),
+                                    1.0 - 2.0 * (q.y * q.y + q.z * q.z))
+
+    def publish_zero_vel(self):
+        self.cmd_pub.publish(Twist())
+
+    def plan_velocity_profile(self, path):
+        max_v = self.get_parameter("max_linear_vel").value
+        accel = self.get_parameter("accel_limit").value
+        num_points = len(path.poses)
+        distances = [0.0] * num_points
+        total_dist = 0.0
+        for i in range(1, num_points):
+            p1 = path.poses[i - 1].pose.position
+            p2 = path.poses[i].pose.position
+            total_dist += math.hypot(p2.x - p1.x, p2.y - p1.y)
+            distances[i] = total_dist
+        velocity_profile = []
+        for s in distances:
+            v_accel = math.sqrt(2 * accel * s)
+            v_decel = math.sqrt(2 * accel * max(0.0, total_dist - s))
+            velocity_profile.append(min(v_accel, max_v, v_decel))
+        return velocity_profile
+
+    def get_robot_pose(self):
+        try:
+            t = self.tf_buffer.lookup_transform(
+                self.get_parameter("global_frame").value,
+                self.get_parameter("robot_frame").value, rclpy.time.Time())
+            _, _, yaw = self.get_quaternion_to_euler(t.transform.rotation)
+            return t.transform.translation.x, t.transform.translation.y, yaw
+        except:
+            return None
+
+    async def execute_callback(self, goal_handle):
+        path = goal_handle.request.path
+        v_profile = self.plan_velocity_profile(path)
+        current_idx = 0
+        rate = self.create_rate(20)
+
+        # パラメータ取得
+        v_floor = self.get_parameter("v_floor").value
+        v_push = self.get_parameter("v_min_push").value
+        d_decel = self.get_parameter("decel_start_dist").value
+        d_enforce = self.get_parameter("min_vel_enforce_dist").value
+        g_tol = self.get_parameter("goal_tolerance").value
+        y_tol = self.get_parameter("yaw_tolerance").value
+
+        while rclpy.ok():
+            if goal_handle.is_cancel_requested:
+                goal_handle.canceled()
+                self.publish_zero_vel()
+                return FollowPath.Result()
+
+            pose = self.get_robot_pose()
+            if not pose:
+                rate.sleep()
+                continue
+            rx, ry, ryaw = pose
+
+            # 1. 最近傍点検索
+            min_d = float('inf')
+            search_range = min(current_idx + 50, len(path.poses))
+            for i in range(current_idx, search_range):
+                d = math.hypot(path.poses[i].pose.position.x - rx,
+                               path.poses[i].pose.position.y - ry)
+                if d < min_d:
+                    min_d = d
+                    current_idx = i
+
+            # 2. 誤差の計算
+            dist_to_goal = math.hypot(path.poses[-1].pose.position.x - rx,
+                                      path.poses[-1].pose.position.y - ry)
+            _, _, gyaw = self.get_quaternion_to_euler(
+                path.poses[-1].pose.orientation)
+            yaw_err = math.atan2(math.sin(gyaw - ryaw), math.cos(gyaw - ryaw))
+
+            # 3. 終了判定（両方合格でループを抜ける）
+            if dist_to_goal < g_tol and abs(yaw_err) < y_tol:
+                break
+
+            # 4. 速度決定ロジック
+            v_planned = v_profile[current_idx]
+
+            # --- 【核心】ここを条件分岐を厳格化 ---
+            if dist_to_goal < g_tol:
+                # 距離が合格なら、並進速度を【物理的に 0】にする
+                v_final = 0.0
+            elif dist_to_goal < d_enforce:
+                # 15cm以内：押し込み速度を適用
+                v_final = max(v_planned, v_push)
+            else:
+                # 巡航中：v_floorを保証して爆走
+                v_final = max(v_planned, v_floor)
+
+            # 5. 指令値生成（Twist）
+            cmd = Twist()
+
+            # 並進の計算（v_final が 0 ならここは 0 になる）
+            if v_final > 0:
+                ld = self.get_parameter("min_lookahead_dist").value + (
+                    self.get_parameter("lookahead_gain").value * v_final)
+                target_pt = path.poses[-1].pose.position
+                for i in range(current_idx, len(path.poses)):
+                    if math.hypot(path.poses[i].pose.position.x - rx,
+                                  path.poses[i].pose.position.y - ry) >= ld:
+                        target_pt = path.poses[i].pose.position
+                        break
+
+                dx, dy = target_pt.x - rx, target_pt.y - ry
+                angle_to_target = math.atan2(dy, dx) - ryaw
+                cmd.linear.x = v_final * math.cos(angle_to_target)
+                cmd.linear.y = v_final * math.sin(angle_to_target)
+            else:
+                cmd.linear.x = 0.0
+                cmd.linear.y = 0.0
+
+            # 旋回の計算（距離に関わらず、角度がズレていれば常に回る）
+            kp_y = self.get_parameter("kp_yaw").value
+            max_ang_vel = self.get_parameter("max_angular_vel").value
+            z_out = yaw_err * kp_y
+            min_z = 0.12  # 旋回不感帯対策
+            if abs(yaw_err) > y_tol:
+                if abs(z_out) < min_z:
+                    z_out = math.copysign(min_z, z_out)
+                cmd.angular.z = max(-max_ang_vel, min(max_ang_vel, z_out))
+            else:
+                cmd.angular.z = 0.0
+
+            # 6. パブリッシュ
+            self.cmd_pub.publish(cmd)
+            self.v_debug_pub.publish(Float32(data=v_final))
+
+            #self.get_logger().info(
+            #    f"D: {dist_to_goal:.3f} | Y: {yaw_err:.3f} | V: {v_final:.2f}",
+            #    throttle_duration_sec=0.2)
+            rate.sleep()
+
+        self.publish_zero_vel()
+        self.get_logger().info("目標到達：座標・角度ともに合格。")
+        goal_handle.succeed()
+        return FollowPath.Result()
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = OmniPurePursuitActionServer()
+    rclpy.spin(node, executor=MultiThreadedExecutor())
+    node.destroy_node()
+    rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+
+
+===== FILE: src/tourobo_2026_foot/tourobo_2026_foot/publish_odometry_node.py =====
+
+"""IMU,tofセンサ2つ、接地エンコーダー2つをesp32からシリアル通信で受け取り、publishする"""
+
+import rclpy
+from rclpy.node import Node
+import math
+import numpy as np
+from tf2_ros import TransformBroadcaster
+
+# メッセージ型
+from std_msgs.msg import String, UInt16
+from sensor_msgs.msg import Joy, Imu
+from geometry_msgs.msg import TransformStamped, Twist, Quaternion
+from nav_msgs.msg import Odometry
+import tf_transformations
+
+#自作ライブラリ
+import os
+import sys
+from ah_python_lib.recv_feedback import *
+
+
+
+def calc_delta_odometry(x_vel, y_vel, theta, ang_z_vel, dt):
+    delta_x = (x_vel * math.cos(theta) - y_vel * math.sin(theta)) * dt
+    delta_y = (x_vel * math.sin(theta) + y_vel * math.cos(theta)) * dt
+    delta_theta = ang_z_vel * dt
+
+    return (delta_x, delta_y, delta_theta)
+
+
+class feedback_publisher(Node):
+
+    def __init__(self):
+        super().__init__("feedback_publisher")
+
+        # --- パラメータ設定 ----
+        self.declare_parameter("imu_frame_id", "imu_link")
+        self.declare_parameter("odom_frame_id", "odom")
+        self.declare_parameter("base_frame_id", "base_link")
+        self.declare_parameter("wheel_radius", 0.0235)  #[m]
+        self.declare_parameter("port_name", "/dev/ttyACM0")
+
+        self.imu_frame_id = self.get_parameter("imu_frame_id").value
+        self.odom_frame_id = self.get_parameter("odom_frame_id").value
+        self.base_frame_id = self.get_parameter("base_frame_id").value
+        self.wheel_radius = self.get_parameter("wheel_radius").value
+        port_name = self.get_parameter("port_name").value
+
+        # --- publisherの設定 ---
+        self.imu_pub = self.create_publisher(Imu, "imu/data", 10)
+        self.odom_pub = self.create_publisher(Odometry, "odom", 10)
+
+        # recv_feedbackの割り込み設定
+        self.recv_feedback_timer = self.create_timer(0.01, self.recv_feedback)
+
+        # esp32 serialの設定
+        self.ser = serial.Serial(port=port_name, baudrate=10000000, timeout=0.0)
+        self.ser.low_latency = True
+        # メンバ変数初期化
+        self.mcu_timestamp_millis = 0
+
+        self.enc_x_vel = 0.0
+        self.enc_y_vel = 0.0
+
+        self.q_w = 1.0
+        self.q_x = 0.0
+        self.q_y = 0.0
+        self.q_z = 0.0
+
+        self.ang_x_vel = 0.0
+        self.ang_y_vel = 0.0
+        self.ang_z_vel = 0.0
+
+        self.last_time = self.get_clock().now()
+
+        # ---- Params -----
+        self.Lx = 0.313  #中心からy軸odomまでの距離[m]
+        self.y_enc_alpha = 16.7  #y方向エンコーダーの中心からの角度 [degree]
+
+    def publish_feedback(self):
+        current_time = self.get_clock().now()
+        dt = (current_time - self.last_time).nanoseconds / 1e9
+        self.last_time = current_time
+
+        # odomの配信
+        odom = Odometry()
+        odom.header.stamp = current_time.to_msg()
+        odom.header.frame_id = self.odom_frame_id
+        odom.child_frame_id = self.base_frame_id
+
+        # 位置情報 (積分計算はekfが行う)
+        odom.pose.pose.position.x = 0.0
+        odom.pose.pose.position.y = 0.0
+        odom.pose.pose.position.z = 0.0
+
+        # 共分散(位置)
+        odom.pose.covariance = [
+            1e-3,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,  # x
+            0.0,
+            1e-3,
+            0.0,
+            0.0,
+            0.0,
+            0.0,  # y
+            0.0,
+            0.0,
+            1e-6,
+            0.0,
+            0.0,
+            0.0,  # z
+            0.0,
+            0.0,
+            0.0,
+            1e-6,
+            0.0,
+            0.0,  # roll
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1e-6,
+            0.0,  # pitch
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1e-3,  # yaw
+        ]
+
+        # 速度情報 (角速度は0)
+        wheel_x_vel = self.enc_x_vel * 2 * math.pi * self.wheel_radius  # [m/s]
+        wheel_y_vel = -(self.enc_y_vel * 2 * math.pi * self.wheel_radius)
+        alpha = np.deg2rad(self.y_enc_alpha)
+
+        #euler = tf_transformations.euler_from_quaternion(
+        # ---- ODOM計算式(ekfを使う場合は不要)
+        #    [self.q_x, self.q_y, self.q_z, self.q_w])
+        #yaw = euler[2]
+        ##self.get_logger().info(f"yaw{yaw}")
+        #cos, sin = np.cos(yaw), np.sin(yaw)
+
+        #R = np.array([[cos, -sin, self.Lx * np.cos(alpha) * sin],
+        #              [sin, cos, -self.Lx * np.cos(alpha) * cos]])
+
+        #vec = np.array([wheel_x_vel, wheel_y_vel, self.ang_z_vel])
+        #twist_vec = R @ vec
+
+        #odom.twist.twist.linear.x = twist_vec[0]
+        #odom.twist.twist.linear.y = twist_vec[1]
+        #odom.twist.twist.angular.z = 0.0
+
+        odom.header.stamp = current_time.to_msg()
+        odom.twist.twist.linear.x = wheel_x_vel
+        odom.twist.twist.linear.y = wheel_y_vel - self.Lx * np.cos(
+            alpha) * self.ang_z_vel
+        odom.twist.twist.angular.z = 0.0
+
+        # 共分散(Twist)
+        odom.twist.covariance = [
+            1e-3,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,  # x速度の信頼度
+            0.0,
+            1e-3,
+            0.0,
+            0.0,
+            0.0,
+            0.0,  # y速度の信頼度
+            0.0,
+            0.0,
+            1e-6,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1e-6,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1e-6,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1e-3,  # yaw角速度の信頼度
+        ]
+
+        self.odom_pub.publish(odom)
+
+        # imuの配信
+        imu = Imu()
+        imu.header.stamp = current_time.to_msg()
+        imu.header.frame_id = self.imu_frame_id
+
+        # 姿勢(Quaternion)
+        imu.orientation.w = self.q_w
+        imu.orientation.x = self.q_x
+        imu.orientation.y = self.q_y
+        imu.orientation.z = self.q_z
+
+        # 共分散行列
+        # 本来はセンサーのスペックから設定
+        imu.orientation_covariance = [
+            1e-9, 0.0, 0.0, 0.0, 1e-9, 0.0, 0.0, 0.0, 1e-9
+        ]
+
+        # 角速度(Aungular Vel)
+        imu.angular_velocity.x = self.ang_x_vel
+        imu.angular_velocity.y = self.ang_y_vel
+        imu.angular_velocity.z = self.ang_z_vel
+        imu.angular_velocity_covariance = [
+            1e-9,
+            0.0,
+            0.0,
+            0.0,
+            1e-9,
+            0.0,
+            0.0,
+            0.0,
+            1e-9,
+        ]
+
+        self.imu_pub.publish(imu)
+
+        # tfはsensor fusionパッケージで出力する
+    def recv_feedback(self):
+        struct_format = "<BIfffffffffB"
+        packet = receive_packet(struct_format, self.ser)
+        if packet is None:
+            return
+
+        self.mcu_timestamp_millis = packet[1]
+
+        self.q_w = packet[2]
+        self.q_x = packet[3]
+        self.q_y = packet[4]
+        self.q_z = packet[5]
+
+        self.ang_x_vel = packet[6]
+        self.ang_y_vel = packet[7]
+        self.ang_z_vel = packet[8]
+
+        self.enc_x_vel = packet[9]  #[rot/s]
+        self.enc_y_vel = packet[10]
+
+        self.publish_feedback()
+
+
+def main():
+    rclpy.init()  # rclpyライブラリの初期化
+
+    feedback_publisher_node = feedback_publisher()
+    rclpy.spin(feedback_publisher_node)  # ノードをスピンさせる
+    feedback_publisher_node.destroy_node()  # ノードを停止する
+    rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+
+
+===== FILE: src/tourobo_2026_foot/tourobo_2026_foot/robot_client_node.py =====
+
+"""
+"""
+
+import os
+import sys
+import csv
+import math
+import asyncio
+import rclpy
+from rclpy.node import Node
+from rclpy.action import ActionClient
+from rclpy.callback_groups import ReentrantCallbackGroup
+from action_msgs.msg import GoalStatus
+
+# アクションインターフェースのインポート
+from auto_robot_interfaces.action import (OverSteps, BoxArm, PoseCorrection,
+                                          MoveOnSteps, SwitchLoc, Spear,
+                                          DetectAruco, IsVgoal)
+from nav_msgs.msg import Path
+from nav2_msgs.action import FollowPath
+from geometry_msgs.msg import PoseStamped
+
+target_dir = os.path.abspath("/home/aratahorie/ah_python_libraries")
+sys.path.append(target_dir)
+
+
+class RobotActionClient(Node):
+
+    def __init__(self):
+        super().__init__("robot_action_client")
+
+        self.cb_group = ReentrantCallbackGroup()
+
+        # --- Action Clientの初期化 (全て共通のグループを割り当て) ---
+        self._action_client_boxarm = ActionClient(self,
+                                                  BoxArm,
+                                                  "box_arm",
+                                                  callback_group=self.cb_group)
+        self._action_client_oversteps = ActionClient(
+            self, OverSteps, "over_steps", callback_group=self.cb_group)
+        self._action_client_correctpos = ActionClient(
+            self, PoseCorrection, "correct_pose", callback_group=self.cb_group)
+        self._action_client_move_on_steps = ActionClient(
+            self, MoveOnSteps, "move_on_steps", callback_group=self.cb_group)
+        self._action_client_switch_localization = ActionClient(
+            self,
+            SwitchLoc,
+            "switch_localization",
+            callback_group=self.cb_group)
+        self._action_client_spear = ActionClient(self,
+                                                 Spear,
+                                                 "spear",
+                                                 callback_group=self.cb_group)
+        self._action_client_detect_aruco = ActionClient(
+            self, DetectAruco, "detect_aruco", callback_group=self.cb_group)
+        self._action_client_is_vgoal = ActionClient(
+            self, IsVgoal, "is_vgoal", callback_group=self.cb_group)
+        self._action_client_path = ActionClient(self,
+                                                FollowPath,
+                                                "follow_path_map",
+                                                callback_group=self.cb_group)
+
+        # パブリッシャー
+        self.path_pub = self.create_publisher(Path, "/visual_spline_path", 10)
+
+        # 経路データの読み込み
+        self.start_to_before_spear = self.load_path_from_csv(
+            "/home/aratahorie/NHK2026_auto_robot_v2/src/auto_robot_v2/path/start_to_before_spear.csv"
+        )
+
+        self.spear_to_aruco_wait = self.load_path_from_csv(
+            "/home/aratahorie/NHK2026_auto_robot_v2/src/auto_robot_v2/path/spear_to_aruco_wait.csv"
+        )
+
+        self.aruco_wait_to_before_steps = self.load_path_from_csv(
+            "/home/aratahorie/NHK2026_auto_robot_v2/src/auto_robot_v2/path/aruco_wait_to_before_steps.csv"
+        )
+
+        self.before_to_step_0 = self.load_path_from_csv(
+            "/home/aratahorie/NHK2026_auto_robot_v2/src/auto_robot_v2/path/before_to_step_0.csv"
+        )
+
+        self.before_to_step_1 = self.load_path_from_csv(
+            "/home/aratahorie/NHK2026_auto_robot_v2/src/auto_robot_v2/path/before_to_step_1.csv"
+        )
+
+        self.before_to_step_2 = self.load_path_from_csv(
+            "/home/aratahorie/NHK2026_auto_robot_v2/src/auto_robot_v2/path/before_to_step_2.csv"
+        )
+
+        self.step_0_to_rightside = self.load_path_from_csv(
+            "/home/aratahorie/NHK2026_auto_robot_v2/src/auto_robot_v2/path/step_0_to_rightside.csv"
+        )
+
+        self.step_1_to_rightside = self.load_path_from_csv(
+            "/home/aratahorie/NHK2026_auto_robot_v2/src/auto_robot_v2/path/step_1_to_rightside.csv"
+        )
+
+        self.step_2_to_rightside = self.load_path_from_csv(
+            "/home/aratahorie/NHK2026_auto_robot_v2/src/auto_robot_v2/path/step_2_to_rightside.csv"
+        )
+
+        self.step_0_to_after = self.load_path_from_csv(
+            "/home/aratahorie/NHK2026_auto_robot_v2/src/auto_robot_v2/path/step_0_to_after.csv"
+        )
+
+        self.step_1_to_after = self.load_path_from_csv(
+            "/home/aratahorie/NHK2026_auto_robot_v2/src/auto_robot_v2/path/step_1_to_after.csv"
+        )
+
+        self.step_2_to_after = self.load_path_from_csv(
+            "/home/aratahorie/NHK2026_auto_robot_v2/src/auto_robot_v2/path/step_2_to_after.csv"
+        )
+
+        self.map_path = "/home/aratahorie/NHK2026_auto_robot_v2/src/auto_robot_v2/map/c419_map_1.yaml.yaml"
+
+        # ----Params----
+        self.items = [
+            [0, 0, 1],
+            [2, 2, 1],
+            [0, 1, 0],
+            [1, 0, 0],
+        ]
+
+        self.spear_init_pos = [0.9991, 1.1486, 1.595]
+        self.aruco_init_pos = [0.7638, 0.7688, -1.676]
+        self.step_0_init_pos = [0, 0, 0]
+        self.step_1_init_pos = [0, 0, 0]
+        self.step_2_init_pos = [8.0696, 0.2564, 0.0723]
+
+        #初期化
+
+    def load_path_from_csv(self, file_path):
+        """CSVからPathメッセージを生成"""
+        path_msg = Path()
+        path_msg.header.frame_id = "map"
+        path_msg.header.stamp = self.get_clock().now().to_msg()
+
+        if not os.path.exists(file_path):
+            self.get_logger().error(f"File not found: {file_path}")
+            return None
+
+        try:
+            with open(file_path, 'r') as f:
+                reader = csv.reader(f)
+                next(reader)  # ヘッダーをスキップ
+                for row in reader:
+                    if not row:
+                        continue
+                    x, y, yaw = map(float, row)
+                    pose = PoseStamped()
+                    pose.header = path_msg.header
+                    pose.pose.position.x = x
+                    pose.pose.position.y = y
+                    pose.pose.orientation.z = math.sin(yaw / 2.0)
+                    pose.pose.orientation.w = math.cos(yaw / 2.0)
+                    path_msg.poses.append(pose)
+            return path_msg
+        except Exception as e:
+            self.get_logger().error(f"CSV読み込みエラー: {e}")
+            return None
+
+    # --- Action実行用の共通内部メソッド ---
+    async def _send_action_goal(self, client, goal_msg, action_name):
+        """Actionを送信し、完了(SUCCEEDED)まで待機する共通処理"""
+        self.get_logger().info(f"[{action_name}] サーバーを待機中...")
+        if not client.wait_for_server(timeout_sec=10.0):
+            self.get_logger().error(f"[{action_name}] サーバーが見つかりません")
+            return False
+
+        self.get_logger().info(f"[{action_name}] ゴール送信開始")
+        send_goal_future = await client.send_goal_async(goal_msg)
+
+        if not send_goal_future.accepted:
+            self.get_logger().error(f"[{action_name}] 命令が拒否されました")
+            return False
+
+        self.get_logger().info(f"[{action_name}] 受理されました。結果を待機します...")
+        result_handle = await send_goal_future.get_result_async()
+
+        # ステータスコードのチェック
+        if result_handle.status == GoalStatus.STATUS_SUCCEEDED:
+            self.get_logger().info(f"[{action_name}] 正常完了しました")
+            return result_handle.result
+        else:
+            self.get_logger().warn(
+                f"[{action_name}] 失敗しました (Status ID: {result_handle.status})")
+            return None
+
+    # --- 各アクション呼び出しメソッド群 ---
+
+    async def send_goal(self, path_msg):
+        if path_msg is None:
+            return False
+        self.path_pub.publish(path_msg)
+        goal_msg = FollowPath.Goal()
+        goal_msg.path = path_msg
+        return await self._send_action_goal(self._action_client_path, goal_msg,
+                                            "FollowPath")
+
+    async def send_to_boxarm(self, mode):
+        goal_msg = BoxArm.Goal()
+        goal_msg.mode = mode
+        return await self._send_action_goal(self._action_client_boxarm,
+                                            goal_msg, "BoxArm")
+
+    async def send_to_oversteps(self, mode):
+        goal_msg = OverSteps.Goal()
+        goal_msg.mode = mode
+        return await self._send_action_goal(self._action_client_oversteps,
+                                            goal_msg, "OverSteps")
+
+    async def send_to_correctpos(self):
+        goal_msg = PoseCorrection.Goal()
+        return await self._send_action_goal(self._action_client_correctpos,
+                                            goal_msg, "PoseCorrection")
+
+    async def send_to_move_on_steps(self, mode):
+        goal_msg = MoveOnSteps.Goal()
+        goal_msg.mode = mode
+        return await self._send_action_goal(self._action_client_move_on_steps,
+                                            goal_msg, "MoveOnSteps")
+
+    async def send_to_switch_loc(self,
+                                 mode,
+                                 x=0.0,
+                                 y=0.0,
+                                 yaw=0.0,
+                                 map_path=""):
+        goal_msg = SwitchLoc.Goal()
+        goal_msg.mode = mode
+        goal_msg.x = float(x)
+        goal_msg.y = float(y)
+        goal_msg.yaw = float(yaw)
+        goal_msg.map_path = str(map_path)
+        return await self._send_action_goal(
+            self._action_client_switch_localization, goal_msg, "SwitchLoc")
+
+    async def send_to_spear(self):
+        goal_msg = Spear.Goal()
+        return await self._send_action_goal(self._action_client_spear, goal_msg,
+                                            "Spear")
+
+    async def send_to_detect_aruco(self):
+        goal_msg = DetectAruco.Goal()
+        return await self._send_action_goal(self._action_client_detect_aruco,
+                                            goal_msg, "DetectAruco")
+
+    async def send_to_is_vgoal(self):
+        goal_msg = IsVgoal.Goal()
+        return await self._send_action_goal(self._action_client_is_vgoal,
+                                            goal_msg, "IsVgoal")
+
+    async def steps_action_pattern(self, num):
+        """
+        ID	カテゴリ	アクション名	補足
+        1	移動	段差上り	+1 の段差へ進む
+        2	移動	段差降り	-1 の段差へ進む
+        3	移動	そのまま移動	同じ高さのまま前進
+        4	正面取得	正面取得（右腕 / 同じ）	1個目 / 正面 / 高さ±0
+        5	正面取得	正面取得（右腕 / 下）	1個目 / 正面 / 高さ-1
+        6	正面取得	正面取得（右腕 / 上）	1個目 / 正面 / 高さ+1
+        7	正面取得	正面取得（左腕 / 同じ）	2個目 / 正面 / 高さ±0
+        8	正面取得	正面取得（左腕 / 下）	2個目 / 正面 / 高さ-1
+        9	正面取得	正面取得（左腕 / 上）	2個目 / 正面 / 高さ+1
+        10	左側取得	左側取得（右腕 / 同じ）	1個目 / 左側 / 高さ±0
+        11	左側取得	左側取得（右腕 / 下）	1個目 / 左側 / 高さ-1
+        12	左側取得	左側取得（右腕 / 上）	1個目 / 左側 / 高さ+1
+        13	左側取得	左側取得（左腕 / 同じ）	2個目 / 左側 / 高さ±0
+        14	左側取得	左側取得（左腕 / 下）	2個目 / 左側 / 高さ-1
+        15	左側取得	左側取得（左腕 / 上）	2個目 / 左側 / 高さ+1
+        16	右側取得	右側取得（右腕 / 同じ）	1個目 / 右側 / 高さ±0
+        17	右側取得	右側取得（右腕 / 下）	1個目 / 右側 / 高さ-1
+        18	右側取得	右側取得（右腕 / 上）	1個目 / 右側 / 高さ+1
+        19	右側取得	右側取得（左腕 / 同じ）	2個目 / 右側 / 高さ±0
+        20	右側取得	右側取得（左腕 / 下）	2個目 / 右側 / 高さ-1
+        21	右側取得	右側取得（左腕 / 上）	2個目 / 右側 / 高さ+1
+        22	廃棄	廃棄（左腕）	1回目の廃棄
+        23	廃棄	廃棄（右腕）	2回目の廃棄
+        24	準備	位置確認・真ん中移動	移動完了直後の姿勢制御
+        25	進入	0列目進入（取得あり）	進入時に正面の箱を取得
+        26	進入	1列目進入（取得あり）	進入時に正面の箱を取得
+        27	進入	2列目進入（取得あり）	進入時に正面の箱を取得
+        28	進入	0列目進入（取得なし）	取得せずに進入
+        29	進入	1列目進入（取得なし）	取得せずに進入
+        30	進入	2列目進入（取得なし）	取得せずに進入
+        31	最終移動	0列目から地点移動	退出後、指定地点へ移動
+        32	最終移動	1列目から地点移動	退出後、指定地点へ移動
+        33	最終移動	2列目から地点移動	退出後、指定地点へ移動
+        """
+
+        if num == 1:
+            #段差上り
+            await self.send_to_move_on_steps(8)  #中央から段差のぼり位置まで移動
+            await self.send_to_oversteps(1)  #段差上り
+        elif num == 2:
+            #段差降り
+            await self.send_to_move_on_steps(8)
+            await self.send_to_oversteps(2)  #段差降り
+        elif num == 3:
+            #段差そのまま
+            await self.send_to_move_on_steps(8)
+            await self.send_to_oversteps(3)  #段差そのまま
+        elif num == 4:
+            #正面取得 ,右腕、同じ
+            await self.send_to_move_on_steps(4)
+            await self.send_to_boxarm(11)
+            await self.send_to_move_on_steps(7)
+
+        elif num == 5:
+            #正面取得 ,右腕、下
+            await self.send_to_move_on_steps(4)
+            await self.send_to_boxarm(7)
+            await self.send_to_move_on_steps(7)
+
+        elif num == 6:
+            #正面取得 ,右腕、上
+            await self.send_to_move_on_steps(4)
+            await self.send_to_boxarm(3)
+            await self.send_to_move_on_steps(7)
+
+        elif num == 7:
+            #正面取得 ,左腕、同じ
+            await self.send_to_move_on_steps(4)
+            await self.send_to_boxarm(9)
+            await self.send_to_move_on_steps(7)
+
+        elif num == 8:
+            #正面取得 ,左腕、下
+            await self.send_to_move_on_steps(4)
+            await self.send_to_boxarm(5)
+            await self.send_to_move_on_steps(7)
+
+        elif num == 9:
+            #正面取得 ,左腕、上
+            await self.send_to_move_on_steps(4)
+            await self.send_to_boxarm(1)
+            await self.send_to_move_on_steps(7)
+
+        elif num == 10:
+            #左側取得 ,右腕、同じ
+            await self.send_to_move_on_steps(2)
+            await self.send_to_boxarm(11)
+            await self.send_to_move_on_steps(5)
+
+        elif num == 11:
+            #左側取得 ,右腕、下
+            await self.send_to_move_on_steps(2)
+            await self.send_to_boxarm(7)
+            await self.send_to_move_on_steps(5)
+
+        elif num == 12:
+            #左側取得 ,右腕、上
+            await self.send_to_move_on_steps(2)
+            await self.send_to_boxarm(3)
+            await self.send_to_move_on_steps(5)
+
+        elif num == 13:
+            #左側取得 ,左腕、同じ
+            await self.send_to_move_on_steps(2)
+            await self.send_to_boxarm(9)
+            await self.send_to_move_on_steps(5)
+
+        elif num == 14:
+            #左側取得 ,左腕、下
+            await self.send_to_move_on_steps(2)
+            await self.send_to_boxarm(5)
+            await self.send_to_move_on_steps(5)
+
+        elif num == 15:
+            #左側取得 ,左腕、上
+            await self.send_to_move_on_steps(2)
+            await self.send_to_boxarm(1)
+            await self.send_to_move_on_steps(5)
+
+        elif num == 16:
+            #右側取得 ,右腕、同じ
+            await self.send_to_move_on_steps(3)
+            await self.send_to_boxarm(11)
+            await self.send_to_move_on_steps(6)
+
+        elif num == 17:
+            #右側取得 ,右腕、下
+            await self.send_to_move_on_steps(3)
+            await self.send_to_boxarm(7)
+            await self.send_to_move_on_steps(6)
+
+        elif num == 18:
+            #右側取得 ,右腕、上
+            await self.send_to_move_on_steps(3)
+            await self.send_to_boxarm(3)
+            await self.send_to_move_on_steps(6)
+
+        elif num == 19:
+            #右側取得 ,左腕、同じ
+            await self.send_to_move_on_steps(3)
+            await self.send_to_boxarm(9)
+            await self.send_to_move_on_steps(6)
+
+        elif num == 20:
+            #右側取得 ,左腕、下
+            await self.send_to_move_on_steps(3)
+            await self.send_to_boxarm(5)
+            await self.send_to_move_on_steps(6)
+
+        elif num == 21:
+            #右側取得 ,左腕、上
+            await self.send_to_move_on_steps(3)
+            await self.send_to_boxarm(1)
+            await self.send_to_move_on_steps(6)
+
+        elif num == 22:
+            #廃棄、左
+            await self.send_to_boxarm(14)
+        elif num == 23:
+            #廃棄、右
+            await self.send_to_boxarm(13)
+        elif num == 24:
+            #位置確認、真ん中移動
+            await self.send_to_correctpos()
+            await self.send_to_move_on_steps(1)
+        elif num == 25:
+            #0列目侵入、取得あり
+            #高さ1
+            await self.send_goal(self.before_to_step_0)
+            await self.send_to_boxarm(1)
+            await self.send_goal(self.step_0_to_rightside)
+            await self.send_to_switch_loc(1)
+            await self.send_to_oversteps(1)
+        elif num == 26:
+            #1列目侵入、取得あり
+            #高さ0
+            await self.send_goal(self.before_to_step_1)
+            await self.send_to_boxarm(9)
+            await self.send_goal(self.step_1_to_rightside)
+            await self.send_to_switch_loc(1)
+            await self.send_to_oversteps(3)
+        elif num == 27:
+            #2列目侵入、取得あり
+            #高さ1
+            await self.send_goal(self.before_to_step_2)
+            await self.send_to_boxarm(1)
+            await self.send_goal(self.step_2_to_rightside)
+            await self.send_to_switch_loc(1)
+            await self.send_to_oversteps(1)
+        elif num == 28:
+            #0列目侵入、取得なし
+            await self.send_goal(self.before_to_step_0)
+            await self.send_goal(self.step_0_to_rightside)
+            await self.send_to_switch_loc(1)
+            await self.send_to_oversteps(1)
+        elif num == 29:
+            #1列目侵入、取得なし
+            await self.send_goal(self.before_to_step_1)
+            await self.send_goal(self.step_1_to_rightside)
+            await self.send_to_switch_loc(1)
+            await self.send_to_oversteps(3)
+        elif num == 30:
+            #2列目侵入、取得なし
+            await self.send_goal(self.before_to_step_2)
+            await self.send_goal(self.step_2_to_rightside)
+            await self.send_to_switch_loc(1)
+            await self.send_to_oversteps(1)
+        elif num == 31:
+            #退出地点移動、0列目
+            await self.send_to_switch_loc(2, self.step_0_init_pos[0],
+                                          self.step_0_init_pos[1],
+                                          self.step_0_init_pos[2],
+                                          self.map_path)
+            #await self.send_goal()
+        elif num == 32:
+            #退出地点移動、1列目
+            await self.send_to_switch_loc(2, self.step_1_init_pos[0],
+                                          self.step_1_init_pos[1],
+                                          self.step_1_init_pos[2],
+                                          self.map_path)
+            #await self.send_goal()
+        elif num == 33:
+            #退出地点移動、2列目
+            await self.send_to_switch_loc(2, self.step_2_init_pos[0],
+                                          self.step_2_init_pos[1],
+                                          self.step_2_init_pos[2],
+                                          self.map_path)
+            #await self.send_goal()
+
+    # --- メインシーケンス ---
+    async def run_robot_sequence(self):
+        self.get_logger().info("--- ロボットシーケンス開始 ---")
+        #speak("ロボットを起動します")
+        #await self.send_to_correctpos()
+
+        #やり取得シークエンス
+        #await self.send_goal(self.start_to_before_spear)  #スタートからやり
+        #await self.send_to_switch_loc(1)  #amcl無効化
+        #await self.send_to_spear()  #やり取得
+        #await self.send_to_switch_loc(
+        #    2,
+        #    self.spear_init_pos[0],  #amcl有効化
+        #    self.spear_init_pos[1],
+        #    self.spear_init_pos[2],
+        #    self.map_path)
+
+        #await self.send_goal(self.spear_to_aruco_wait)
+        #await self.send_to_switch_loc(1)  #amcl無効化
+        #await self.send_to_detect_aruco()  #aruco検出待ち
+        #await self.send_to_switch_loc(
+        #    2,
+        #    self.aruco_init_pos[0],  #amcl有効化
+        #    self.aruco_init_pos[1],
+        #    self.aruco_init_pos[2],
+        #    self.map_path)
+        #await self.send_goal(self.aruco_wait_to_before_steps)
+
+        #段差超え(テスト)
+        #await self.steps_action_pattern(30)  #スタート、段差超え
+        #await self.steps_action_pattern(24)  #位置確認、真ん中移動
+        #await self.steps_action_pattern(18)
+        #await self.steps_action_pattern(2)
+
+        #段差超えシークエンス(本番)
+        #route = calc_on_step_sequence(self.items)
+        #for i in range(0, len(route)):
+        #    await self.steps_action_pattern(route[i])
+
+        ##Vゴールシークエンス
+        #await self.send_goal(self.step_2_to_after)  #棚の前まで移動
+        #await self.send_to_boxarm(15)  #中段を入れる
+        await self.send_to_is_vgoal()  #高さ待ち
+        await self.send_to_boxarm(16)  #上段を入れる
+
+        self.get_logger().info("--- 全シーケンス正常終了 ---")
+
+
+def main(args=None):
+    rclpy.init(args=args)
+
+    node = RobotActionClient()
+
+    # MultiThreadedExecutor: 複数のスレッドでコールバック（Action結果受信など）を処理可能にする
+    executor = rclpy.executors.MultiThreadedExecutor()
+    executor.add_node(node)
+
+    # シーケンスをバックグラウンドタスクとして作成
+    # これにより spin() を実行しながらシーケンスを並行して進める
+    sequence_task = executor.create_task(node.run_robot_sequence)
+
+    try:
+        executor.spin()
+    except KeyboardInterrupt:
+        node.get_logger().info("キーボード割り込みにより停止します")
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+
+
+===== FILE: src/tourobo_2026_foot/tourobo_2026_foot/subscribe_twist_node.py =====
+
+import can
+"""twistをsubscribeして、足回りesp32にモーター指令値を送信する"""
+
+import rclpy
+from rclpy.node import Node
+from std_msgs.msg import String
+from sensor_msgs.msg import Joy
+import math
+import numpy as np
+from geometry_msgs.msg import TransformStamped, Twist
+from tf2_ros import TransformBroadcaster
+from nav_msgs.msg import Odometry
+import atexit
+
+#自作ライブラリ
+import os
+import sys
+
+target_dir = os.path.abspath("/home/aratahorie/ah_python_libraries")
+sys.path.append(target_dir)
+from ah_python_lib.ah_python_can import *
+
+#足回り用(id 2)エンコーダーピン配列
+#const int ENC_PINNUM_A[4] = {19, 17, 21, 15};  足回りのピン
+#const int ENC_PINNUM_B[4] = {23, 18, 16, 2};
+
+
+def from_twist_to_motor_vel(vx, vy, w, L, fy):
+    V_1 = (-vx - vy + 2 * math.sqrt(2) * w * L) / (4 * math.pi * fy)
+    V_2 = (vx + vy + 2 * math.sqrt(2) * w * L) / (4 * math.pi * fy)
+    V_3 = (vx - vy + 2 * math.sqrt(2) * w * L) / (4 * math.pi * fy)
+    V_4 = (-vx + vy - 2 * math.sqrt(2) * -w * L) / (4 * math.pi * fy)
+
+    return (V_1, V_2, V_3, V_4)
+
+
+bus = can.interface.Bus(bustype="socketcan",
+                        channel="can0",
+                        asynchronous=True,
+                        bitrate=1000000)
+
+
+class TwistSubscriber(Node):
+
+    def __init__(self):
+        super().__init__("TwistSubscriber")
+
+        # 足回り速度制御立ち上げ
+        set_enc_vel_mode(0x020, bus)
+        set_enc_vel_mode(0x021, bus)
+        set_enc_vel_mode(0x022, bus)
+        set_enc_vel_mode(0x023, bus)
+
+        self.subscription_twist = self.create_subscription(
+            Twist,  # メッセージの型
+            "/cmd_vel",  # 購読するトピック名
+            self.twist_callback,  # 呼び出すコールバック関数
+            10,
+        )  # キューサイズ(溜まっていく)
+
+        self.subscription_twist
+
+        # --- Config ---
+        # 車体横の長さ
+        self.L = 0.3
+        # 車体中心からタイヤまでの距離
+        self.fy = 0.127
+        self.wheel_r = 0.05  #[m]
+        self.twist_gain = 2 * math.pi * self.wheel_r
+
+        # メンバーの初期化
+        self.linear_x = 0
+        self.linear_y = 0
+        self.w = 0
+
+        timer_period = 0.01
+        # wirte_to_motorの割り込み設定
+        self.timer = self.create_timer(timer_period, self.write_to_motor)
+
+    def twist_callback(self, msg):
+        self.linear_x = msg.linear.x
+        self.linear_y = msg.linear.y
+        self.w = msg.angular.z
+
+    def write_to_motor(self):
+        """Twistをメカナムホイール逆運動学で、各モーターの速度指令値に分解。4つの速度指令値を一つのパケットでesp32に送信する"""
+        vx = self.linear_x
+        vy = self.linear_y
+        w = self.w
+
+        V_1, V_2, V_3, V_4 = from_twist_to_motor_vel(vx, vy, w, self.L, self.fy)
+
+        set_goal_vel(0x020, float(V_1 / self.twist_gain), bus)
+        set_goal_vel(0x021, float(V_2 / self.twist_gain), bus)
+        set_goal_vel(0x022, float(V_3 / self.twist_gain), bus)
+        set_goal_vel(0x023, float(V_4 / self.twist_gain), bus)
+
+
+def main():
+    rclpy.init()  # rclpyライブラリの初期化
+
+    twist_subscriber_node = TwistSubscriber()
+
+    rclpy.spin(twist_subscriber_node)
+    twist_subscriber_node.destroy_node()
+    rclpy.shutdown()
+
+
+def stop():
+    """停止モードにする"""
+    set_stop_mode(0x010, bus)
+    set_stop_mode(0x011, bus)
+    set_stop_mode(0x012, bus)
+    set_stop_mode(0x013, bus)
+
+
+atexit.register(stop)
+
+if __name__ == "__main__":
+    main()
+
+
+===== FILE: src/tourobo_2026_interfaces/CMakeLists.txt =====
+
+cmake_minimum_required(VERSION 3.8)
+project(tourobo_2026_interfaces)
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "action/BallGet.action"
+  "action/BallPutGate.action"
+  "action/BallPutPlate.action"
+  "action/BallShoot.action"
+  "action/BallShootAim.action"
+  "action/BallIntake.action"
+  "action/BallArmOperation.action"
+  "action/MechanismReset.action"
+  "action/BallVomitPlate.action"
+)
+
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  # the following line skips the linter which checks for copyrights
+  # comment the line when a copyright and license is added to all source files
+  set(ament_cmake_copyright_FOUND TRUE)
+  # the following line skips cpplint (only works in a git repo)
+  # comment the line when this package is in a git repo and when
+  # a copyright and license is added to all source files
+  set(ament_cmake_cpplint_FOUND TRUE)
+  ament_lint_auto_find_test_dependencies()
+endif()
+
+ament_package()
+
+
+===== FILE: src/tourobo_2026_interfaces/package.xml =====
+
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>tourobo_2026_interfaces</name>
+  <version>0.0.0</version>
+  <description>TODO: Package description</description>
+  <maintainer email="teruna1493kisamami@gmail.com">hatsu</maintainer>
+  <license>TODO: License declaration</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>rosidl_default_generators</buildtool_depend>
+
+  <exec_depend>rosidl_default_runtime</exec_depend>
+
+  <member_of_group>rosidl_interface_packages</member_of_group>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
+
+
+===== FILE: src/tourobo_2026_mechanisms/launch/mechanism_launch.py =====
+
+"""
+メカニズム関連のnodeを立ち上げるlaunchですわよ
+"""
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.actions import IncludeLaunchDescription
+import os
+from ament_index_python.packages import get_package_share_directory
+import launch
+from launch import LaunchDescription
+from launch_ros.actions import Node
+
+def generate_launch_description():
+    pkg_name = 'tourobo_2026_mechanisms'
+    
+#Nodes
+    ball_get = Node(package=pkg_name, executable="ball_get_node", name="ball_get_node")
+    ball_put_plate = Node(package=pkg_name, executable="ball_put_plate_node", name="ball_put_plate_node")
+    ball_put_gate = Node(package=pkg_name, executable="ball_put_gate_node", name="ball_put_gate_node")
+    ball_shoot = Node(package=pkg_name, executable="ball_shoot_node", name="ball_shoot_node")
+    ball_arm_operation = Node(package=pkg_name, executable="ball_arm_operation_node", name="ball_arm_operation_node")
+    ball_intake = Node(package=pkg_name, executable="ball_intake_node", name="ball_intake_node")
+    ball_shoot_aim = Node(package=pkg_name, executable="ball_shoot_aim_node", name="ball_shoot_aim_node")
+    ball_vomit_plate = Node(package=pkg_name, executable="ball_vomit_plate_node", name="ball_vomit_plate_node")
+
+    joy_client = Node(package=pkg_name, executable="joy_mechanism_client", name="joy_mechanism_client")
+
+    ld = LaunchDescription()
+
+    ld.add_action(ball_get)
+    ld.add_action(ball_put_plate)
+    ld.add_action(ball_put_gate)
+    ld.add_action(ball_shoot)
+    ld.add_action(ball_arm_operation)
+    ld.add_action(ball_intake)
+#    ld.add_action(ball_shoot_aim)
+    ld.add_action(ball_vomit_plate)
+    ld.add_action(joy_client)
+
+    return ld
+
+
+===== FILE: src/tourobo_2026_mechanisms/package.xml =====
+
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>tourobo_2026_mechanisms</name>
+  <version>0.0.0</version>
+  <description>TODO: Package description</description>
+  <maintainer email="teruna1493kisamami@gmail.com">hatsu</maintainer>
+  <license>TODO: License declaration</license>
+  <depend>dyna_interfaces</depend>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
+
+
+===== FILE: src/tourobo_2026_mechanisms/setup.py =====
+
+import os
+from glob import glob
+from setuptools import find_packages, setup
+
+package_name = 'tourobo_2026_mechanisms'
+
+setup(
+    name=package_name,
+    version='0.0.0',
+    packages=find_packages(exclude=['test']),
+    data_files=[
+        ('share/ament_index/resource_index/packages',
+            ['resource/' + package_name]),
+        ('share/' + package_name, ['package.xml']),
+        (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', '*launch.[pxy][yma]*'))),
+    ],
+    install_requires=['setuptools'],
+    zip_safe=True,
+    maintainer='hatsu',
+    maintainer_email='teruna1493kisamami@gmail.com',
+    description='TODO: Package description',
+    license='TODO: License declaration',
+    extras_require={
+        'test': [
+            'pytest',
+        ],
+    },
+    entry_points={
+        'console_scripts': [
+            "yolo_node = tourobo_2026_mechanisms.yolo_node:main",
+            "ball_get_node = tourobo_2026_mechanisms.ball_get_node:main",
+            "ball_put_plate_node = tourobo_2026_mechanisms.ball_put_plate_node:main",
+            "ball_put_gate_node = tourobo_2026_mechanisms.ball_put_gate_node:main",
+            "ball_shoot_node = tourobo_2026_mechanisms.ball_shoot_node:main",
+            "joy_mechanism_client = tourobo_2026_mechanisms.joy_mechanism_client:main",
+            "ball_arm_operation_node = tourobo_2026_mechanisms.ball_arm_operation_node:main",
+            "ball_intake_node = tourobo_2026_mechanisms.ball_intake_node:main",
+            "ball_shoot_aim_node = tourobo_2026_mechanisms.ball_shoot_aim_node:main",
+            "mechanism_reset_node = tourobo_2026_mechanisms.mechanism_reset_node:main",
+            "ball_vomit_plate_node = tourobo_2026_mechanisms.ball_vomit_plate_node:main",
+        ],
+    },
+)
+
+
+===== FILE: src/tourobo_2026_mechanisms/test/test_copyright.py =====
+
+# Copyright 2015 Open Source Robotics Foundation, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+from ament_copyright.main import main
+import pytest
+
+
+# Remove the `skip` decorator once the source file(s) have a copyright header
+@pytest.mark.skip(reason='No copyright header has been placed in the generated source file.')
+@pytest.mark.copyright
+@pytest.mark.linter
+def test_copyright():
+    rc = main(argv=['.', 'test'])
+    assert rc == 0, 'Found errors'
+
+
+===== FILE: src/tourobo_2026_mechanisms/test/test_flake8.py =====
+
+# Copyright 2017 Open Source Robotics Foundation, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+from ament_flake8.main import main_with_errors
+import pytest
+
+
+@pytest.mark.flake8
+@pytest.mark.linter
+def test_flake8():
+    rc, errors = main_with_errors(argv=[])
+    assert rc == 0, \
+        'Found %d code style errors / warnings:\n' % len(errors) + \
+        '\n'.join(errors)
+
+
+===== FILE: src/tourobo_2026_mechanisms/test/test_pep257.py =====
+
+# Copyright 2015 Open Source Robotics Foundation, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+from ament_pep257.main import main
+import pytest
+
+
+@pytest.mark.linter
+@pytest.mark.pep257
+def test_pep257():
+    rc = main(argv=['.', 'test'])
+    assert rc == 0, 'Found code style errors / warnings'
+
+
+===== FILE: src/tourobo_2026_mechanisms/tourobo_2026_mechanisms/__init__.py =====
+
+
+
+
+===== FILE: src/tourobo_2026_mechanisms/tourobo_2026_mechanisms/ball_arm_operation_node.py =====
+
+"""
+ボールを取り込むアームの開閉をするだけ
+ダイナミクセル　アーム開閉
+"""
+from rclpy.action import ActionServer, GoalResponse
+import rclpy
+import asyncio
+from rclpy.node import Node
+from tourobo_2026_mechanisms.constants import *
+from std_msgs.msg import String
+import os
+import sys
+import time 
+
+from ah_python_lib.ah_python_can import *
+from tourobo_2026_interfaces.action import BallArmOperation
+from dyna_interfaces.msg import DynaTarget
+
+class BallArmOperationNode(Node):
+
+    def __init__(self):
+        super().__init__('ball_arm_operation_node')
+        self.is_executing = False
+        self.cb_group = rclpy.callback_groups.ReentrantCallbackGroup()
+
+        self.dyna_extpos_publisher = self.create_publisher(
+            DynaTarget, "/dyna_target_extpos", 10)
+        self.dyna_vel_publisher = self.create_publisher(DynaTarget,
+                                                        "/dyna_target_vel", 10)
+        self.dyna_pos_publisher = self.create_publisher(DynaTarget,
+                                                        "/dyna_target_pos", 10)
+
+        self._action_server = ActionServer(
+            self,
+            BallArmOperation,
+            'ball_arm_operation',
+            self.execute_callback,
+            goal_callback=self.goal_callback,
+            callback_group=self.cb_group,
+        )
+
+    def goal_callback(self, goal_request):
+        if self.is_executing:
+            self.get_logger().warn('現在別の処理を実行中です。新しい指令を拒否します。')
+            return GoalResponse.REJECT
+        self.get_logger().info('新しい指令を受け付けました。')
+        return GoalResponse.ACCEPT
+
+    def publish_dyna_extpos(self, id, target):
+        msg = DynaTarget()
+        msg.id = id
+        msg.target = target
+        self.dyna_extpos_publisher.publish(msg)
+
+    def publish_dyna_vel(self, id, target):
+        msg = DynaTarget()
+        msg.id = id
+        msg.target = target
+        self.dyna_vel_publisher.publish(msg)
+
+    def publish_dyna_pos(self, id, target):
+        msg = DynaTarget()
+        msg.id = id
+        msg.target = target
+        self.dyna_pos_publisher.publish(msg)
+
+    # ここがメインの処理じゃぞ
+    async def operate_ball_arm(self, target_arm, is_open):
+
+        DIR_NAME = {1: "左", 2: "右", 0: "エラー"}
+
+        if target_arm not in DIR_NAME:
+            self.get_logger().info("エラー: target_armが1(左)または2(右)ではありません")
+            return False
+
+        action_name = "開けます" if is_open else "閉じます"
+        self.get_logger().info(f"{DIR_NAME[target_arm]}アームを{action_name}")
+
+
+        # モーターを開閉位置に動かす処理をここに書く
+        if target_arm == 1:
+            if is_open:
+                # 左アームを開く動作
+                self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_OPEN)
+            else:
+                # 左アームを閉じる動作
+                self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_CLOSE)
+            time.sleep(WAIT_TIME_ARM)
+        elif target_arm == 2:
+            if is_open:
+                # 右アームを開く動作
+                self.publish_dyna_extpos(RIGHT_ARM_ID, RIGHT_ARM_OPEN)
+            else:
+                # 右アームを閉じる動作
+                self.publish_dyna_extpos(RIGHT_ARM_ID, RIGHT_ARM_CLOSE)
+            time.sleep(WAIT_TIME_ARM)
+
+        return True
+
+    async def execute_callback(self, goal_handle):
+
+        self.is_executing = True
+        try:
+            req = goal_handle.request
+            res = BallArmOperation.Result()
+            res.next_state = req.current_state
+            res.next_carry = req.carry
+            res.next_push_state = req.push_state
+            res.next_shoot_angle_state = req.shoot_angle_state
+            res.next_is_left_arm_open = req.is_left_arm_open
+            res.next_is_right_arm_open = req.is_right_arm_open
+
+            success = False
+
+            success = await self.operate_ball_arm(req.target_arm, req.is_open)
+
+            if success:
+                if req.target_arm == 1:
+                    res.next_is_left_arm_open = req.is_open
+                    if req.is_open and req.carry == BALL_CARRY.LEFT.value:
+                        res.next_carry = BALL_CARRY.NOT.value
+                        if req.current_state == Mechanism_State.SINGLE_CARRY.value:
+                            res.next_state = Mechanism_State.NOT_CARRY.value
+                elif req.target_arm == 2:
+                    res.next_is_right_arm_open = req.is_open
+                    if req.is_open and req.carry == BALL_CARRY.RIGHT.value:
+                        res.next_carry = BALL_CARRY.NOT.value
+                        if req.current_state == Mechanism_State.SINGLE_CARRY.value:
+                            res.next_state = Mechanism_State.NOT_CARRY.value
+
+                # (Removed overwrite of next_state here)
+                res.success = True
+                goal_handle.succeed()
+            else:
+                goal_handle.abort()
+
+            return res
+        finally:
+            self.is_executing = False
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = BallArmOperationNode()
+    executor = rclpy.executors.MultiThreadedExecutor()
+    executor.add_node(node)
+    executor.spin()
+    node.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+
+
+===== FILE: src/tourobo_2026_mechanisms/tourobo_2026_mechanisms/ball_get_node.py =====
+
+import can
+from rclpy.action import ActionServer, GoalResponse
+import rclpy
+import asyncio
+from rclpy.node import Node
+from tourobo_2026_mechanisms.constants import *
+from std_msgs.msg import String
+import time
+
+from tourobo_2026_interfaces.action import BallGet
+from dyna_interfaces.msg import DynaTarget
+from ah_python_lib.ah_python_can import *
+import os
+import sys
+
+CAN_BUS = can.interface.Bus(
+    bustype="socketcan", channel="can0", asynchronous=True, bitrate=1000000
+)
+
+
+class BallGetNode(Node):
+    def __init__(self):
+        super().__init__("ball_get_node")
+        self.is_executing = False
+        self.cb_group = rclpy.callback_groups.ReentrantCallbackGroup()
+
+        self.dyna_extpos_publisher = self.create_publisher(
+            DynaTarget, "/dyna_target_extpos", 10
+        )
+        self.dyna_vel_publisher = self.create_publisher(
+            DynaTarget, "/dyna_target_vel", 10
+        )
+        self.dyna_pos_publisher = self.create_publisher(
+            DynaTarget, "/dyna_target_pos", 10
+        )
+
+        self._action_server = ActionServer(
+            self,
+            BallGet,
+            "ball_get",
+            self.execute_callback,
+            goal_callback=self.goal_callback,
+            callback_group=self.cb_group,
+        )
+
+        # dcモーター立ち上げ
+        set_pwm_mode(DOWN_ROLLER_CAN_ID, CAN_BUS)
+        set_pwm_mode(RIGHT_ROLLER_CAN_ID, CAN_BUS)
+        set_pwm_mode(LEFT_ROLLER_CAN_ID, CAN_BUS)
+
+        # 初期化
+        set_goal_pwm(DOWN_ROLLER_CAN_ID, 0, CAN_BUS)
+        set_goal_pwm(RIGHT_ROLLER_CAN_ID, 0, CAN_BUS)
+        set_goal_pwm(LEFT_ROLLER_CAN_ID, 0, CAN_BUS)
+
+    def goal_callback(self, goal_request):
+        if self.is_executing:
+            self.get_logger().warn("現在別の処理を実行中です。新しい指令を拒否します。")
+            return GoalResponse.REJECT
+        self.get_logger().info("新しい指令を受け付けました。")
+        return GoalResponse.ACCEPT
+
+    def publish_dyna_extpos(self, id, target):
+        msg = DynaTarget()
+        msg.id = id
+        msg.target = target
+        self.dyna_extpos_publisher.publish(msg)
+
+    def publish_dyna_vel(self, id, target):
+        msg = DynaTarget()
+        msg.id = id
+        msg.target = target
+        self.dyna_vel_publisher.publish(msg)
+
+    def publish_dyna_pos(self, id, target):
+        msg = DynaTarget()
+        msg.id = id
+        msg.target = target
+        self.dyna_pos_publisher.publish(msg)
+
+    # ここがメインの処理じゃぞ
+    async def get_ball(self, execute_mode):
+
+        # 左右共通して行う処理
+        self.get_logger().info(f"execute_mode = {execute_mode} でget_ballが実行された")
+        self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_OPEN)
+        self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_OPEN)
+        time.sleep(WAIT_TIME_GUARD)
+
+        if execute_mode == 1:  # 左
+            # 上のローラーを回す
+            set_goal_pwm(LEFT_ROLLER_CAN_ID, -BALL_GET_UP_ROLLER_SPEED, CAN_BUS)
+            # 下のローラーを回す
+            set_goal_pwm(DOWN_ROLLER_CAN_ID, BALL_GET_DOWN_ROLLER_SPEED, CAN_BUS)
+
+            # ダイナミクセルでゲートを閉じる
+            self.get_logger().info("左のゲートを閉じます")
+            self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_GET_HALF)
+
+        elif execute_mode == 2:  # 右
+            # 右のローラーを回す
+            set_goal_pwm(RIGHT_ROLLER_CAN_ID, BALL_GET_UP_ROLLER_SPEED, CAN_BUS)
+            # 下のローラーを回す
+            set_goal_pwm(DOWN_ROLLER_CAN_ID, -BALL_GET_DOWN_ROLLER_SPEED, CAN_BUS)
+
+            # ダイナミクセルでゲートを閉じる
+            self.get_logger().info("右のゲートを閉じます")
+            self.publish_dyna_extpos(RIGHT_ARM_ID, RIGHT_ARM_GET_HALF)
+
+        else:  # エラー
+            self.get_logger().info("エラー: dir_numが1または2ではありません")
+            return False
+
+        # 左右共通して行う後処理
+        # ボールが入るのを待つ
+        time.sleep(WAIT_TIME_GET)
+
+        # ろーらーをとめる
+        set_goal_pwm(LEFT_ROLLER_CAN_ID, 0, CAN_BUS)
+        set_goal_pwm(RIGHT_ROLLER_CAN_ID, 0, CAN_BUS)
+        set_goal_pwm(DOWN_ROLLER_CAN_ID, 0, CAN_BUS)
+
+        return True
+
+    async def execute_callback(self, goal_handle):
+        self.is_executing = True
+        try:
+            req = goal_handle.request
+            res = BallGet.Result()
+            res.next_state = req.current_state
+            res.next_carry = req.carry
+            res.next_push_state = req.push_state
+            res.next_shoot_angle_state = req.shoot_angle_state
+            res.next_is_left_arm_open = req.is_left_arm_open
+            res.next_is_right_arm_open = req.is_right_arm_open
+
+            success = False
+
+            success = await self.get_ball(req.execute_mode)
+
+            if success:
+                if req.execute_mode == 1:
+                    res.next_is_left_arm_open = False
+                elif req.execute_mode == 2:
+                    res.next_is_right_arm_open = False
+
+                res.success = True
+                # execute_mode 1=左 -> LEFT_CARRY(2), 2=右 -> RIGHT_CARRY(3)
+                if req.current_state in [
+                    Mechanism_State.INTAKE_GATE.value,
+                    Mechanism_State.INTAKE_SHOOT.value,
+                ]:
+                    res.next_state = req.current_state
+                else:
+                    res.next_state = Mechanism_State.SINGLE_CARRY.value
+                res.next_carry = (
+                    BALL_CARRY.LEFT.value
+                    if req.execute_mode == 1
+                    else BALL_CARRY.RIGHT.value
+                )
+                goal_handle.succeed()
+            else:
+                goal_handle.abort()
+
+            return res
+        finally:
+            self.is_executing = False
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = BallGetNode()
+    executor = rclpy.executors.MultiThreadedExecutor()
+    executor.add_node(node)
+    executor.spin()
+    node.destroy_node()
+    rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+
+
+===== FILE: src/tourobo_2026_mechanisms/tourobo_2026_mechanisms/ball_intake_node.py =====
+
+import can
+from rclpy.action import ActionServer, GoalResponse
+import rclpy
+from rclpy.node import Node
+from tourobo_2026_mechanisms.constants import *
+from std_msgs.msg import String
+import os
+import sys
+import asyncio
+import time
+
+from ah_python_lib.ah_python_can import *
+from tourobo_2026_interfaces.action import BallIntake
+from dyna_interfaces.msg import DynaTarget
+
+CAN_BUS = can.interface.Bus(
+    bustype="socketcan", channel="can0", asynchronous=True, bitrate=1000000
+)
+
+
+class BallIntakeNode(Node):
+    def __init__(self):
+        super().__init__("ball_intake_node")
+        self.is_executing = False
+        self.cb_group = rclpy.callback_groups.ReentrantCallbackGroup()
+
+        self.dyna_extpos_publisher = self.create_publisher(
+            DynaTarget, "/dyna_target_extpos", 10
+        )
+        self.dyna_vel_publisher = self.create_publisher(
+            DynaTarget, "/dyna_target_vel", 10
+        )
+        self.dyna_pos_publisher = self.create_publisher(
+            DynaTarget, "/dyna_target_pos", 10
+        )
+
+        self._action_server = ActionServer(
+            self,
+            BallIntake,
+            "ball_intake",
+            self.execute_callback,
+            goal_callback=self.goal_callback,
+            callback_group=self.cb_group,
+        )
+
+        # dcモーター立ち上げ
+        set_pwm_mode(DOWN_ROLLER_CAN_ID, CAN_BUS)
+        set_pwm_mode(RIGHT_ROLLER_CAN_ID, CAN_BUS)
+        set_pwm_mode(LEFT_ROLLER_CAN_ID, CAN_BUS)
+
+        # dcモーター初期化
+        set_goal_pwm(DOWN_ROLLER_CAN_ID, 0, CAN_BUS)
+        set_goal_pwm(RIGHT_ROLLER_CAN_ID, 0, CAN_BUS)
+        set_goal_pwm(LEFT_ROLLER_CAN_ID, 0, CAN_BUS)
+
+        # ロボマスモーター立ち上げ
+        set_enc_pos_mode(MINI_SHOOT_CAN_ID, CAN_BUS)
+
+    def goal_callback(self, goal_request):
+        if self.is_executing:
+            self.get_logger().warn("現在別の処理を実行中です。新しい指令を拒否します。")
+            return GoalResponse.REJECT
+        self.get_logger().info("新しい指令を受け付けました。")
+        return GoalResponse.ACCEPT
+
+    def publish_dyna_extpos(self, id, target):
+        msg = DynaTarget()
+        msg.id = id
+        msg.target = target
+        self.dyna_extpos_publisher.publish(msg)
+
+    def publish_dyna_vel(self, id, target):
+        msg = DynaTarget()
+        msg.id = id
+        msg.target = target
+        self.dyna_vel_publisher.publish(msg)
+
+    def publish_dyna_pos(self, id, target):
+        msg = DynaTarget()
+        msg.id = id
+        msg.target = target
+        self.dyna_pos_publisher.publish(msg)
+
+    # ここがメインの処理じゃぞ
+    async def intake_ball(
+        self, carry, execute_mode, push_state, shoot_angle_state
+    ):
+        # 左右両方で共通して実行する処理を書く
+        # フィードバック無しのため、常に支柱を下げて待機する
+        if shoot_angle_state != Shoot_Angle_State.MIN.value:
+            self.get_logger().info("支柱を下げます")
+            self.publish_dyna_extpos(SHOOT_ANGLE_ID, SHOOT_ANGLE_MIN)
+            time.sleep(WAIT_TIME_SHOOT_ANGLE)
+
+        # current_state は 2: LEFT_CARRY, 3: RIGHT_CARRY
+        # 城門
+        if execute_mode == 1:
+            # 左右共通して行う前処理
+            # 押し出し機構を上げる
+            if push_state != Shoot_Push_State.MAX.value:
+                set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MAX, CAN_BUS)
+                time.sleep(WAIT_TIME_PUSH)
+
+            # left
+            if carry == 1:
+                self.get_logger().info("左脇にあるボールをintake(城門)します")
+
+                # 右側のガードを下げる
+                self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_CLOSE)
+                time.sleep(WAIT_TIME_GUARD)
+
+                # 左側のガードを上げる
+                self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_OPEN)
+                time.sleep(WAIT_TIME_GUARD)
+
+                # 下ローラーを右側へ回転
+                set_goal_pwm(DOWN_ROLLER_CAN_ID, BALL_INTAKE_DOWN_ROLLER_SPEED, CAN_BUS)
+
+                # 上ローラーを回転
+                set_goal_pwm(LEFT_ROLLER_CAN_ID, -BALL_INTAKE_UP_ROLLER_SPEED, CAN_BUS)
+
+                # 左アームを下ろす
+                self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_CLOSE)
+                time.sleep(WAIT_TIME_ARM)
+
+                # ボールが完全に内側に入るのを待つ
+                time.sleep(WAIT_TIME_INTAKE)
+
+                # 左ガードを下げる
+                self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_CLOSE)
+                time.sleep(WAIT_TIME_GUARD)
+
+            # right
+            elif carry == 2:
+                self.get_logger().info("右脇にあるボールをintake(城門)します")
+
+                # 左側のガードを下げる
+                self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_CLOSE)
+                time.sleep(WAIT_TIME_GUARD)
+
+                # 右側のガードを上げる
+                self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_OPEN)
+                time.sleep(WAIT_TIME_GUARD)
+
+                # 下ローラーを左側へ回転
+                set_goal_pwm(DOWN_ROLLER_CAN_ID, -BALL_INTAKE_DOWN_ROLLER_SPEED, CAN_BUS)
+
+                # 上ローラーを回転
+                set_goal_pwm(RIGHT_ROLLER_CAN_ID, BALL_INTAKE_UP_ROLLER_SPEED, CAN_BUS)
+
+                # 右アームを下ろす
+                self.publish_dyna_extpos(RIGHT_ARM_ID, RIGHT_ARM_CLOSE)
+                time.sleep(WAIT_TIME_ARM)
+
+                # ボールが完全に内側に入るのを待つ
+                time.sleep(WAIT_TIME_INTAKE)
+
+                # 右ガードを下げる
+                self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_CLOSE)
+                time.sleep(WAIT_TIME_GUARD)
+
+            # 左右共通して行う後処理
+            # ローラーを止める
+            set_goal_pwm(DOWN_ROLLER_CAN_ID, 0, CAN_BUS)
+            set_goal_pwm(RIGHT_ROLLER_CAN_ID, 0, CAN_BUS)
+            set_goal_pwm(LEFT_ROLLER_CAN_ID, 0, CAN_BUS)
+
+            # ボールが引っかからないように押出機構で支える
+            set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_GATE_HOLD, CAN_BUS)
+            time.sleep(WAIT_TIME_PUSH_HALF)
+
+            #射出角度をさげる
+            self.publish_dyna_extpos(SHOOT_ANGLE_ID, SHOOT_ANGLE_AT_GATE)
+            time.sleep(WAIT_TIME_SHOOT_ANGLE_PUT_GATE)
+
+
+        # 射出
+        elif execute_mode == 2:
+            # 左右共通して行う前処理
+            # 押し出し機構を下げる
+            if push_state != Shoot_Push_State.MIN.value:
+                set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MIN, CAN_BUS)
+                time.sleep(WAIT_TIME_PUSH)
+
+
+            # left
+            if carry == 1:
+                self.get_logger().info("左脇にあるボールを内側に取り込みます")
+
+                # 右側のガードを下げる
+                self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_CLOSE)
+                time.sleep(WAIT_TIME_GUARD)
+
+                # 左側のガードを上げる
+                self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_OPEN)
+                time.sleep(WAIT_TIME_GUARD)
+
+                # 下ローラーを右側へ回転
+                set_goal_pwm(DOWN_ROLLER_CAN_ID, BALL_INTAKE_DOWN_ROLLER_SPEED, CAN_BUS)
+
+                # 上ローラーを回転
+                set_goal_pwm(LEFT_ROLLER_CAN_ID, -BALL_INTAKE_UP_ROLLER_SPEED, CAN_BUS)
+
+                # 左アームを下ろす
+                self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_CLOSE)
+                time.sleep(WAIT_TIME_ARM)
+
+                # ボールが完全に内側に入るのを待つ
+                time.sleep(WAIT_TIME_INTAKE)
+
+                # 左ガードを下げる
+                self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_CLOSE)
+
+                set_goal_pwm(DOWN_ROLLER_CAN_ID, 0, CAN_BUS)
+
+
+                # time.sleep(WAIT_TIME_GUARD)
+
+            # right
+            if carry == 2:
+                self.get_logger().info("右脇にあるボールを内側に取り込みます")
+
+                # 左側のガードを下げる
+                self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_CLOSE)
+                time.sleep(WAIT_TIME_GUARD)
+
+                # 右側のガードを上げる
+                self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_OPEN)
+                time.sleep(WAIT_TIME_GUARD)
+
+                # 下ローラーを左側へ回転
+                set_goal_pwm(DOWN_ROLLER_CAN_ID, -BALL_INTAKE_DOWN_ROLLER_SPEED, CAN_BUS)
+
+                # 上ローラーを回転
+                set_goal_pwm(RIGHT_ROLLER_CAN_ID, BALL_INTAKE_UP_ROLLER_SPEED, CAN_BUS)
+
+                # 右アームを下ろす
+                self.publish_dyna_extpos(RIGHT_ARM_ID, RIGHT_ARM_CLOSE)
+                time.sleep(WAIT_TIME_ARM)
+
+                # ボールが完全に内側に入るのを待つ
+                time.sleep(WAIT_TIME_INTAKE)
+
+                # 右ガードを下げる
+                self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_CLOSE)
+                time.sleep(WAIT_TIME_GUARD)
+
+            # 左右共通して行う後処理
+            # ローラーを止める
+            set_goal_pwm(DOWN_ROLLER_CAN_ID, 0, CAN_BUS)
+            set_goal_pwm(RIGHT_ROLLER_CAN_ID, 0, CAN_BUS)
+            set_goal_pwm(LEFT_ROLLER_CAN_ID, 0, CAN_BUS)
+
+            # 射出機構の直前までボールをセットしておく
+            set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_LOADING,CAN_BUS)
+            time.sleep(WAIT_TIME_PUSH_HALF)
+
+        else:
+            self.get_logger().error(
+                f"エラー: 想定外の current_state ({current_state}) です。取り込みを中止します。"
+            )
+            return False
+
+        self.get_logger().info("取り込み完了")
+        return True
+
+    async def execute_callback(self, goal_handle):
+        self.is_executing = True
+        try:
+            req = goal_handle.request
+            res = BallIntake.Result()
+            res.next_state = req.current_state
+            res.next_carry = req.carry
+            res.next_push_state = req.push_state
+            res.next_shoot_angle_state = req.shoot_angle_state
+            res.next_is_left_arm_open = req.is_left_arm_open
+            res.next_is_right_arm_open = req.is_right_arm_open
+
+            success = False
+
+            success = await self.intake_ball(
+                req.carry,
+                req.execute_mode,
+                req.push_state,
+                req.shoot_angle_state,
+            )
+
+            if success:
+                if req.execute_mode == 1:
+                    res.next_push_state = Shoot_Push_State.GATE_HOLD.value
+                elif req.execute_mode == 2:
+                    res.next_push_state = Shoot_Push_State.LOADING.value
+
+                res.success = True
+                # 城門
+                if req.execute_mode == 1:
+                    res.next_state = Mechanism_State.INTAKE_GATE.value
+                # 射出
+                elif req.execute_mode == 2:
+                    res.next_state = Mechanism_State.INTAKE_SHOOT.value
+                
+                res.next_carry = BALL_CARRY.NOT.value
+                goal_handle.succeed()
+            else:
+                goal_handle.abort()
+
+            return res
+        finally:
+            self.is_executing = False
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = BallIntakeNode()
+    executor = rclpy.executors.MultiThreadedExecutor()
+    executor.add_node(node)
+    executor.spin()
+    node.destroy_node()
+    rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+
+
+===== FILE: src/tourobo_2026_mechanisms/tourobo_2026_mechanisms/ball_put_gate_node.py =====
+
+import can
+import osrf_pycommon.process_utils.async_execute_process_asyncio
+from rclpy.action import ActionServer, GoalResponse
+import rclpy
+from rclpy.node import Node
+from tourobo_2026_mechanisms.constants import *
+from std_msgs.msg import String
+import os
+import sys
+import asyncio
+import time
+
+from ah_python_lib.ah_python_can import *
+from tourobo_2026_interfaces.action import BallPutGate
+from dyna_interfaces.msg import DynaTarget
+
+CAN_BUS = can.interface.Bus(
+    bustype="socketcan", channel="can0", asynchronous=True, bitrate=1000000
+)
+
+
+class BallPutGateNode(Node):
+    def __init__(self):
+        super().__init__("ball_put_gate_node")
+        self.is_executing = False
+        self.cb_group = rclpy.callback_groups.ReentrantCallbackGroup()
+
+        self.dyna_extpos_publisher = self.create_publisher(
+            DynaTarget, "/dyna_target_extpos", 10
+        )
+        self.dyna_vel_publisher = self.create_publisher(
+            DynaTarget, "/dyna_target_vel", 10
+        )
+        self.dyna_pos_publisher = self.create_publisher(
+            DynaTarget, "/dyna_target_pos", 10
+        )
+
+        self._action_server = ActionServer(
+            self,
+            BallPutGate,
+            "ball_put_gate",
+            self.execute_callback,
+            goal_callback=self.goal_callback,
+            callback_group=self.cb_group,
+        )
+
+        # ロボマスモーター立ち上げ
+        set_enc_pos_mode(MINI_SHOOT_CAN_ID, CAN_BUS)
+
+    def goal_callback(self, goal_request):
+        if self.is_executing:
+            self.get_logger().warn("現在別の処理を実行中です。新しい指令を拒否します。")
+            return GoalResponse.REJECT
+        self.get_logger().info("新しい指令を受け付けました。")
+        return GoalResponse.ACCEPT
+
+    # 相対角度
+    def publish_dyna_extpos(self, id, target):
+        msg = DynaTarget()
+        msg.id = id
+        msg.target = target
+        self.dyna_extpos_publisher.publish(msg)
+
+    # 速度制御
+    def publish_dyna_vel(self, id, target):
+        msg = DynaTarget()
+        msg.id = id
+        msg.target = target
+        self.dyna_vel_publisher.publish(msg)
+
+    # 絶対角度
+    def publish_dyna_pos(self, id, target):
+        msg = DynaTarget()
+        msg.id = id
+        msg.target = target
+        self.dyna_pos_publisher.publish(msg)
+
+    # じっさいのどうさぶぶん
+    async def put_ball_in_gate(self, current_state, push_state):
+
+        #ga-do wo tojiru
+        self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_CLOSE)
+        self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_CLOSE)
+ 
+        # 押し出しを城門側へ
+        # ロボマスを使って押し出しを城門側へ
+        if push_state != Shoot_Push_State.MIN.value:
+            set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MIN, CAN_BUS)
+        time.sleep(WAIT_TIME_PUSH)
+
+        #ボールが転がるまでちょっと待つ
+        time.sleep(1.0)
+
+         #ガードを戻す
+        self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_OPEN)
+        self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_OPEN)
+        #time.sleep(WAIT_TIME_GUARD)
+
+        # 押出機構を上限にあげる
+        set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_GATE_HOLD, CAN_BUS)
+        time.sleep(WAIT_TIME_PUSH_HALF)
+
+        # 射出角度をあげる
+        self.publish_dyna_extpos(SHOOT_ANGLE_ID, SHOOT_ANGLE_MIN)
+        time.sleep(WAIT_TIME_SHOOT_ANGLE_PUT_GATE)
+
+        # osidasi kicou wo sageru
+        set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MIN ,CAN_BUS)
+        time.sleep(WAIT_TIME_PUSH_HALF)
+
+        return True
+
+    async def execute_callback(self, goal_handle):
+
+        self.is_executing = True
+        try:
+            req = goal_handle.request
+            res = BallPutGate.Result()
+            res.next_state = req.current_state
+            res.next_carry = req.carry
+            res.next_push_state = req.push_state
+            res.next_shoot_angle_state = req.shoot_angle_state
+            res.next_is_left_arm_open = req.is_left_arm_open
+            res.next_is_right_arm_open = req.is_right_arm_open
+
+            success = False
+
+            success = await self.put_ball_in_gate(req.current_state, req.push_state)
+
+            if success:
+                res.next_push_state = Shoot_Push_State.MIN.value
+                res.next_shoot_angle_state = Shoot_Angle_State.MIN.value
+
+                res.success = True
+                if req.carry != BALL_CARRY.NOT.value:
+                    res.next_state = Mechanism_State.SINGLE_CARRY.value
+                    res.next_carry = req.carry
+                else:
+                    res.next_state = Mechanism_State.NOT_CARRY.value
+                    res.next_carry = BALL_CARRY.NOT.value
+                goal_handle.succeed()
+            else:
+                goal_handle.abort()
+
+            return res
+        finally:
+            self.is_executing = False
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = BallPutGateNode()
+    executor = rclpy.executors.MultiThreadedExecutor()
+    executor.add_node(node)
+    executor.spin()
+    node.destroy_node()
+    rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+
+
+===== FILE: src/tourobo_2026_mechanisms/tourobo_2026_mechanisms/ball_put_plate_node.py =====
+
+import can
+from rclpy.action import ActionServer, GoalResponse
+import rclpy
+from rclpy.node import Node
+from tourobo_2026_mechanisms.constants import *
+from std_msgs.msg import String
+import asyncio
+import os
+import sys
+import asyncio
+import time
+
+from ah_python_lib.ah_python_can import *
+from tourobo_2026_interfaces.action import BallPutPlate
+from dyna_interfaces.msg import DynaTarget
+
+CAN_BUS = can.interface.Bus(
+    bustype="socketcan", channel="can0", asynchronous=True, bitrate=1000000
+)
+
+
+class BallPutPlateNode(Node):
+    def __init__(self):
+        super().__init__("ball_put_plate_node")
+        self.is_executing = False
+        self.cb_group = rclpy.callback_groups.ReentrantCallbackGroup()
+
+        self._action_server = ActionServer(
+            self,
+            BallPutPlate,
+            "ball_put_plate",
+            self.execute_callback,
+            goal_callback=self.goal_callback,
+            callback_group=self.cb_group,
+        )
+
+        set_enc_pos_mode(MINI_SHOOT_CAN_ID, CAN_BUS)
+
+        self.dyna_extpos_publisher = self.create_publisher(
+            DynaTarget, "/dyna_target_extpos", 10
+        )
+        self.dyna_vel_publisher = self.create_publisher(
+            DynaTarget, "/dyna_target_vel", 10
+        )
+        self.dyna_pos_publisher = self.create_publisher(
+            DynaTarget, "/dyna_target_pos", 10
+        )
+
+    def publish_dyna_pos(self, id, target):
+        msg = DynaTarget()
+        msg.id = id
+        msg.target = target
+        self.dyna_pos_publisher.publish(msg)
+
+    # 相対角度
+    def publish_dyna_extpos(self, id, target):
+        msg = DynaTarget()
+        msg.id = id
+        msg.target = target
+        self.dyna_extpos_publisher.publish(msg)
+
+    def goal_callback(self, goal_request):
+        if self.is_executing:
+            self.get_logger().warn("現在別の処理を実行中です。新しい指令を拒否します。")
+            return GoalResponse.REJECT
+        self.get_logger().info("新しい指令を受け付けました。")
+        return GoalResponse.ACCEPT
+
+    # 実際の動作部分
+    async def put_ball_in_plate(self, carry, push_state, shoot_angle_state):
+
+        # 左右共通して行う動作
+        # 押し出し機構を上に上げる
+        #if push_state != Shoot_Push_State.MAX.value:
+        #    set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MAX, CAN_BUS)
+        #time.sleep(WAIT_TIME_PUSH)
+
+        # 射出機構を上げる
+        if shoot_angle_state != Shoot_Angle_State.MIN.value:
+            self.publish_dyna_extpos(SHOOT_ANGLE_ID, SHOOT_ANGLE_MIN)
+            time.sleep(WAIT_TIME_SHOOT_ANGLE)
+
+        # 押出機構がMAXでもMINでもない場合はMINにする
+        if push_state not in [Shoot_Push_State.MIN.value, Shoot_Push_State.MAX.value]:
+            set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MIN, CAN_BUS)
+            time.sleep(WAIT_TIME_PUSH)
+
+        # carry: 1=LEFT, 2=RIGHT
+        if carry == BALL_CARRY.RIGHT.value:
+            self.get_logger().info(
+                "右脇で保持している状態から、左側へボールを関所に置きます"
+            )
+            # 右側だけ半開き(右脇で保持している状態)なら左側から発射
+
+            # 左側のアームを上げる
+            self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_OPEN)
+            time.sleep(WAIT_TIME_ARM)
+
+            # 左側のガードを上げる
+            self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_OPEN)
+            time.sleep(WAIT_TIME_GUARD)
+
+            # 左側のローラーを回す
+            set_goal_pwm(LEFT_ROLLER_CAN_ID, BALL_PUT_PLATE_UP_ROLLER_SPEED, CAN_BUS)
+
+            # 右側のガードを上げる
+            self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_OPEN)
+            time.sleep(WAIT_TIME_GUARD)
+
+            # 右側のローラーを回す
+            set_goal_pwm(RIGHT_ROLLER_CAN_ID, BALL_PUT_PLATE_UP_ROLLER_SPEED, CAN_BUS)
+            # 下のローラーを左向きに回す
+            set_goal_pwm(DOWN_ROLLER_CAN_ID, -BALL_PUT_PLATE_DOWN_ROLLER_SPEED, CAN_BUS)
+
+            # 右側のアームを下げる
+            self.publish_dyna_extpos(RIGHT_ARM_ID, RIGHT_ARM_CLOSE)
+            time.sleep(WAIT_TIME_ARM)
+
+            # ボールが移動して関所に置かれるのを待つ
+            time.sleep(WAIT_TIME_PUT_PLATE)
+
+            # ろーらーをとめ
+            set_goal_pwm(LEFT_ROLLER_CAN_ID, 0, CAN_BUS)
+            set_goal_pwm(RIGHT_ROLLER_CAN_ID, 0, CAN_BUS)
+            set_goal_pwm(DOWN_ROLLER_CAN_ID, 0, CAN_BUS)
+
+        elif carry == BALL_CARRY.LEFT.value:
+            self.get_logger().info(
+                "左脇で保持している状態から、右側へボールを関所に置きます"
+            )
+            # 左側だけ半開き(左脇で保持している状態)なら右側から発射
+
+            # 右側のアームを上げる
+            self.publish_dyna_extpos(RIGHT_ARM_ID, RIGHT_ARM_OPEN)
+            time.sleep(WAIT_TIME_ARM)
+
+            # 右側のガードを上げる
+            self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_OPEN)
+            time.sleep(WAIT_TIME_GUARD)
+            # 右側のローラーを回す
+            set_goal_pwm(RIGHT_ROLLER_CAN_ID, -BALL_PUT_PLATE_UP_ROLLER_SPEED, CAN_BUS)
+
+            # 左側のガードを上げる
+            self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_OPEN)
+            time.sleep(WAIT_TIME_GUARD)
+
+            # 左側のローラーを回す
+            set_goal_pwm(LEFT_ROLLER_CAN_ID, -BALL_PUT_PLATE_UP_ROLLER_SPEED, CAN_BUS)
+
+            # 下のローラーを右向きに回す
+            set_goal_pwm(DOWN_ROLLER_CAN_ID, BALL_PUT_PLATE_DOWN_ROLLER_SPEED, CAN_BUS)
+
+            # 左側のアームを下ろす
+            self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_CLOSE)
+            time.sleep(WAIT_TIME_ARM)
+
+            # ボールが移動して関所に置かれるのを待つ
+            time.sleep(WAIT_TIME_PUT_PLATE)
+
+            # ローラーを止める
+            set_goal_pwm(LEFT_ROLLER_CAN_ID, 0, CAN_BUS)
+            set_goal_pwm(RIGHT_ROLLER_CAN_ID, 0, CAN_BUS)
+            set_goal_pwm(DOWN_ROLLER_CAN_ID, 0, CAN_BUS)
+
+        else:
+            self.get_logger().error(
+                f"エラー: 想定外の carry ({carry}) です。"
+            )
+            return False
+
+        # 終了処理
+        # 左側の上のローラーを止める
+        # 右側の上のローラーを止める
+        # 下のローラーを止める
+        # ガードを落とす
+
+        self.get_logger().info("関所への配置完了")
+        return True
+
+    async def execute_callback(self, goal_handle):
+
+        self.is_executing = True
+        try:
+            req = goal_handle.request
+            res = BallPutPlate.Result()
+            res.next_state = req.current_state
+            res.next_carry = req.carry
+            res.next_push_state = req.push_state
+            res.next_shoot_angle_state = req.shoot_angle_state
+            res.next_is_left_arm_open = req.is_left_arm_open
+            res.next_is_right_arm_open = req.is_right_arm_open
+
+            success = False
+
+            success = await self.put_ball_in_plate(req.carry, req.push_state, req.shoot_angle_state)
+
+            if success:
+                if req.push_state not in [Shoot_Push_State.MIN.value, Shoot_Push_State.MAX.value]:
+                    res.next_push_state = Shoot_Push_State.MIN.value
+                if req.current_state == Mechanism_State.SINGLE_CARRY.value and req.carry == BALL_CARRY.LEFT.value: # LEFT_CARRY
+                    res.next_is_right_arm_open = True
+                elif req.current_state == Mechanism_State.SINGLE_CARRY.value and req.carry == BALL_CARRY.RIGHT.value: # RIGHT_CARRY
+                    res.next_is_left_arm_open = True
+
+                res.success = True
+                res.next_state = Mechanism_State.NOT_CARRY.value
+                res.next_carry = 0  # NOT_CARRY
+                goal_handle.succeed()
+            else:
+                goal_handle.abort()
+
+            return res
+        finally:
+            self.is_executing = False
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = BallPutPlateNode()
+    executor = rclpy.executors.MultiThreadedExecutor()
+    executor.add_node(node)
+    executor.spin()
+    node.destroy_node()
+    rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+
+
+===== FILE: src/tourobo_2026_mechanisms/tourobo_2026_mechanisms/ball_shoot_aim_node.py =====
+
+"""
+射出講を上下に動かすだけ
+"""
+from rclpy.action import ActionServer, GoalResponse
+import rclpy
+import asyncio
+from rclpy.node import Node
+from tourobo_2026_mechanisms.constants import *
+from std_msgs.msg import String
+import os
+import sys
+
+from ah_python_lib.ah_python_can import *
+from tourobo_2026_interfaces.action import BallShootAim
+from dyna_interfaces.msg import DynaTarget
+
+class BallShootAimNode(Node):
+
+    def __init__(self):
+        super().__init__('ball_shoot_aim_node')
+        self.is_executing = False
+        self.cb_group = rclpy.callback_groups.ReentrantCallbackGroup()
+
+        self.dyna_extpos_publisher = self.create_publisher(
+            DynaTarget, "/dyna_target_extpos", 10)
+        self.dyna_vel_publisher = self.create_publisher(DynaTarget,
+                                                        "/dyna_target_vel", 10)
+        self.dyna_pos_publisher = self.create_publisher(DynaTarget,
+                                                        "/dyna_target_pos", 10)
+
+        self._action_server = ActionServer(
+            self,
+            BallShootAim,
+            'ball_shoot_aim',
+            self.execute_callback,
+            goal_callback=self.goal_callback,
+            callback_group=self.cb_group,
+        )
+
+    def publish_dyna_extpos(self, id, target):
+        msg = DynaTarget()
+        msg.id = id
+        msg.target = target
+        self.dyna_extpos_publisher.publish(msg)
+
+    def publish_dyna_vel(self, id, target):
+        msg = DynaTarget()
+        msg.id = id
+        msg.target = target
+        self.dyna_vel_publisher.publish(msg)
+
+    def publish_dyna_pos(self, id, target):
+        msg = DynaTarget()
+        msg.id = id
+        msg.target = target
+        self.dyna_pos_publisher.publish(msg)
+
+    #しゃしゅつきこうのじょうげ
+    async def aim_ball(self, direction):
+
+
+        #1: 上げる -1: 下げる 0: 待機
+        if direction == 1:
+            self.publish_dyna_pos(SHOOT_ANGLE_ID, SHOOT_ANGLE_MAX)
+        elif direction == -1:
+            self.publish_dyna_pos(SHOOT_ANGLE_ID, SHOOT_ANGLE_MIN)
+        elif direction == 0:
+            pass
+
+        return True
+
+    def goal_callback(self, goal_request):
+        if self.is_executing:
+            self.get_logger().warn('現在別の処理を実行中です。新しい指令を拒否します。')
+            return GoalResponse.REJECT
+        self.get_logger().info('新しい指令を受け付けました。')
+        return GoalResponse.ACCEPT
+
+    async def execute_callback(self, goal_handle):
+        self.is_executing = True
+        try:
+            req = goal_handle.request
+            res = BallShootAim.Result()
+            res.next_state = req.current_state
+            res.next_carry = req.carry
+            res.next_push_state = req.push_state
+            res.next_shoot_angle_state = req.shoot_angle_state
+            res.next_is_left_arm_open = req.is_left_arm_open
+            res.next_is_right_arm_open = req.is_right_arm_open
+
+            success = False
+
+            success = await self.aim_ball(req.direction)
+
+            if success:
+                if req.direction == 1:
+                    res.next_shoot_angle_state = Shoot_Angle_State.MAX.value
+                elif req.direction == -1:
+                    res.next_shoot_angle_state = Shoot_Angle_State.MIN.value
+
+                res.success = True
+                goal_handle.succeed()
+            else:
+                goal_handle.abort()
+
+            return res
+        finally:
+            self.is_executing = False
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = BallShootAimNode()
+    executor = rclpy.executors.MultiThreadedExecutor()
+    executor.add_node(node)
+    executor.spin()
+    node.destroy_node()
+    rclpy.shutdown()
+
+
+
+===== FILE: src/tourobo_2026_mechanisms/tourobo_2026_mechanisms/ball_shoot_node.py =====
+
+import can
+from rclpy.action import ActionServer, GoalResponse
+import rclpy
+from rclpy.node import Node
+from tourobo_2026_mechanisms.constants import *
+from std_msgs.msg import String
+import os
+import sys
+import asyncio
+import time
+
+from tourobo_2026_interfaces.action import BallShoot
+from ah_python_lib.ah_python_can import *
+from dyna_interfaces.msg import DynaTarget
+
+CAN_BUS = can.interface.Bus(
+    bustype="socketcan", channel="can0", asynchronous=True, bitrate=1000000
+)
+
+
+class BallShootNode(Node):
+    def __init__(self):
+        super().__init__("ball_shoot_node")
+        self.is_executing = False
+        self.cb_group = rclpy.callback_groups.ReentrantCallbackGroup()
+
+        self.dyna_extpos_publisher = self.create_publisher(
+            DynaTarget, "/dyna_target_extpos", 10
+        )
+        self.dyna_vel_publisher = self.create_publisher(
+            DynaTarget, "/dyna_target_vel", 10
+        )
+        self.dyna_pos_publisher = self.create_publisher(
+            DynaTarget, "/dyna_target_pos", 10
+        )
+
+        self._action_server = ActionServer(
+            self,
+            BallShoot,
+            "ball_shoot",
+            self.execute_callback,
+            goal_callback=self.goal_callback,
+            callback_group=self.cb_group,
+        )
+
+        # 射出モーターの立ち上げ
+        #モーターの初期化
+        set_enc_vel_mode(SHOOT_ROLLER_1_CAN_ID, CAN_BUS)
+        set_enc_vel_mode(SHOOT_ROLLER_2_CAN_ID, CAN_BUS)
+        set_enc_vel_mode(SHOOT_ROLLER_3_CAN_ID, CAN_BUS)
+
+        #回転方向設定
+        set_motor_rot_dir(SHOOT_ROLLER_1_CAN_ID, 1, CAN_BUS)
+        set_motor_rot_dir(SHOOT_ROLLER_2_CAN_ID, 1, CAN_BUS)
+        set_motor_rot_dir(SHOOT_ROLLER_3_CAN_ID, 1, CAN_BUS)
+
+        #ゲインの設定
+        set_vel_pid_gain(SHOOT_ROLLER_1_CAN_ID, 10.0, 300.0, 0.0, CAN_BUS)
+        set_vel_pid_gain(SHOOT_ROLLER_2_CAN_ID, 10.0, 300.0, 0.0, CAN_BUS)
+        set_vel_pid_gain(SHOOT_ROLLER_3_CAN_ID, 10.0, 300.0, 0.0, CAN_BUS)
+
+
+    def goal_callback(self, goal_request):
+        if self.is_executing:
+            self.get_logger().warn("現在別の処理を実行中です。新しい指令を拒否します。")
+            return GoalResponse.REJECT
+        self.get_logger().info("新しい指令を受け付けました。")
+        return GoalResponse.ACCEPT
+
+    def publish_dyna_extpos(self, id, target):
+        msg = DynaTarget()
+        msg.id = id
+        msg.target = target
+        self.dyna_extpos_publisher.publish(msg)
+
+    def publish_dyna_vel(self, id, target):
+        msg = DynaTarget()
+        msg.id = id
+        msg.target = target
+        self.dyna_vel_publisher.publish(msg)
+
+    def publish_dyna_pos(self, id, target):
+        msg = DynaTarget()
+        msg.id = id
+        msg.target = target
+        self.dyna_pos_publisher.publish(msg)
+
+    async def shoot_ball(self, push_state):
+
+        # ボールを発射する処理を書く
+        # 同時に3つのモーターを回す
+        set_goal_vel(SHOOT_ROLLER_1_CAN_ID, SHOOT_MOTOR_SPEED, CAN_BUS)
+        set_goal_vel(SHOOT_ROLLER_2_CAN_ID, -SHOOT_MOTOR_SPEED, CAN_BUS)
+        set_goal_vel(SHOOT_ROLLER_3_CAN_ID, -SHOOT_MOTOR_SPEED, CAN_BUS)
+
+        set_goal_vel(SHOOT_ROLLER_1_CAN_ID, SHOOT_MOTOR_SPEED, CAN_BUS)
+        set_goal_vel(SHOOT_ROLLER_2_CAN_ID, -SHOOT_MOTOR_SPEED, CAN_BUS)
+        set_goal_vel(SHOOT_ROLLER_3_CAN_ID, -SHOOT_MOTOR_SPEED, CAN_BUS)
+
+        set_goal_vel(SHOOT_ROLLER_1_CAN_ID, SHOOT_MOTOR_SPEED, CAN_BUS)
+        set_goal_vel(SHOOT_ROLLER_2_CAN_ID, -SHOOT_MOTOR_SPEED, CAN_BUS)
+        set_goal_vel(SHOOT_ROLLER_3_CAN_ID, -SHOOT_MOTOR_SPEED, CAN_BUS)
+
+        # ロボマスを使って押し出す
+        if push_state != Shoot_Push_State.MAX.value:
+            set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MAX, CAN_BUS)
+        time.sleep(WAIT_TIME_PUSH_HALF)
+
+        # 射出モーターを停止
+        set_goal_vel(SHOOT_ROLLER_1_CAN_ID, 0, CAN_BUS)
+        set_goal_vel(SHOOT_ROLLER_2_CAN_ID, 0, CAN_BUS)
+        set_goal_vel(SHOOT_ROLLER_3_CAN_ID, 0, CAN_BUS)
+
+        set_goal_vel(SHOOT_ROLLER_1_CAN_ID, 0, CAN_BUS)
+        set_goal_vel(SHOOT_ROLLER_2_CAN_ID, 0, CAN_BUS)
+        set_goal_vel(SHOOT_ROLLER_3_CAN_ID, 0, CAN_BUS)
+
+        set_goal_vel(SHOOT_ROLLER_1_CAN_ID, 0, CAN_BUS)
+        set_goal_vel(SHOOT_ROLLER_2_CAN_ID, 0, CAN_BUS)
+        set_goal_vel(SHOOT_ROLLER_3_CAN_ID, 0, CAN_BUS)
+
+     # 押出機構を下限までさげる
+        set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MIN, CAN_BUS)
+        time.sleep(WAIT_TIME_PUSH)
+
+        return True
+
+    async def execute_callback(self, goal_handle):
+
+        self.is_executing = True
+        try:
+            req = goal_handle.request
+            res = BallShoot.Result()
+            res.next_state = req.current_state
+            res.next_carry = req.carry
+            res.next_push_state = req.push_state
+            res.next_shoot_angle_state = req.shoot_angle_state
+            res.next_is_left_arm_open = req.is_left_arm_open
+            res.next_is_right_arm_open = req.is_right_arm_open
+
+            success = False
+
+            success = await self.shoot_ball(req.push_state)
+
+            if success:
+                res.next_push_state = Shoot_Push_State.MIN.value
+
+                res.success = True
+                if req.carry != BALL_CARRY.NOT.value:
+                    res.next_state = Mechanism_State.SINGLE_CARRY.value
+                    res.next_carry = req.carry
+                else:
+                    res.next_state = Mechanism_State.NOT_CARRY.value
+                    res.next_carry = BALL_CARRY.NOT.value
+                goal_handle.succeed()
+            else:
+                goal_handle.abort()
+
+            return res
+        finally:
+            self.is_executing = False
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = BallShootNode()
+    executor = rclpy.executors.MultiThreadedExecutor()
+    executor.add_node(node)
+    executor.spin()
+    node.destroy_node()
+    rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+
+
+===== FILE: src/tourobo_2026_mechanisms/tourobo_2026_mechanisms/ball_vomit_plate_node.py =====
+
+import rclpy
+from rclpy.node import Node
+from rclpy.action import ActionServer, GoalResponse
+import asyncio
+import time
+
+from tourobo_2026_mechanisms.constants import *
+from tourobo_2026_interfaces.action import BallVomitPlate
+from dyna_interfaces.msg import DynaTarget
+from ah_python_lib.ah_python_can import *
+import can
+
+CAN_BUS = can.interface.Bus(
+    bustype="socketcan", channel="can0", asynchronous=True, bitrate=1000000
+)
+
+
+class BallVomitPlateNode(Node):
+    def __init__(self):
+        super().__init__("ball_vomit_plate_node")
+        self.is_executing = False
+        self.cb_group = rclpy.callback_groups.ReentrantCallbackGroup()
+
+        self._action_server = ActionServer(
+            self,
+            BallVomitPlate,
+            "ball_vomit_plate",
+            self.execute_callback,
+            goal_callback=self.goal_callback,
+            callback_group=self.cb_group,
+        )
+
+        self.dyna_extpos_publisher = self.create_publisher(
+            DynaTarget, "/dyna_target_extpos", 10
+        )
+
+    def goal_callback(self, goal_request):
+        if self.is_executing:
+            self.get_logger().warn("現在別の処理を実行中です。新しい指令を拒否します。")
+            return GoalResponse.REJECT
+        self.get_logger().info("新しい指令を受け付けました。")
+        return GoalResponse.ACCEPT
+
+    def publish_dyna_extpos(self, id, target):
+        msg = DynaTarget()
+        msg.id = id
+        msg.target = target
+        self.dyna_extpos_publisher.publish(msg)
+
+    # 実際の動作部分
+    async def execute_vomit_plate_action(self, carry, push_state, shoot_angle_state):
+
+        if carry == BALL_CARRY.LEFT.value:
+            self.get_logger().info("左脇抱えなので左側にボールを吐き出します")
+
+            # 左アームを開く
+            self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_OPEN)
+            time.sleep(WAIT_TIME_ARM)
+
+            # 左上のローラーを外向きに回す
+            set_goal_pwm(LEFT_ROLLER_CAN_ID, BALL_VOMIT_UP_ROLLER_SPEED, CAN_BUS)
+
+            # 下のローラーを左向きに回す
+            set_goal_pwm(DOWN_ROLLER_CAN_ID, -BALL_VOMIT_DOWN_ROLLER_SPEED, CAN_BUS)
+
+        elif carry == BALL_CARRY.RIGHT.value:
+            self.get_logger().info("右脇抱えなので右側にボールを吐き出します")
+
+            # 右アームを開く
+            self.publish_dyna_extpos(RIGHT_ARM_ID, RIGHT_ARM_OPEN)
+            time.sleep(WAIT_TIME_ARM)
+
+            # 右上のローラーを外向きに回す
+            set_goal_pwm(RIGHT_ROLLER_CAN_ID, -BALL_VOMIT_UP_ROLLER_SPEED, CAN_BUS)
+            # 下のローラーを右向きに回す
+            set_goal_pwm(DOWN_ROLLER_CAN_ID, BALL_VOMIT_DOWN_ROLLER_SPEED, CAN_BUS)
+
+        # 左右共通して行う後処理
+        time.sleep(WAIT_TIME_VOMIT)
+
+        # ローラーを止める
+        set_goal_pwm(LEFT_ROLLER_CAN_ID, 0, CAN_BUS)
+        set_goal_pwm(RIGHT_ROLLER_CAN_ID, 0, CAN_BUS)
+        set_goal_pwm(DOWN_ROLLER_CAN_ID, 0, CAN_BUS)
+
+        return True
+
+    async def execute_callback(self, goal_handle):
+        self.is_executing = True
+        try:
+            req = goal_handle.request
+            res = BallVomitPlate.Result()
+            # 初期状態をそのまま引き継ぐ
+            res.next_state = req.current_state
+            res.next_carry = req.carry
+            res.next_push_state = req.push_state
+            res.next_shoot_angle_state = req.shoot_angle_state
+            res.next_is_left_arm_open = req.is_left_arm_open
+            res.next_is_right_arm_open = req.is_right_arm_open
+
+            success = await self.execute_vomit_plate_action(
+                req.carry, req.push_state, req.shoot_angle_state
+            )
+
+            if success:
+                # 実行後は抱えているアームに対してステートを変化させ、抱えを解除する
+                if req.carry == BALL_CARRY.LEFT.value:
+                    res.next_is_left_arm_open = True  # 仮: アームを開いた状態にする
+                elif req.carry == BALL_CARRY.RIGHT.value:
+                    res.next_is_right_arm_open = True
+
+                res.next_carry = BALL_CARRY.NOT.value
+
+                # もしSINGLE_CARRY(脇に1つだけ抱えている状態)だったなら、NOT_CARRYに戻す
+                if req.current_state == Mechanism_State.SINGLE_CARRY.value:
+                    res.next_state = Mechanism_State.NOT_CARRY.value
+
+                res.success = True
+                goal_handle.succeed()
+            else:
+                goal_handle.abort()
+
+            return res
+        finally:
+            self.is_executing = False
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = BallVomitPlateNode()
+    executor = rclpy.executors.MultiThreadedExecutor()
+    executor.add_node(node)
+    try:
+        executor.spin()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+
+
+===== FILE: src/tourobo_2026_mechanisms/tourobo_2026_mechanisms/constants.py =====
+
+# 各モーターCANのID
+# 下ローラー
+DOWN_ROLLER_CAN_ID = 0x040
+# 右ローラー
+RIGHT_ROLLER_CAN_ID = 0x041
+# 左ローラー
+LEFT_ROLLER_CAN_ID = 0x010
+# 射出機構ローラー
+SHOOT_ROLLER_1_CAN_ID = 0x011  # 左下
+SHOOT_ROLLER_2_CAN_ID = 0x012  # 上
+SHOOT_ROLLER_3_CAN_ID = 0x013  # 右下
+# 小ロボマス(射出機構用)
+MINI_SHOOT_CAN_ID = 0x031
+
+# ダイナミクセルID
+LEFT_ARM_ID = 0
+RIGHT_ARM_ID = 1
+LEFT_GUARD_ID = 2
+RIGHT_GUARD_ID = 3
+SHOOT_ANGLE_ID = 4
+
+# 左右アーム開閉時のダイナミクセル値
+LEFT_ARM_OPEN = 1300  # 内部的には2630
+RIGHT_ARM_OPEN = -1300  # 内部的には1040
+LEFT_ARM_CLOSE = 0  # 内部的には1467
+RIGHT_ARM_CLOSE = 0  # 内部的には2216
+LEFT_ARM_GET_HALF = 910  # 内部的には2251
+RIGHT_ARM_GET_HALF = -750  # 内部的には1353
+
+# ガード開閉時のダイナミクセル値
+LEFT_GUARD_OPEN = 0  # 内部的には317
+RIGHT_GUARD_OPEN = 0  # 内部的には1502
+LEFT_GUARD_CLOSE = 1156  # 内部的には1473
+RIGHT_GUARD_CLOSE = -1204  # 内部的には298
+
+# 射出機構の角度の最小値と最大値
+SHOOT_ANGLE_MIN = 0  # 内部的には3000
+SHOOT_ANGLE_MAX = 800  # 内部的には3800
+# 城門位置の射出機構角度
+SHOOT_ANGLE_AT_GATE = 695  # 内部的には3695
+
+# 射出機構押し出し機構の位置(初期位置からの相対角度)
+SHOOT_PUSH_MIN = 0  # これを初期位置にする
+SHOOT_PUSH_GATE_HOLD = 65000  # 城門に設置するまえにボールを支える角度(仮)
+SHOOT_PUSH_LOADING = 40000  # 射出機構に装填するときの角度(仮)
+SHOOT_PUSH_MAX = 78000  # 射出機構に近いほどでかい
+
+# 射出機構のローラー回転速度
+SHOOT_MOTOR_SPEED = 50
+
+# ボール入手のローラー回転速度
+BALL_GET_DOWN_ROLLER_SPEED = 1000
+BALL_GET_UP_ROLLER_SPEED = -1000
+
+# ボール内側取り込みローラー回転速度
+BALL_INTAKE_DOWN_ROLLER_SPEED = 600
+BALL_INTAKE_UP_ROLLER_SPEED = -700
+
+# ぼーるを関所におくときのローラー回転速度
+BALL_PUT_PLATE_DOWN_ROLLER_SPEED =1000
+BALL_PUT_PLATE_UP_ROLLER_SPEED = -1000
+
+# ボールを吐き出すときのローラー回転速度
+BALL_VOMIT_DOWN_ROLLER_SPEED = 1000
+BALL_VOMIT_UP_ROLLER_SPEED = -1000
+# 動作待機時間の設定
+# ガードの開閉にかかる時間
+WAIT_TIME_GUARD = 0.6
+# アームの開閉にかかる時間
+WAIT_TIME_ARM = 0.4
+# ボール入手の時にボールが入るのを待つ時間
+WAIT_TIME_GET = 0.5
+# ボール内側取り込み時にボールが内部に入るのを待つ時間
+WAIT_TIME_INTAKE = 2.8
+# 射出機構の角度変更にかかる時間
+WAIT_TIME_SHOOT_ANGLE = 1.5
+WAIT_TIME_SHOOT_ANGLE_PUT_GATE = 1.5
+# ボールを関所に置くときに内部を移動するのを待つ時間
+WAIT_TIME_PUT_PLATE = 3.3
+# ボール吐き出し動作の待機時間
+WAIT_TIME_VOMIT = 1.0
+# 射出機構の押し出し部分の動作時間
+WAIT_TIME_PUSH = 4.5
+WAIT_TIME_PUSH_HALF = 2.3
+
+
+from enum import Enum
+
+
+class Shoot_Angle_State(Enum):
+    UNKNOWN = -1
+    MIN = 0
+    MAX = 1
+    GATE = 2
+
+
+class Mechanism_State(Enum):
+    UNKNOWN = 0
+    # 最初
+    # できること
+    # 左または右のどちらかのゲートを開閉
+    # 左または右からボールを脇にかかえる動作
+    # LEFT_CARRYかRIGHT_CARRYへ
+    NOT_CARRY = 1
+
+    # ボールを脇に保持
+    # できること
+    # ボールを反対側から排出
+    # NOT_CARRYへ
+    # ボールを内側に取り込む
+    # INTAKEへ
+    # ゲートの開閉
+    # 保持している方向のゲートが開いたら NOT_CARRYへ
+    SINGLE_CARRY = 2
+
+    # ボールを内側に保持
+    # できること
+    # ボールを発射
+    # NOT_CARRYへ
+    # ボールを城門に置く
+    # NOT_CARRYへ
+    # ゲートの開閉
+    # 射出機構を上下する
+    INTAKE_GATE = 3
+    INTAKE_SHOOT = 4
+
+
+class BALL_CARRY(Enum):
+    NOT = 0
+    LEFT = 1
+    RIGHT = 2
+
+
+class Shoot_Push_State(Enum):
+    MIN = 0
+    GATE_HOLD = 1  # 城門に設置するまえにボールを支える角度(仮)
+    LOADING = 2  # 射出機構に装填するときの角度(仮)
+    MAX = 3  # 射出機構に近いほどでかい
+
+
+===== FILE: src/tourobo_2026_mechanisms/tourobo_2026_mechanisms/joy_mechanism_client.py =====
+
+import rclpy
+from rclpy.node import Node
+from rclpy.action import ActionClient
+from rclpy.callback_groups import ReentrantCallbackGroup
+from sensor_msgs.msg import Joy
+from action_msgs.msg import GoalStatus
+from dataclasses import dataclass
+
+from tourobo_2026_mechanisms.constants import *
+from tourobo_2026_interfaces.action import *
+
+
+@dataclass
+class RobotState:
+    current: Mechanism_State = Mechanism_State.UNKNOWN
+    carry: BALL_CARRY = BALL_CARRY.NOT
+    shoot_push: Shoot_Push_State = Shoot_Push_State.MIN
+    shoot_angle: Shoot_Angle_State = Shoot_Angle_State.MIN
+    is_left_arm_open: bool = False
+    is_right_arm_open: bool = False
+
+
+class JoyMechanismClient(Node):
+    def __init__(self):
+        super().__init__("joy_mechanism_client")
+        self.cb_group = ReentrantCallbackGroup()
+
+        self.joy_sub = self.create_subscription(
+            Joy, "/joy", self.joy_callback, 10, callback_group=self.cb_group
+        )
+
+        # 論理状態の初期化
+        self.state = RobotState()
+
+        # クライアント設定
+        self.ball_get_client = ActionClient(
+            self, BallGet, "ball_get", callback_group=self.cb_group
+        )
+        self.ball_put_gate_client = ActionClient(
+            self, BallPutGate, "ball_put_gate", callback_group=self.cb_group
+        )
+        self.ball_put_plate_client = ActionClient(
+            self, BallPutPlate, "ball_put_plate", callback_group=self.cb_group
+        )
+        self.ball_shoot_client = ActionClient(
+            self, BallShoot, "ball_shoot", callback_group=self.cb_group
+        )
+        self.ball_arm_operation_client = ActionClient(
+            self, BallArmOperation, "ball_arm_operation", callback_group=self.cb_group
+        )
+        self.ball_intake_client = ActionClient(
+            self, BallIntake, "ball_intake", callback_group=self.cb_group
+        )
+        self.mechanism_reset_client = ActionClient(
+            self, MechanismReset, "mechanism_reset", callback_group=self.cb_group
+        )
+        self.ball_vomit_plate_client = ActionClient(
+            self, BallVomitPlate, "ball_vomit_plate", callback_group=self.cb_group
+        )
+
+        # ボタンの状態保持用
+        self.prev_buttons = []
+        self.prev_axes = []
+
+        # 連打防止用のフラグ
+        self.is_action_running = False
+
+    def set_goal_states(self, goal_msg):
+        goal_msg.current_state = self.state.current.value
+        goal_msg.carry = self.state.carry.value
+        goal_msg.push_state = self.state.shoot_push.value
+        goal_msg.shoot_angle_state = self.state.shoot_angle.value
+        goal_msg.is_left_arm_open = self.state.is_left_arm_open
+        goal_msg.is_right_arm_open = self.state.is_right_arm_open
+
+    def update_states(self, res):
+        if res and hasattr(res, 'success') and res.success:
+            if hasattr(res, 'next_state') and res.next_state != Mechanism_State.UNKNOWN.value:
+                self.state.current = Mechanism_State(res.next_state)
+            if hasattr(res, 'next_carry'):
+                self.state.carry = BALL_CARRY(res.next_carry)
+            if hasattr(res, 'next_push_state'):
+                self.state.shoot_push = Shoot_Push_State(res.next_push_state)
+            if hasattr(res, 'next_shoot_angle_state'):
+                self.state.shoot_angle = Shoot_Angle_State(res.next_shoot_angle_state)
+            if hasattr(res, 'next_is_left_arm_open'):
+                self.state.is_left_arm_open = res.next_is_left_arm_open
+            if hasattr(res, 'next_is_right_arm_open'):
+                self.state.is_right_arm_open = res.next_is_right_arm_open
+
+    # action送信共通関数
+    async def send_action_goal(self, client, goal_msg, action_name):
+        self.get_logger().info(f"[{action_name}] サーバーを待機中...")
+        if not client.wait_for_server(timeout_sec=1.0):
+            self.get_logger().error(f"[{action_name}] サーバーが見つかりません")
+            return None
+
+        self.get_logger().info(f"[{action_name}] ゴール送信 (state: {self.state})")
+        send_goal_future = await client.send_goal_async(goal_msg)
+
+        if not send_goal_future.accepted:
+            self.get_logger().error(f"[{action_name}] 命令が拒否されました")
+            return None
+
+        self.get_logger().info(f"[{action_name}] 受理されました。結果を待機します...")
+        result_handle = await send_goal_future.get_result_async()
+
+        if result_handle.status == GoalStatus.STATUS_SUCCEEDED:
+            self.get_logger().info(f"[{action_name}] 正常完了しました")
+            return result_handle.result
+        else:
+            self.get_logger().warn(
+                f"[{action_name}] 失敗しました (Status ID: {result_handle.status})"
+            )
+            return None
+
+    # 各種アクションのゴール生成
+    async def send_ball_get_goal(self, execute_mode):
+        goal_msg = BallGet.Goal()
+        goal_msg.execute_mode = execute_mode
+        self.set_goal_states(goal_msg)
+        return await self.send_action_goal(self.ball_get_client, goal_msg, "ball_get")
+
+    async def send_ball_intake_goal(self, execute_mode):
+        goal_msg = BallIntake.Goal()
+        goal_msg.execute_mode = execute_mode
+        self.set_goal_states(goal_msg)
+        return await self.send_action_goal(
+            self.ball_intake_client, goal_msg, "ball_intake"
+        )
+
+    async def send_ball_put_gate_goal(self):
+        goal_msg = BallPutGate.Goal()
+        goal_msg.execute = True
+        self.set_goal_states(goal_msg)
+        return await self.send_action_goal(
+            self.ball_put_gate_client, goal_msg, "ball_put_gate"
+        )
+
+    async def send_ball_put_plate_goal(self):
+        goal_msg = BallPutPlate.Goal()
+        goal_msg.execute = True
+        self.set_goal_states(goal_msg)
+        return await self.send_action_goal(
+            self.ball_put_plate_client, goal_msg, "ball_put_plate"
+        )
+
+    async def send_ball_shoot_goal(self):
+        goal_msg = BallShoot.Goal()
+        goal_msg.execute = True
+        self.set_goal_states(goal_msg)
+        return await self.send_action_goal(
+            self.ball_shoot_client, goal_msg, "ball_shoot"
+        )
+
+    async def send_ball_arm_operation_goal(self, target_arm, is_open):
+        goal_msg = BallArmOperation.Goal()
+        goal_msg.target_arm = target_arm
+        goal_msg.is_open = is_open
+        self.set_goal_states(goal_msg)
+        return await self.send_action_goal(
+            self.ball_arm_operation_client, goal_msg, "ball_arm_operation"
+        )
+
+    async def send_mechanism_reset_goal(self):
+        goal_msg = MechanismReset.Goal()
+        goal_msg.execute = True
+        return await self.send_action_goal(
+            self.mechanism_reset_client, goal_msg, "mechanism_reset"
+        )
+
+    async def send_ball_vomit_plate_goal(self):
+        goal_msg = BallVomitPlate.Goal()
+        self.set_goal_states(goal_msg)
+        return await self.send_action_goal(
+            self.ball_vomit_plate_client, goal_msg, "ball_vomit_plate"
+        )
+
+    # ボタンが押された瞬間だけ取る
+    def is_pressed(self, msg, prev_buttons, idx):
+        if idx < len(msg.buttons) and idx < len(prev_buttons):
+            return msg.buttons[idx] == 1 and prev_buttons[idx] == 0
+        return False
+
+    # スティックが一定角度以上傾いたときだけとる
+    def is_axis_changed(self, msg, prev_axes, idx, threshold, direction):
+        if idx < len(msg.axes) and idx < len(prev_axes):
+            if direction > 0:
+                return msg.axes[idx] > threshold and prev_axes[idx] <= threshold
+            else:
+                return msg.axes[idx] < -threshold and prev_axes[idx] >= -threshold
+        return False
+
+    # joyスティックが入力されるたびに呼ばれるやつ
+    async def joy_callback(self, msg):
+        # 初期化だけする
+        if not self.prev_buttons:
+            self.prev_buttons = msg.buttons
+            self.prev_axes = msg.axes
+            return
+
+        # 以前の状態をローカルに保存してから上書きする (await後の巻き戻りを防ぐため)
+        prev_buttons = self.prev_buttons
+        prev_axes = self.prev_axes
+        self.prev_buttons = msg.buttons
+        self.prev_axes = msg.axes
+
+        # 各ボタン機構
+        # OPTIONS: 強制リセット
+        # □: ボールを内側に取り込む(射撃用)→もう一度押すとボールを射出
+        # △: ボールを内側に取り込む(城門用)→もう一度押すと城門に設置
+        # ◯: 今抱えている方向の反対側へボールを関所に配置
+        # L1: 左ゲートを開閉
+        # R1: 右ゲートを開閉
+        # L2: 左から脇に抱える
+        # R2: 右から脇に抱える
+
+        # ボタンが押された瞬間に一括でステートをログ表示する
+        if not self.is_action_running and any(self.is_pressed(msg, prev_buttons, b) for b in [0, 1, 2, 3, 4, 5, 6, 7, 9]):
+            state_str = (
+                f"\n  current: {self.state.current.name}"
+                f"\n  carry: {self.state.carry.name}"
+                f"\n  shoot_push: {self.state.shoot_push.name}"
+                f"\n  shoot_angle: {self.state.shoot_angle.name}"
+                f"\n  left_arm_open: {self.state.is_left_arm_open}"
+                f"\n  right_arm_open: {self.state.is_right_arm_open}"
+            )
+            self.get_logger().info(f"--- Button Pressed --- state = {state_str}")
+
+        if self.is_pressed(msg, prev_buttons, 9):  # OPTIONSボタンで強制リセット
+            self.get_logger().info(
+                "OPTIONSボタン: 機構の初期位置へのリセットを開始します"
+            )
+            self.is_action_running = True
+            res = await self.send_mechanism_reset_goal()
+            if res and res.success:
+                self.get_logger().info("ハードウェアのリセットが完了しました。")
+                self.update_states(res)
+            else:
+                self.get_logger().error(
+                    "ハードウェアのリセットに失敗しました！論理状態のみリセットします"
+                )
+                self.state = RobotState()
+            self.is_action_running = False
+
+        elif self.is_action_running:
+            # 動作中は何のボタンを押しても受け付けない
+            # 何かボタンや軸が操作されたときだけ警告を出す
+            if any(self.is_pressed(msg, prev_buttons, b) for b in [1, 2, 3, 4, 5, 6, 7]):
+                self.get_logger().warn("現在他の動作中です")
+
+        # ◯ : 新機能
+        elif self.is_pressed(msg, prev_buttons, 1):
+            if self.state.carry != BALL_CARRY.NOT:
+                self.get_logger().info("◯ボタンが入力された（ボール抱え解除）")
+                self.is_action_running = True
+                res = await self.send_ball_vomit_plate_goal()
+                if res and res.success:
+                    self.update_states(res)
+                self.is_action_running = False
+            else:
+                self.get_logger().warn("脇にボールを抱えていないため、〇ボタンのアクションは実行できません")
+
+        # × :ボールを関所に入れる
+        elif self.is_pressed(msg, prev_buttons, 0):
+            self.get_logger().info("×ボタンが入力された")
+
+            # current_stateがLEFT_CARRYならば右の関所へ
+            if (
+                self.state.current == Mechanism_State.SINGLE_CARRY
+                and self.state.carry == BALL_CARRY.LEFT
+            ):
+                self.is_action_running = True
+                res = await self.send_ball_put_plate_goal()
+
+                if res and res.success:
+                    self.update_states(res)
+                self.is_action_running = False
+
+            # current_stateがRIGHT_CARRYならば左の関所へ
+            elif (
+                self.state.current == Mechanism_State.SINGLE_CARRY
+                and self.state.carry == BALL_CARRY.RIGHT
+            ):
+                self.is_action_running = True
+                res = await self.send_ball_put_plate_goal()
+
+                if res and res.success:
+                    self.update_states(res)
+                self.is_action_running = False
+
+        # △: ボールを城門に入れる
+        elif self.is_pressed(msg, prev_buttons, 2):
+            self.get_logger().info("△ボタンが入力された")
+
+            # current_stateがLEFT_CARRYかRIGHT_CARRYならば城門用内側取り込み
+            if self.state.current == Mechanism_State.SINGLE_CARRY:
+                self.is_action_running = True
+                res = await self.send_ball_intake_goal(1)
+
+                if res and res.success:
+                    self.update_states(res)
+                self.is_action_running = False
+
+            # current_stateがINTAKE_GATEならば城門に置く
+            elif self.state.current == Mechanism_State.INTAKE_GATE:
+                if self.state.carry == BALL_CARRY.NOT:
+                    self.is_action_running = True
+                    res = await self.send_ball_put_gate_goal()
+
+                    if res and res.success:
+                        self.update_states(res)
+                    self.is_action_running = False
+                else:
+                    self.get_logger().warn("脇にボールを抱えているため、城門への設置は実行できません")
+
+        # □: 射出用取り込み + ボールを射出
+        elif self.is_pressed(msg, prev_buttons, 3):
+            self.get_logger().info("□ボタンが入力された")
+
+            # current_stateがLEFT_CARRYかRIGHT_CARRYならば内側取り込み
+            if self.state.current == Mechanism_State.SINGLE_CARRY:
+                self.is_action_running = True
+                res = await self.send_ball_intake_goal(2)
+
+                if res and res.success:
+                    self.update_states(res)
+                self.is_action_running = False
+
+            # current_stateがなら射出
+            elif self.state.current == Mechanism_State.INTAKE_SHOOT:
+                self.is_action_running = True
+                res = await self.send_ball_shoot_goal()
+
+                if res and res.success:
+                    self.update_states(res)
+                self.is_action_running = False
+
+        # L1: 左ゲートを開閉
+        elif self.is_pressed(msg, prev_buttons, 4):
+            self.get_logger().info("L1が入力された")
+            self.is_action_running = True
+            target_is_open = not self.state.is_left_arm_open
+            res = await self.send_ball_arm_operation_goal(1, target_is_open)
+
+            if res and res.success:
+                self.update_states(res)
+            self.is_action_running = False
+
+        # R1: 右ゲートを開閉
+        elif self.is_pressed(msg, prev_buttons, 5):
+            self.get_logger().info("R1が入力された")
+            self.is_action_running = True
+            target_is_open = not self.state.is_right_arm_open
+            res = await self.send_ball_arm_operation_goal(2, target_is_open)
+            if res and res.success:
+                self.update_states(res)
+            self.is_action_running = False
+
+        # L2: 左から脇に抱える
+        elif self.is_pressed(msg, prev_buttons, 6):
+            if not self.state.is_left_arm_open:
+                self.get_logger().warn(
+                    "左アームが開いていないため、BallGet(左)は実行できません"
+                )
+                return
+
+            if self.state.current in [
+                Mechanism_State.NOT_CARRY,
+                Mechanism_State.INTAKE_GATE,
+                Mechanism_State.INTAKE_SHOOT,
+                Mechanism_State.UNKNOWN,
+            ]:
+                self.get_logger().info("L2が入力された")
+                self.is_action_running = True
+                res = await self.send_ball_get_goal(1)
+                if res and res.success:
+                    self.update_states(res)
+                self.is_action_running = False
+
+        # R2: 右から脇に抱える
+        elif self.is_pressed(msg, prev_buttons, 7):
+            if not self.state.is_right_arm_open:
+                self.get_logger().warn(
+                    "右アームが開いていないため、BallGet(右)は実行できません"
+                )
+                return
+
+            if self.state.current in [
+                Mechanism_State.NOT_CARRY,
+                Mechanism_State.INTAKE_GATE,
+                Mechanism_State.INTAKE_SHOOT,
+                Mechanism_State.UNKNOWN,
+            ]:
+                self.get_logger().info("R2が入力された")
+                self.is_action_running = True
+                res = await self.send_ball_get_goal(2)
+                if res and res.success:
+                    self.update_states(res)
+                self.is_action_running = False
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = JoyMechanismClient()
+    executor = rclpy.executors.MultiThreadedExecutor()
+    executor.add_node(node)
+    try:
+        executor.spin()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+
+
+===== FILE: src/tourobo_2026_mechanisms/tourobo_2026_mechanisms/mechanism_reset_node.py =====
+
+import rclpy
+from rclpy.node import Node
+from rclpy.action import ActionServer, GoalResponse
+import asyncio
+import time
+
+from tourobo_2026_mechanisms.constants import *
+from tourobo_2026_interfaces.action import MechanismReset
+from dyna_interfaces.msg import DynaTarget
+from ah_python_lib.ah_python_can import *
+import can
+
+CAN_BUS = can.interface.Bus(
+    bustype="socketcan", channel="can0", asynchronous=True, bitrate=1000000
+)
+
+class MechanismResetNode(Node):
+    def __init__(self):
+        super().__init__("mechanism_reset_node")
+        self.is_executing = False
+        self.cb_group = rclpy.callback_groups.ReentrantCallbackGroup()
+
+        self._action_server = ActionServer(
+            self,
+            MechanismReset,
+            "mechanism_reset",
+            self.execute_callback,
+            goal_callback=self.goal_callback,
+            callback_group=self.cb_group,
+        )
+
+        set_enc_pos_mode(MINI_SHOOT_CAN_ID, CAN_BUS)
+
+        self.dyna_extpos_publisher = self.create_publisher(
+            DynaTarget, "/dyna_target_extpos", 10
+        )
+
+    def goal_callback(self, goal_request):
+        if self.is_executing:
+            self.get_logger().warn("現在別の処理を実行中です。新しい指令を拒否します。")
+            return GoalResponse.REJECT
+        self.get_logger().info("強制リセット指令を受け付けました。")
+        return GoalResponse.ACCEPT
+
+    def publish_dyna_extpos(self, id, target):
+        msg = DynaTarget()
+        msg.id = id
+        msg.target = target
+        self.dyna_extpos_publisher.publish(msg)
+
+    def reset_mechanisms_sync(self):
+        self.get_logger().info("終了処理: 機構を初期位置に戻します (shoot_angleは除く)")
+
+        # 左右アームを閉じる
+        self.publish_dyna_extpos(LEFT_ARM_ID, LEFT_ARM_CLOSE)
+        self.publish_dyna_extpos(RIGHT_ARM_ID, RIGHT_ARM_CLOSE)
+        
+        # 左右ガードを開ける
+        self.publish_dyna_extpos(LEFT_GUARD_ID, LEFT_GUARD_OPEN)
+        self.publish_dyna_extpos(RIGHT_GUARD_ID, RIGHT_GUARD_OPEN)
+        
+        # モーターが動くのを待つ
+        time.sleep(WAIT_TIME_GUARD)
+
+        # ローラーを全て停止する
+        set_goal_pwm(LEFT_ROLLER_CAN_ID, 0, CAN_BUS)
+        set_goal_pwm(RIGHT_ROLLER_CAN_ID, 0, CAN_BUS)
+        set_goal_pwm(DOWN_ROLLER_CAN_ID, 0, CAN_BUS)
+
+        # 押し出し機構を初期位置に戻す
+        set_goal_pos(MINI_SHOOT_CAN_ID, SHOOT_PUSH_MIN, CAN_BUS)
+        time.sleep(WAIT_TIME_PUSH)
+
+    async def reset_mechanisms(self):
+        self.reset_mechanisms_sync()
+        return True
+
+    async def execute_callback(self, goal_handle):
+        self.is_executing = True
+        try:
+            res = MechanismReset.Result()
+            success = await self.reset_mechanisms()
+
+            if success:
+                res.success = True
+                res.next_state = Mechanism_State.NOT_CARRY.value
+                res.next_carry = BALL_CARRY.NOT.value
+                res.next_push_state = Shoot_Push_State.MIN.value
+                res.next_is_left_arm_open = False
+                res.next_is_right_arm_open = False
+                goal_handle.succeed()
+            else:
+                goal_handle.abort()
+
+            return res
+        finally:
+            self.is_executing = False
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = MechanismResetNode()
+    executor = rclpy.executors.MultiThreadedExecutor()
+    executor.add_node(node)
+    try:
+        executor.spin()
+    except KeyboardInterrupt:
+        node.get_logger().info("Ctrl+Cが押されました。終了時のリセット処理を実行します...")
+        node.reset_mechanisms_sync()
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == "__main__":
+    main()
+
+
+===== FILE: src/tourobo_auto_main_pkg/launch/tourobo_2026_auto.launch.py =====
+
+import os
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+
+def generate_launch_description():
+    mechanism_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(
+                get_package_share_directory('tourobo_2026_mechanisms'),
+                'launch',
+                'mechanism_launch.py'
+            )
+        )
+    )
+
+    foot_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(
+                get_package_share_directory('tourobo_2026_foot'),
+                'launch',
+                'foot_launch.py'
+            )
+        )
+    )
+
+    lidar_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(
+                get_package_share_directory('tourobo_2026_foot'),
+                'launch',
+                'lidar_launch.py'
+            )
+        )
+    )
+
+    static_tf_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(
+                get_package_share_directory('tourobo_2026_foot'),
+                'launch',
+                'static_tf_launch.py'
+            )
+        )
+    )
+
+
+    ld = LaunchDescription()
+    
+    ld.add_action(mechanism_launch)
+    ld.add_action(foot_launch)
+    ld.add_action(lidar_launch)
+    ld.add_action(static_tf_launch)
+
+    return ld
+
+
+===== FILE: src/tourobo_auto_main_pkg/launch/tourobo_2026_manual.launch.py =====
+
+import os
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+
+def generate_launch_description():
+    mechanism_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(
+                get_package_share_directory('tourobo_2026_mechanisms'),
+                'launch',
+                'mechanism_launch.py'
+            )
+        )
+    )
+
+    foot_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(
+                get_package_share_directory('tourobo_2026_foot'),
+                'launch',
+                'foot_launch.py'
+            )
+        )
+    )
+
+    ld = LaunchDescription()
+    
+    ld.add_action(mechanism_launch)
+    ld.add_action(foot_launch)
+
+    return ld
+
+
+===== FILE: src/tourobo_auto_main_pkg/package.xml =====
+
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>tourobo_auto_main_pkg</name>
+  <version>0.0.0</version>
+  <description>TODO: Package description</description>
+  <maintainer email="teruna1493kisamami@gmail.com">hatsu</maintainer>
+  <license>TODO: License declaration</license>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
+
+
+===== FILE: src/tourobo_auto_main_pkg/setup.py =====
+
+import os
+from glob import glob
+from setuptools import find_packages, setup
+
+package_name = 'tourobo_auto_main_pkg'
+
+setup(
+    name=package_name,
+    version='0.0.0',
+    packages=find_packages(exclude=['test']),
+    data_files=[
+        ('share/ament_index/resource_index/packages',
+            ['resource/' + package_name]),
+        ('share/' + package_name, ['package.xml']),
+        (os.path.join('share', package_name, 'launch'), glob('launch/*.launch.py')),
+    ],
+    install_requires=['setuptools'],
+    zip_safe=True,
+    maintainer='hatsu',
+    maintainer_email='teruna1493kisamami@gmail.com',
+    description='TODO: Package description',
+    license='TODO: License declaration',
+    extras_require={
+        'test': [
+            'pytest',
+        ],
+    },
+    entry_points={
+        'console_scripts': [
+            "yolo_node = tourobo_auto_main_pkg.yolo_node:main",
+        ],
+    },
+)
+
+
+===== FILE: src/tourobo_auto_main_pkg/tourobo_auto_main_pkg/testnode.py =====
+
+import rclpy
+from rclpy.node import Node
+
+class SimpleNode(Node):
+    def __init__(self):
+        # ノード名を 'simple_node' として初期化
+        super().__init__('simple_node')
+        self.get_logger().info('ノードが正常に起動しました！')
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = SimpleNode()
+    
+    # ノードを待機状態にする
+    rclpy.spin(node)
+    
+    # 終了処理
+    node.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+
+
+===== FILE: src/tourobo_auto_main_pkg/tourobo_auto_main_pkg/yolo_node.py =====
+
+#!/usr/bin/env python3
+import rclpy
+from rclpy.node import Node
+from std_msgs.msg import String
+
+import pyrealsense2 as rs
+import numpy as np
+import json
+import sys
+import os
+
+# yolo_detector.py があるディレクトリ（yolo_tourobo）にパスを通す
+YOLO_DIR = os.path.expanduser('~/Robobobo/yolo_tourobo')
+if YOLO_DIR not in sys.path:
+    sys.path.append(YOLO_DIR)
+
+try:
+    from yolo_detector import YoloDetector
+except ImportError as e:
+    print(f"yolo_detectorのインポートに失敗しました。パスを確認してください: {e}")
+    sys.exit(1)
+
+class YoloRealSenseNode(Node):
+    def __init__(self):
+        super().__init__('yolo_realsense_node')
+        
+        # ROS2パラメータの宣言（起動時に上書き可能）
+        self.declare_parameter('model_path', os.path.join(YOLO_DIR, 'yolo_assets/robocon_models/custom_model_v1/weights/best.pt'))
+        self.declare_parameter('conf_threshold', 0.5)
+        self.declare_parameter('fps', 30.0)
+
+        model_path = self.get_parameter('model_path').value
+        conf_threshold = self.get_parameter('conf_threshold').value
+        fps = self.get_parameter('fps').value
+
+        self.get_logger().info(f"モデルをロード中: {model_path}")
+        self.detector = YoloDetector(model_path=model_path, conf_threshold=conf_threshold)
+        
+        # JSON形式の検出結果をパブリッシュするPublisherの設定
+        self.publisher_ = self.create_publisher(String, '/yolo/detections', 10)
+        
+        # RealSenseの初期化
+        self.pipeline = rs.pipeline()
+        config = rs.config()
+        # TH50の負荷を考慮した解像度設定
+        config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+        config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+        
+        self.align_to = rs.stream.color
+        self.align = rs.align(self.align_to)
+        
+        # デプス欠損対策用のフィルター群
+        self.spatial_filter = rs.spatial_filter()
+        self.temporal_filter = rs.temporal_filter()
+        self.hole_filling_filter = rs.hole_filling_filter()
+        
+        try:
+            self.pipeline.start(config)
+            self.get_logger().info("RealSenseを起動しました。")
+        except Exception as e:
+            self.get_logger().error(f"RealSenseの起動に失敗しました: {e}")
+            sys.exit(1)
+
+        # 指定したFPSで定期的に推論・パブリッシュを実行
+        timer_period = 1.0 / fps
+        self.timer = self.create_timer(timer_period, self.timer_callback)
+
+    def timer_callback(self):
+        frames = self.pipeline.wait_for_frames()
+        aligned_frames = self.align.process(frames)
+        color_frame = aligned_frames.get_color_frame()
+        depth_frame = aligned_frames.get_depth_frame()
+
+        if not color_frame or not depth_frame:
+            return
+
+        # デプスフレームにフィルターを適用して精度向上
+        depth_frame = self.spatial_filter.process(depth_frame)
+        depth_frame = self.temporal_filter.process(depth_frame)
+        depth_frame = self.hole_filling_filter.process(depth_frame).as_depth_frame()
+
+        color_image = np.asanyarray(color_frame.get_data())
+
+        # YOLOによる推論（画像への描画処理は不要なので破棄）
+        _, detections = self.detector.detect(color_image)
+        
+        depth_intrin = depth_frame.profile.as_video_stream_profile().intrinsics
+        
+        results = []
+        for det in detections:
+            x1, y1, x2, y2 = det['bbox']
+            cx = int((x1 + x2) / 2)
+            cy = int((y1 + y2) / 2)
+            
+            # インデックスの範囲外アクセスを防ぐ
+            cx = max(0, min(cx, color_frame.width - 1))
+            cy = max(0, min(cy, color_frame.height - 1))
+
+            # 中心点周辺から有効な距離を取得
+            half_w = 2
+            valid_distances = []
+            for dy in range(-half_w, half_w + 1):
+                for dx in range(-half_w, half_w + 1):
+                    px, py = cx + dx, cy + dy
+                    if 0 <= px < color_frame.width and 0 <= py < color_frame.height:
+                        dist = depth_frame.get_distance(px, py)
+                        if dist > 0:
+                            valid_distances.append(dist)
+            
+            if len(valid_distances) > 0:
+                distance = float(np.median(valid_distances))
+                x_val, y_val, z_val = rs.rs2_deproject_pixel_to_point(depth_intrin, [cx, cy], distance)
+                
+                # ROS側で扱いやすいように辞書型に格納
+                results.append({
+                    "class": det['class_name'],
+                    "confidence": float(det['confidence']),
+                    "x": float(x_val),  # メートル単位
+                    "y": float(y_val),  # メートル単位
+                    "z": float(z_val),  # メートル単位
+                    "distance": distance
+                })
+
+        # JSON文字列に変換してPublish
+        msg = String()
+        msg.data = json.dumps(results)
+        self.publisher_.publish(msg)
+
+    def destroy_node(self):
+        self.pipeline.stop()
+        super().destroy_node()
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = YoloRealSenseNode()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        node.get_logger().info("ノードを終了します")
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
